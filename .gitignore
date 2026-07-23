@@ -1,0 +1,13 @@
+# Rahasia -- JANGAN pernah di-upload ke GitHub/GitLab
+.env
+
+# Dependency yang bisa dibuat ulang otomatis lewat "npm install"
+server/node_modules/
+
+# File sistem/editor
+.DS_Store
+Thumbs.db
+
+# File backup database (kalau Anda simpan di folder ini)
+*.sql.bak
+backup*.sql

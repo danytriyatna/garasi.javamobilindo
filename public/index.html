@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Kendaraan — Garasi Java Mobilindo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F8FB; --panel:#FFFFFF; --ink:#12233D; --muted:#64748B; --line:#E3E8EF;
+    --amber:#E0A233; --amber-soft:#FBEFD9;
+    --pos:#2E5943; --pos-soft:#E4ECE6; --neg:#8A3B32; --neg-soft:#F3E5E1;
+    --blue:#1668B3; --blue-soft:#E4EEF7;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);margin:0;}
+  .g{font-family:'Fraunces',serif;font-optical-sizing:auto;}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  ::selection{background:var(--amber);color:#16181D;}
+  .no-sb::-webkit-scrollbar{width:8px;height:8px;}
+  .no-sb::-webkit-scrollbar-thumb{background:rgba(0,0,0,.14);border-radius:8px;}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 2px rgba(27,29,34,.04),0 10px 24px -8px rgba(27,29,34,.05);}
+  table{width:100%;border-collapse:collapse;}
+  thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:12px 16px;border-bottom:1.5px solid var(--amber);white-space:nowrap;}
+  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr.click{cursor:pointer;transition:background .15s;}
+  tbody tr.click:hover{background:#FAFAFB;}
+  tfoot td{border-top:1px solid var(--line);}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .dot{width:6px;height:6px;border-radius:999px;}
+  .tab{padding:12px 4px;margin-right:26px;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--amber);}
+  .field label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:5px;}
+  .field .val{font-size:14.5px;font-weight:500;}
+  .inp{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13.5px;background:#fff;transition:border-color .2s;}
+  .inp:focus{outline:none;border-color:var(--amber);}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;cursor:pointer;transition:background .2s,opacity .2s;border:none;}
+  .btn-dark{background:var(--blue);color:#fff;} .btn-dark:hover{opacity:.9;}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink);} .btn-ghost:hover{background:#FAFAFB;}
+  .btn-amber{background:var(--amber);color:var(--ink);} .btn-amber:hover{opacity:.9;}
+  .act{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;transition:color .2s,border-color .2s,background .2s;}
+  .act:hover{color:var(--ac);border-color:var(--ac);background:#fff;}
+  .modal-scrim{position:fixed;inset:0;background:rgba(23,38,63,.45);backdrop-filter:blur(2px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
+  .modal-scrim.open{display:flex;}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:760px;box-shadow:0 24px 60px rgba(23,38,63,.25);}
+  /* ===== cetak dokumen ===== */
+  #printArea{ display:none; }
+  #printArea.open{ display:block; position:fixed; inset:0; z-index:100; background:#fff; overflow:auto; }
+  .print-toolbar{ position:sticky; top:0; background:#fff; border-bottom:1px solid var(--line); padding:12px 16px; display:flex; gap:10px; justify-content:flex-end; align-items:center; }
+  .print-toolbar .ptitle{ margin-right:auto; font-weight:600; font-size:14px; }
+  .doc{ max-width:820px; margin:16px auto; padding:26px 30px; color:#111; background:#fff; font-size:12px; line-height:1.45; }
+  .doc h1{ text-align:center; font-size:17px; font-weight:700; letter-spacing:.5px; margin:6px 0 12px; text-decoration:underline; }
+  .doc .dhead{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #12233D; padding-bottom:8px; margin-bottom:12px; }
+  .doc .brand{ font-family:'Fraunces',serif; } .doc .brand .b1{ font-size:10px; letter-spacing:2px; color:#777; } .doc .brand .b2{ font-size:20px; font-weight:700; color:#12233D; line-height:1; }
+  .doc .cinfo{ text-align:right; font-size:10px; color:#444; line-height:1.5; }
+  .doc table{ width:100%; border-collapse:collapse; }
+  .doc .bx td,.doc .bx th{ border:1px solid #444; padding:6px 8px; vertical-align:top; }
+  .doc .kv td{ padding:2px 4px; vertical-align:top; }
+  .doc .lbl{ color:#333; width:130px; }
+  .doc .sign{ display:inline-block; text-align:center; min-width:200px; }
+  .doc .muted{ color:#666; }
+  @media print {
+    body > div.flex, #printArea .print-toolbar { }
+    body * { visibility:hidden !important; }
+    #printArea, #printArea *{ visibility:visible !important; }
+    #printArea{ position:absolute; inset:0; display:block !important; background:#fff; }
+    #printArea .print-toolbar{ display:none !important; }
+    .doc{ margin:0 auto; }
+    @page{ size:A4; margin:12mm; }
+  }
+  /* ===== sidebar & halaman ===== */
+  .navlink{display:flex;align-items:center;gap:12px;padding:11px 14px 11px 20px;color:rgba(255,255,255,.82);font-size:13.5px;font-weight:500;border-left:3px solid transparent;cursor:pointer;transition:color .2s,background .2s,border-color .2s;}
+  .navlink:hover{color:#fff;background:rgba(255,255,255,.07);}
+  .navlink.active{color:#fff;border-left-color:var(--amber);background:rgba(255,255,255,.14);}
+  .navlink svg{width:18px;height:18px;flex-shrink:0;}
+  .page{display:none;} .page.show{display:block;}
+  @media(max-width:860px){
+    #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:70;transform:translateX(-100%);transition:transform .3s;}
+    #sidebar.open{transform:none;}
+    #scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:60;display:none;}
+    #scrim.open{display:block;}
+  }
+  @media(min-width:861px){
+    #scrim{display:none;}
+    #sidebar{transition:width .2s ease; position:relative;}
+    #sidebar.collapsed{width:84px !important;}
+    #sidebar.collapsed .navlabel{display:none;}
+    #sidebar.collapsed .navlink{justify-content:center;padding-left:0;padding-right:0;gap:0;}
+    #sidebar.collapsed #sidebarLogoWrap{display:none;}
+    #sidebar.collapsed #sidebarUserWrap{display:none;}
+    #sidebar.collapsed #sidebarFooterTop{justify-content:center;display:flex;}
+    #sidebar.collapsed .hidden-when-expanded{display:block !important;}
+    .sidebarToggleBtn{position:absolute;top:22px;right:-14px;width:28px;height:28px;border-radius:999px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.18);z-index:15;color:var(--ink);transition:transform .2s;}
+    #sidebar.collapsed .sidebarToggleBtn{transform:rotate(180deg);}
+  }
+</style>
+</head>
+<body>
+<div id="appShell" class="flex min-h-screen" style="visibility:hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-[248px] shrink-0 text-white flex flex-col" style="background:linear-gradient(180deg,#173E63,#0B2740)">
+    <div class="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Perkecil/perbesar menu">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div id="sidebarLogoWrap" class="px-5 py-6 border-b border-white/15">
+      <div class="flex items-center justify-center">
+        <img src="data:image/png;base64,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" alt="Java Mobilindo" class="h-14 w-auto" style="object-fit:contain">
+      </div>
+    </div>
+    <nav class="py-4 flex-1 overflow-y-auto no-sb">
+      <p class="px-5 text-[10px] tracking-[.14em] text-white/60 mb-2">MENU</p>
+      <div class="navlink active" data-page="dashboard" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span class="navlabel">Dashboard</span>
+      </div>
+      <div class="navlink" data-page="kendaraan" onclick="go('kendaraan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l1.5-4.5A2 2 0 018.4 7h7.2a2 2 0 011.9 1.5L19 13"/><path d="M4 13h16v4a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H7v1a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><circle cx="7.5" cy="15.5" r=".7"/><circle cx="16.5" cy="15.5" r=".7"/></svg>
+        <span class="navlabel">Data Kendaraan</span>
+      </div>
+      <div class="navlink" data-page="operasional" onclick="go('operasional')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span class="navlabel">Biaya Operasional</span>
+      </div>
+      <div class="navlink" data-page="labarugi" onclick="go('labarugi')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg>
+        <span class="navlabel">Laporan Laba Rugi</span>
+      </div>
+      <div class="navlink" id="navUsers" data-page="users" onclick="go('users')" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span class="navlabel">Manajemen User</span>
+      </div>
+      <div class="navlink" id="navPermissions" data-page="permissions" onclick="go('permissions')" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span class="navlabel">Hak Akses</span>
+      </div>
+    </nav>
+    <div id="sidebarFooterTop" class="px-5 py-4 border-t border-white/15 text-[11px] text-white/70">
+      <div id="sidebarUserWrap">
+        <div class="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg><span id="dbStatus">Menghubungkan ke database...</span></div>
+        <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+          <span id="currentUserLabel" class="truncate"></span>
+          <button onclick="doLogout()" class="text-white/70 hover:text-white underline shrink-0 ml-2">Keluar</button>
+        </div>
+      </div>
+      <button onclick="doLogout()" title="Keluar" class="hidden-when-expanded text-white/70 hover:text-white" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div id="scrim" onclick="toggleSidebar()"></div>
+
+  <!-- LAYAR LOGIN -->
+  <div id="loginScreen" style="position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#173E63,#0B2740);display:none;align-items:center;justify-content:center;padding:16px;">
+    <div class="card" style="width:360px;max-width:90vw;padding:36px 28px">
+      <div class="flex items-center justify-center mb-6">
+        <img src="data:image/png;base64,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" alt="Java Mobilindo" class="h-14 w-auto" style="object-fit:contain">
+      </div>
+      <h1 class="g font-bold text-[20px] text-center mb-1" style="color:var(--ink)">Masuk ke Aplikasi</h1>
+      <p class="text-[13px] text-center text-[var(--muted)] mb-6">Garasi Java Mobilindo</p>
+      <div class="field mb-4"><label>Username</label><input id="loginUsername" class="inp" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="field mb-2"><label>Password</label><input id="loginPassword" type="password" class="inp" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <p id="loginError" class="text-[12.5px] mb-3" style="color:var(--neg);display:none"></p>
+      <button id="btnLogin" class="btn btn-dark w-full justify-center" onclick="doLogin()">Masuk</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main" class="flex-1 min-w-0 flex flex-col">
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-[var(--line)]">
+      <div class="flex items-center justify-between px-6 py-3.5">
+        <div class="flex items-center gap-3">
+          <button class="md:hidden" onclick="toggleSidebar()" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div>
+            <h1 id="ptitle" class="g text-[18px] font-bold leading-none">Data Kendaraan</h1>
+            <p id="psub" class="text-[12px] text-[var(--muted)] mt-1">Garasi Java Mobilindo · Stok Juni 2026</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-6 w-full">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section id="page-dashboard" class="page show">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="text-[13px] text-[var(--muted)]">Periode:</span>
+          <select id="dashMonth" class="inp w-auto" onchange="renderDashboard()"></select>
+          <select id="dashYear" class="inp w-auto" onchange="renderDashboard()"></select>
+        </div>
+        <div id="dashWrap"></div>
+      </section>
+
+      <section id="page-kendaraan" class="page">
+
+    <!-- LIST -->
+    <div id="kendaraanList">
+      <div id="vStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4"></div>
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <div class="flex items-center gap-2 border border-[var(--line)] rounded-lg px-3 py-2 bg-white flex-1 min-w-[220px] max-w-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="vsearch" class="w-full text-[13.5px] outline-none" placeholder="Cari merk, model, atau no. polisi..." oninput="renderKendaraan()">
+        </div>
+        <select id="vfilter" class="inp w-auto" onchange="renderKendaraan()">
+          <option value="all">Semua status</option>
+          <option value="READY">Ready</option>
+          <option value="SOLD">Sold</option>
+        </select>
+        <select id="vpayfilter" class="inp w-auto" onchange="renderKendaraan()">
+          <option value="all">Semua pembayaran</option>
+          <option value="lunas">Lunas (Sold)</option>
+          <option value="belum">Belum Lunas (Sold)</option>
+        </select>
+        <button id="btnExportKendaraan" class="btn btn-ghost ml-auto" onclick="exportKendaraanList()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export Excel</button>
+      </div>
+      <div class="mb-4">
+        <button id="btnTambahUnit" class="btn btn-amber" onclick="openAddForm()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Tambah Unit
+        </button>
+      </div>
+      <div id="vehicleCards" class="md:hidden space-y-3"></div>
+      <div class="card overflow-hidden hidden md:block">
+        <div class="overflow-x-auto"><table id="vehicleTable"></table></div>
+      </div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="kendaraanDetail" style="display:none">
+      <button class="btn btn-ghost mb-4" onclick="backToList()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Kembali ke daftar
+      </button>
+      <div id="vhead" class="mb-5"></div>
+      <div class="flex items-center border-b border-[var(--line)] mb-6 overflow-x-auto no-sb">
+        <div class="tab active" data-tab="info" onclick="switchTab('info')">Informasi Kendaraan</div>
+        <div class="tab" data-tab="perawatan" onclick="switchTab('perawatan')">Pengeluaran</div>
+        <div class="tab" data-tab="penjualan" onclick="switchTab('penjualan')">Penjualan</div>
+      </div>
+      <div id="tab-info"></div>
+      <div id="tab-perawatan" style="display:none"></div>
+      <div id="tab-penjualan" style="display:none"></div>
+    </div>
+
+    <!-- EDIT / TAMBAH UNIT (halaman ber-tab, editable) -->
+    <div id="kendaraanEdit" style="display:none">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <button class="btn btn-ghost" onclick="closeEdit()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Batal
+        </button>
+        <button id="btnSimpanUnit" class="btn btn-dark" onclick="saveVehicle()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Simpan
+        </button>
+      </div>
+      <div id="ehead" class="mb-5"></div>
+      <div class="flex items-center border-b border-[var(--line)] mb-6 overflow-x-auto no-sb">
+        <div class="tab active" data-etab="info" onclick="editSwitchTab('info')">Informasi Kendaraan</div>
+        <div class="tab" data-etab="perawatan" onclick="editSwitchTab('perawatan')">Pengeluaran</div>
+        <div class="tab" data-etab="penjualan" onclick="editSwitchTab('penjualan')">Penjualan</div>
+      </div>
+      <div id="etab-info"></div>
+      <div id="etab-perawatan" style="display:none"></div>
+      <div id="etab-penjualan" style="display:none"></div>
+    </div>
+
+      </section>
+
+      <!-- ============ BIAYA OPERASIONAL ============ -->
+      <section id="page-operasional" class="page">
+        <div id="opStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4"></div>
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <div class="flex items-center gap-2 border border-[var(--line)] rounded-lg px-3 py-2 bg-white flex-1 min-w-[220px] max-w-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="opsearch" class="w-full text-[13.5px] outline-none" placeholder="Cari keterangan atau akun..." oninput="renderOperasional()">
+          </div>
+          <select id="opfilter" class="inp w-auto" onchange="renderOperasional()"><option value="">Semua akun</option></select>
+          <select id="opMonth" class="inp w-auto" onchange="renderOperasional()"></select>
+          <select id="opYear" class="inp w-auto" onchange="renderOperasional()"></select>
+          <button id="btnExportOperasional" class="btn btn-ghost ml-auto" onclick="exportOperasionalList()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export Excel</button>
+          <button id="btnTambahBiaya" class="btn btn-amber" onclick="openOpModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Biaya</button>
+        </div>
+        <div id="opTableWrap"></div>
+      </section>
+
+      <!-- ============ LAPORAN LABA RUGI ============ -->
+      <section id="page-labarugi" class="page">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="text-[13px] text-[var(--muted)]">Periode:</span>
+          <select id="lrMonth" class="inp w-auto" onchange="renderLabaRugi()"></select>
+          <select id="lrYear" class="inp w-auto" onchange="renderLabaRugi()"></select>
+        </div>
+        <div id="lrWrap"></div>
+      </section>
+
+      <!-- ============ MANAJEMEN USER ============ -->
+      <section id="page-users" class="page">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-[13px] text-[var(--muted)]">Kelola akun yang bisa masuk ke aplikasi ini.</p>
+          <button class="btn btn-amber" onclick="openUserModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah User</button>
+        </div>
+        <div id="usersTableWrap"></div>
+      </section>
+
+      <!-- ============ PENGATURAN HAK AKSES ============ -->
+      <section id="page-permissions" class="page">
+        <div class="card p-6 max-w-2xl">
+          <div class="flex items-start gap-3 mb-5 p-3 rounded-lg" style="background:var(--blue-soft)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <p class="text-[13px]" style="color:var(--blue)">Pengaturan ini mengatur hak akses untuk role <b>Staff</b>. Akun <b>Admin</b> selalu memiliki akses penuh ke semua menu dan fungsi, tidak bisa dibatasi di sini.</p>
+          </div>
+
+          <h3 class="g font-bold text-[15px] mb-3">Akses Menu</h3>
+          <div class="space-y-2.5 mb-6">
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Data Kendaraan</span><input type="checkbox" id="perm_menu_kendaraan" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Biaya Operasional</span><input type="checkbox" id="perm_menu_operasional" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Laporan Laba Rugi</span><input type="checkbox" id="perm_menu_labarugi" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+          </div>
+
+          <h3 class="g font-bold text-[15px] mb-3">Fungsi Data Kendaraan</h3>
+          <div class="space-y-2.5 mb-6">
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Tambah Unit</span><input type="checkbox" id="perm_kendaraan_tambah" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Edit Unit</span><input type="checkbox" id="perm_kendaraan_edit" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Hapus Unit</span><input type="checkbox" id="perm_kendaraan_hapus" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Export Excel</span><input type="checkbox" id="perm_kendaraan_export" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+          </div>
+
+          <h3 class="g font-bold text-[15px] mb-3">Fungsi Biaya Operasional</h3>
+          <div class="space-y-2.5 mb-6">
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Tambah Biaya</span><input type="checkbox" id="perm_operasional_tambah" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Edit Biaya</span><input type="checkbox" id="perm_operasional_edit" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Hapus Biaya</span><input type="checkbox" id="perm_operasional_hapus" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Export Excel</span><input type="checkbox" id="perm_operasional_export" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-[var(--line)]">
+            <button class="btn btn-ghost" onclick="renderPermissionsPage()">Batalkan Perubahan</button>
+            <button class="btn btn-dark" onclick="savePermissions()">Simpan Hak Akses</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+  <!-- POPUP TAMBAH/EDIT USER -->
+  <div id="userModal" class="modal-scrim" onclick="if(event.target===this)closeUserModal()">
+    <div class="modal" style="max-width:480px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="userModalTitle" class="g font-bold text-[16px]">Tambah User</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closeUserModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div class="field"><label>Nama Lengkap</label><input id="um_name" class="inp" placeholder="Nama lengkap"></div>
+        <div class="field"><label>Username</label><input id="um_username" class="inp" placeholder="username" autocomplete="off"></div>
+        <div class="field"><label id="um_pwLabel">Password</label><input id="um_password" type="password" class="inp" placeholder="Minimal 6 karakter" autocomplete="new-password"></div>
+        <div class="field"><label>Peran</label><select id="um_role" class="inp"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+        <label id="um_activeWrap" class="flex items-center gap-2.5 cursor-pointer text-[13px]" style="display:none"><input type="checkbox" id="um_active" class="w-4 h-4 accent-[color:var(--pos)]"> Akun aktif (bisa login)</label>
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closeUserModal()">Batal</button>
+        <button class="btn btn-dark" onclick="saveUserModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP TAMBAH/EDIT BIAYA OPERASIONAL -->
+  <div id="opModal" class="modal-scrim" onclick="if(event.target===this)closeOpModal()">
+    <div class="modal" style="max-width:560px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="opModalTitle" class="g font-bold text-[16px]">Tambah Biaya Operasional</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closeOpModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 grid sm:grid-cols-2 gap-4">
+        <div class="field"><label>Tanggal</label><input id="op_tgl" type="date" class="inp"></div>
+        <div class="field"><label>Akun / Kategori</label><select id="op_akun" class="inp"></select></div>
+        <div class="field"><label>Kas / Bank (sumber dana)</label><select id="op_kas" class="inp"></select></div>
+        <div class="field"><label>Jumlah (Rp)</label><input id="op_jml" type="number" class="inp" placeholder="0"></div>
+        <div class="field sm:col-span-2"><label>Keterangan</label><input id="op_ket" class="inp" placeholder="mis. Gaji admin Juni"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closeOpModal()">Batal</button>
+        <button class="btn btn-dark" onclick="saveOpModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP TAMBAH/EDIT PEMBAYARAN -->
+  <div id="payModal" class="modal-scrim" onclick="if(event.target===this)closePayModal()">
+    <div class="modal" style="max-width:560px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="payModalTitle" class="g font-bold text-[16px]">Tambah Pembayaran</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closePayModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 grid sm:grid-cols-2 gap-4">
+        <div class="field"><label>Tanggal</label><input id="pay_tgl" type="date" class="inp"></div>
+        <div class="field"><label>Jenis Pembayaran</label><select id="pay_jenis" class="inp"></select></div>
+        <div class="field"><label>Kas / Bank (penerimaan)</label><select id="pay_kas" class="inp"></select></div>
+        <div class="field"><label>Jumlah (Rp)</label><input id="pay_jml" type="number" class="inp" placeholder="0"></div>
+        <div class="field sm:col-span-2"><label>Keterangan</label><input id="pay_ket" class="inp" placeholder="mis. Pelunasan via transfer BCA"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closePayModal()">Batal</button>
+        <button class="btn btn-dark" onclick="savePayModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP TAMBAH PENGELUARAN -->
+  <div id="pengModal" class="modal-scrim" onclick="if(event.target===this)closePengModal()">
+    <div class="modal" style="max-width:560px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="pengModalTitle" class="g font-bold text-[16px]">Tambah Pengeluaran</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closePengModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 grid sm:grid-cols-2 gap-4">
+        <div class="field"><label>Tanggal</label><input id="pm_tgl" type="date" class="inp"></div>
+        <div class="field"><label>Akun Biaya</label><select id="pm_akun" class="inp"></select></div>
+        <div class="field"><label>Kas / Bank (sumber dana)</label><select id="pm_kas" class="inp"></select></div>
+        <div class="field"><label>Nilai (Rp)</label><input id="pm_nom" type="number" class="inp" placeholder="0"></div>
+        <div class="field sm:col-span-2"><label>Keterangan</label><input id="pm_ket" class="inp" placeholder="mis. Ganti kampas rem depan"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closePengModal()">Batal</button>
+        <button class="btn btn-dark" onclick="savePengModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY CETAK DOKUMEN -->
+  <div id="printArea">
+    <div class="print-toolbar">
+      <span class="ptitle" id="printTitle">Dokumen</span>
+      <button class="btn btn-ghost" onclick="closePrint()">Tutup</button>
+      <button class="btn btn-dark" onclick="window.print()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+        Cetak / Simpan PDF
+      </button>
+    </div>
+    <div id="printDoc"></div>
+  </div>
+
+<script>
+/* ===== data (dari Excel: Garasi Java Mobilindo) ===== */
+const VEHICLES = [];
+
+/* ===== helpers ===== */
+const rp = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const rpShort = n => { const a=Math.abs(n), s=n<0?'-':''; if(a>=1e9) return s+'Rp '+(a/1e9).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})+' M'; if(a>=1e6) return s+'Rp '+(a/1e6).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})+' jt'; return rp(n); };
+const MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${+d} ${MON[+m-1]} ${y}`; };
+const nama = v => v.merk+' '+v.model+(v.type?' '+v.type:'');
+const pengTotal = v => v.peng.reduce((s,p)=>s+(p.n||0),0);
+const modal = v => v.beli + pengTotal(v);
+const laba = v => v.jual ? v.jual.harga - modal(v) : 0;          // laba kotor
+const feeOf = v => v.jual ? (v.jual.fee||0) : 0;
+// info pembayaran per unit (jumlah dibayar, sisa, lunas)
+function payInfo(v){
+  if(!v.jual) return {sold:false,total:0,sisa:0,lunas:false};
+  const pays=v.jual.pembayaran||[];
+  const ttN=(v.jual.tt&&v.jual.tt.nilai)||0;
+  const netHarga=Math.max(0,(v.jual.harga||0)-ttN);
+  const total=pays.reduce((s,x)=>s+(+x.jumlah||0),0);
+  const sisa=Math.max(0,netHarga-total);
+  return {sold:true,total,sisa,lunas:sisa<=0};
+}
+const odoFmt = o => (o==null||o==='')?'—':(typeof o==='number'?o.toLocaleString('id-ID')+' km':String(o)+' km');
+function badge(status){
+  const map={READY:['var(--pos)','var(--pos-soft)'],SOLD:['var(--blue)','var(--blue-soft)']};
+  const [c,bg]=map[status]||['var(--muted)','#eee'];
+  return `<span class="badge" style="color:${c};background:${bg}"><span class="dot" style="background:${c}"></span>${status}</span>`;
+}
+
+/* ===== akun biaya pemeliharaan kendaraan ===== */
+const AKUN_BIAYA = [
+  {kode:'5201',nama:'Servis & Tune-up'},{kode:'5202',nama:'Ganti Oli'},{kode:'5203',nama:'Ban'},
+  {kode:'5204',nama:'Aki'},{kode:'5205',nama:'Kaki-kaki'},{kode:'5206',nama:'Kelistrikan'},
+  {kode:'5207',nama:'Body & Cat'},{kode:'5208',nama:'Salon & Detailing'},{kode:'5209',nama:'Interior'},
+  {kode:'5210',nama:'Pajak & STNK'},{kode:'5211',nama:'Kelengkapan'},{kode:'5212',nama:'Lain-lain'}
+];
+const akunKode = nama => { const a=AKUN_BIAYA.find(x=>x.nama===nama); return a?a.kode:''; };
+const akunLabel = nama => { const k=akunKode(nama); return k?`${k} · ${nama}`:(nama||''); };
+const akunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+AKUN_BIAYA.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+// normalisasi item pengeluaran (dukung data lama {j,n})
+const pengItem = p => ({ tgl:p.tgl||null, akun:p.akun||'', ket:(p.ket!=null?p.ket:(p.j||'')), n:p.n||0, kas:p.kas||'' });
+
+/* ===== master kas / bank ===== */
+const KAS_BANK = [
+  {kode:'1101',nama:'Kas Tunai'},{kode:'1102',nama:'Bank BCA'},{kode:'1103',nama:'Bank Mandiri'},
+  {kode:'1104',nama:'Bank BNI'},{kode:'1105',nama:'Bank BRI'}
+];
+const kasKode = nama => { const a=KAS_BANK.find(x=>x.nama===nama); return a?a.kode:''; };
+const kasLabel = nama => { const k=kasKode(nama); return k?`${k} · ${nama}`:(nama||''); };
+const kasOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih kas/bank —</option>`+KAS_BANK.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+
+/* ===== biaya operasional (akun + data) ===== */
+const OP_AKUN=[
+  {kode:'6101',nama:'Gaji Karyawan'},{kode:'6102',nama:'Sewa Showroom'},{kode:'6103',nama:'Listrik & Air'},
+  {kode:'6104',nama:'Internet & Telepon'},{kode:'6105',nama:'Iklan & Marketing'},{kode:'6106',nama:'Perlengkapan Kantor'},
+  {kode:'6107',nama:'BBM & Transportasi'},{kode:'6108',nama:'Konsumsi'},{kode:'6109',nama:'Perawatan Showroom'},{kode:'6110',nama:'Lain-lain'}
+];
+const opKode = nama => { const a=OP_AKUN.find(x=>x.nama===nama); return a?a.kode:''; };
+const opLabel = nama => { const k=opKode(nama); return k?`${k} · ${nama}`:(nama||''); };
+const opAkunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+OP_AKUN.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+let OPCOSTS=[];
+const opTotal = () => OPCOSTS.reduce((s,o)=>s+(+o.jumlah||0),0);
+
+/* ===== filter periode (bulan & tahun) ===== */
+const monthOptions = cur => `<option value="">Semua bulan</option>`+BULAN.map((b,i)=>{const mm=String(i+1).padStart(2,'0');return `<option value="${mm}" ${mm===cur?'selected':''}>${b}</option>`;}).join('');
+function dataYears(){ const ys=new Set([String(new Date().getFullYear())]); OPCOSTS.forEach(o=>{if(o.tgl)ys.add(o.tgl.slice(0,4));}); VEHICLES.forEach(v=>{if(v.jual&&v.jual.tgl)ys.add(v.jual.tgl.slice(0,4));}); return [...ys].sort(); }
+const yearOptions = cur => `<option value="">Semua tahun</option>`+dataYears().map(y=>`<option ${y===cur?'selected':''}>${y}</option>`).join('');
+function inPeriod(iso,year,month){ if(!iso) return !(year||month); const [y,m]=iso.split('-'); if(year&&y!==year) return false; if(month&&m!==month) return false; return true; }
+function periodeLabel(year,month){ if(!year&&!month) return 'Semua periode'; if(year&&month) return BULAN[+month-1]+' '+year; if(month) return BULAN[+month-1]+' (semua tahun)'; return 'Tahun '+year; }
+
+/* ===== master data (untuk combo box) ===== */
+const MERK_UMUM=['TOYOTA','HONDA','MITSUBISHI','SUZUKI','DAIHATSU','HYUNDAI','NISSAN','WULING','MAZDA','KIA','ISUZU','BMW','MERCEDES-BENZ'];
+const WARNA_UMUM=['Hitam','Putih','Silver','Abu-abu','Merah','Biru','Kuning','Coklat','Hijau','Emas'];
+const LEASING_UMUM=['BCA Finance','Adira Finance','BAF (Bussan Auto Finance)','Mandiri Tunas Finance','ACC (Astra Credit Companies)','OTO Finance','WOM Finance','Mega Auto Finance','MPM Finance','CIMB Niaga Auto Finance','Maybank Finance'];
+
+/* ===== data perusahaan & dokumen ===== */
+const COMPANY={ nama:'GARASI JAVA MOBILINDO', alamat:'Jl. Kanwil (Terusan Saluyu) No. 9 Cipamokolan, Kota Bandung', telp:'0853 5333 7435', email:'javamobilindocorp@gmail.com' };
+const REK_DEFAULT={ bank:'BCA', atasNama:'Sulaiman', no:'2830 760 345' };
+const CHECKLIST_ITEMS=['STNK Asli','BPKB Asli','Faktur','Sertifikat NIK','Kwitansi dan Invoice','FC KTP','Kunci Serep','Buku Manual'];
+const HARI=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function fmtTglPanjang(iso){ if(!iso) return '..........................'; const [y,m,d]=iso.split('-'); return `${+d} ${BULAN[+m-1]} ${y}`; }
+function terbilang(n){
+  n=Math.floor(Math.abs(+n||0));
+  const a=['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+  function w(x){
+    if(x<12) return a[x];
+    if(x<20) return w(x-10)+' belas';
+    if(x<100) return a[Math.floor(x/10)]+' puluh'+(x%10?' '+a[x%10]:'');
+    if(x<200) return 'seratus'+(x%100?' '+w(x%100):'');
+    if(x<1000) return a[Math.floor(x/100)]+' ratus'+(x%100?' '+w(x%100):'');
+    if(x<2000) return 'seribu'+(x%1000?' '+w(x%1000):'');
+    if(x<1000000) return w(Math.floor(x/1000))+' ribu'+(x%1000?' '+w(x%1000):'');
+    if(x<1000000000) return w(Math.floor(x/1000000))+' juta'+(x%1000000?' '+w(x%1000000):'');
+    if(x<1000000000000) return w(Math.floor(x/1000000000))+' miliar'+(x%1000000000?' '+w(x%1000000000):'');
+    return w(Math.floor(x/1000000000000))+' triliun'+(x%1000000000000?' '+w(x%1000000000000):'');
+  }
+  if(n===0) return 'Nol Rupiah';
+  const s=w(n).replace(/\s+/g,' ').trim();
+  return s.charAt(0).toUpperCase()+s.slice(1)+' Rupiah';
+}
+function buildMaster(){
+  const merk=new Set(MERK_UMUM), warna=new Set(WARNA_UMUM), modelByMerk={}, typeByModel={};
+  VEHICLES.forEach(v=>{
+    if(v.merk) merk.add(v.merk);
+    if(v.warna && v.warna!=='—') warna.add(v.warna);
+    if(v.merk&&v.model){ (modelByMerk[v.merk]=modelByMerk[v.merk]||new Set()).add(v.model); }
+    if(v.merk&&v.model&&v.type){ const k=v.merk+'|'+v.model; (typeByModel[k]=typeByModel[k]||new Set()).add(v.type); }
+  });
+  const sortArr=s=>[...s].sort();
+  const mapSort=o=>Object.fromEntries(Object.entries(o).map(([k,s])=>[k,sortArr(s)]));
+  return { merk:sortArr(merk), warna:sortArr(warna), modelByMerk:mapSort(modelByMerk), typeByModel:mapSort(typeByModel) };
+}
+const dlHTML=(id,arr)=>`<datalist id="${id}">${(arr||[]).map(o=>`<option value="${esc(o)}"></option>`).join('')}</datalist>`;
+function setDL(id,arr){ const el=document.getElementById(id); if(el) el.innerHTML=(arr||[]).map(o=>`<option value="${esc(o)}"></option>`).join(''); }
+function refreshEditLists(){
+  const M=buildMaster();
+  const merk=(document.getElementById('ef_merk')||{}).value||'';
+  const model=(document.getElementById('ef_model')||{}).value||'';
+  const allModels=[...new Set(Object.values(M.modelByMerk).flat())].sort();
+  const allTypes=[...new Set(Object.values(M.typeByModel).flat())].sort();
+  setDL('dlMerk', M.merk);
+  setDL('dlModel', M.modelByMerk[merk] || allModels);
+  setDL('dlType', M.typeByModel[merk+'|'+model] || allTypes);
+  setDL('dlWarna', M.warna);
+}
+
+/* ===== list ===== */
+let currentVehicle=null, currentTab='info';
+function currentVehicleList(){
+  const q=(document.getElementById('vsearch').value||'').toLowerCase();
+  const f=document.getElementById('vfilter').value;
+  const pf=(document.getElementById('vpayfilter')||{}).value||'all';
+  return VEHICLES.filter(v=>{
+    if(!((f==='all'||v.status===f) && (v.kode+' '+nama(v)+' '+(v.nopol||'')).toLowerCase().includes(q))) return false;
+    if(pf!=='all'){ const pi=payInfo(v); if(!pi.sold) return false; if(pf==='lunas' && !pi.lunas) return false; if(pf==='belum' && pi.lunas) return false; }
+    return true;
+  });
+}
+function renderKendaraan(){
+  const btnTambahU=document.getElementById('btnTambahUnit'); if(btnTambahU) btnTambahU.style.display=can('kendaraan_tambah')?'':'none';
+  const btnExportK=document.getElementById('btnExportKendaraan'); if(btnExportK) btnExportK.style.display=can('kendaraan_export')?'':'none';
+  const list=currentVehicleList();
+  const ready=VEHICLES.filter(v=>v.status==='READY').length, sold=VEHICLES.filter(v=>v.status==='SOLD').length;
+  const nilaiStok=VEHICLES.filter(v=>!v.jual).reduce((s,v)=>s+modal(v),0);
+  document.getElementById('vStrip').innerHTML=[
+    ['Total unit',VEHICLES.length,'var(--ink)'],['Ready',ready,'var(--pos)'],['Sold',sold,'var(--blue)'],['Nilai stok aktif',rpShort(nilaiStok),'var(--amber)']
+  ].map(([l,val,c])=>`<div class="card px-4 py-3 flex items-center gap-3"><span class="w-1.5 h-8 rounded-full" style="background:${c}"></span><div><p class="text-[10.5px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p><p class="num text-[17px] font-600" style="color:${c}">${val}</p></div></div>`).join('');
+
+  /* ---- kartu (tampilan HP) ---- */
+  document.getElementById('vehicleCards').innerHTML = list.map(v=>{
+    const lk=laba(v), fee=feeOf(v), lb=lk-fee, pi=payInfo(v);
+    return `<div class="card p-4" onclick="openVehicle('${v.kode}')">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <p class="font-700 text-[15px] truncate">${v.merk} ${v.model}${v.type?' '+v.type:''}</p>
+          <p class="num text-[12px] text-[var(--muted)] mt-0.5">${v.nopol} · ${v.thn} · ${v.warna}</p>
+        </div>
+        ${badge(v.status)}
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-3 text-[12.5px]">
+        <div><p class="text-[var(--muted)]">Total Modal</p><p class="num font-600">${rp(modal(v))}</p></div>
+        <div class="text-right"><p class="text-[var(--muted)]">${v.jual?'Harga Jual':'Harga Penawaran'}</p><p class="num font-600">${v.jual?rp(v.jual.harga):(v.penawaran?rp(v.penawaran):'—')}</p></div>
+      </div>
+      ${v.jual?`<div class="flex items-center justify-between mt-2 text-[12.5px]"><span class="text-[var(--muted)]">Laba Bersih</span><span class="num font-600" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${lb>=0?'+':''}${rp(lb)}</span></div>`:''}
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)]">
+        ${pi.sold?`<span class="badge" style="background:${pi.lunas?'var(--pos-soft)':'var(--neg-soft)'};color:${pi.lunas?'var(--pos)':'var(--neg)'}"><span class="dot" style="background:${pi.lunas?'var(--pos)':'var(--neg)'}"></span>${pi.lunas?'LUNAS':'BELUM LUNAS'}</span>`:'<span></span>'}
+        <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+          <button class="act" title="Lihat" onclick="openVehicle('${v.kode}')" style="--ac:var(--blue)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7S19 19 12 19 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          ${can('kendaraan_edit')?`<button class="act" title="Edit" onclick="openEditForm('${v.kode}')" style="--ac:var(--amber)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>`:''}
+          ${can('kendaraan_hapus')?`<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="card p-8 text-center text-[13px] text-[var(--muted)]">Tidak ada unit yang cocok.</div>`;
+
+  document.getElementById('vehicleTable').innerHTML=`
+    <thead><tr>
+      <th class="text-center">Aksi</th>
+      <th>No. Polisi</th><th>Merk</th><th>Model</th><th>Type</th><th>Transmisi</th><th>Warna</th><th>Thn.</th>
+      <th class="text-right">Odometer</th><th>No. Rangka</th><th>No. Mesin</th><th>Bahan Bakar</th>
+      <th>JTP Pajak Tahunan</th><th>JTP Pajak 5 Thn</th><th>Status</th>
+      <th class="text-right">Harga Pembelian</th><th>Tgl. Pembelian</th>
+      <th>Jenis Pengeluaran</th><th class="text-right">Nominal (Rp)</th>
+      <th class="text-right">Total Modal</th>
+      <th class="text-right">Harga Penawaran</th><th class="text-right">Target Nett Price</th>
+      <th class="text-right">Harga Penjualan</th><th>Tgl. Penjualan</th><th>Nama Pembeli</th>
+      <th class="text-right">Laba Kotor</th><th class="text-right">Komisi</th><th class="text-right">Laba Bersih</th>
+      <th class="text-right">Jumlah Bayar</th><th class="text-right">Sisa Bayar</th><th class="text-center">Status Bayar</th>
+    </tr></thead>
+    <tbody>${list.map(v=>{
+      const lk=laba(v), fee=feeOf(v), lb=lk-fee;
+      const money=n=>n?rp(n):'—';
+      const items=v.peng.map(p=>pengItem(p));
+      const rows=items.length?items:[null];
+      const showTotal=items.length>1;
+      const n=rows.length+(showTotal?1:0);
+      const rs=n>1?` rowspan="${n}"`:'';
+      const payCells=(()=>{const pi=payInfo(v); if(!pi.sold) return `<td class="num text-right text-[var(--muted)]"${rs}>—</td><td class="num text-right text-[var(--muted)]"${rs}>—</td><td class="text-center text-[var(--muted)]"${rs}>—</td>`;
+        return `<td class="num text-right whitespace-nowrap" style="color:var(--pos)"${rs}>${rp(pi.total)}</td>
+        <td class="num text-right whitespace-nowrap font-600" style="color:${pi.lunas?'var(--muted)':'var(--neg)'}"${rs}>${rp(pi.sisa)}</td>
+        <td class="text-center"${rs}><span class="badge" style="background:${pi.lunas?'var(--pos-soft)':'var(--neg-soft)'};color:${pi.lunas?'var(--pos)':'var(--neg)'}"><span class="dot" style="background:${pi.lunas?'var(--pos)':'var(--neg)'}"></span>${pi.lunas?'LUNAS':'BELUM LUNAS'}</span></td>`;})();
+      return rows.map((it,i)=>{
+        const first=i===0;
+        const topBorder=first?' style="border-top:2px solid var(--line)"':'';
+        const merged=(html)=>first?html:'';
+        return `<tr class="click"${topBorder} onclick="openVehicle('${v.kode}')">
+      ${merged(`<td onclick="event.stopPropagation()"${rs}>
+        <div class="flex items-center justify-center gap-1.5">
+          <button class="act" title="Lihat detail" onclick="openVehicle('${v.kode}')" style="--ac:var(--blue)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7S19 19 12 19 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          ${can('kendaraan_edit') ? `<button class="act" title="Edit" onclick="openEditForm('${v.kode}')" style="--ac:var(--amber)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
+          </button>` : '' }
+          ${can('kendaraan_hapus') ? `<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>` : '' }
+        </div>
+      </td>`)}
+      ${merged(`<td class="num font-600 whitespace-nowrap"${rs}>${v.nopol}</td>`)}
+      ${merged(`<td class="font-500 whitespace-nowrap"${rs}>${v.merk}</td>`)}
+      ${merged(`<td class="whitespace-nowrap"${rs}>${v.model}</td>`)}
+      ${merged(`<td class="text-[var(--muted)] whitespace-nowrap"${rs}>${v.type||'—'}</td>`)}
+      ${merged(`<td class="whitespace-nowrap"${rs}>${v.trans}</td>`)}
+      ${merged(`<td class="whitespace-nowrap"${rs}>${v.warna}</td>`)}
+      ${merged(`<td class="num"${rs}>${v.thn}</td>`)}
+      ${merged(`<td class="num text-right text-[var(--muted)] whitespace-nowrap"${rs}>${odoFmt(v.odo)}</td>`)}
+      ${merged(`<td class="num text-[11.5px] text-[var(--muted)] whitespace-nowrap"${rs}>${v.rangka}</td>`)}
+      ${merged(`<td class="num text-[11.5px] text-[var(--muted)] whitespace-nowrap"${rs}>${v.mesin}</td>`)}
+      ${merged(`<td class="whitespace-nowrap"${rs}>${v.bbm}</td>`)}
+      ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.pajakThn)}</td>`)}
+      ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.pajak5Thn)}</td>`)}
+      ${merged(`<td${rs}>${badge(v.status)}</td>`)}
+      ${merged(`<td class="num text-right whitespace-nowrap"${rs}>${rp(v.beli)}</td>`)}
+      ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.tglBeli)}</td>`)}
+      <td class="text-[13px] whitespace-nowrap">${it?esc(it.ket||it.akun||'—'):'—'}</td>
+      <td class="num text-right whitespace-nowrap">${it?rp(it.n):'—'}</td>
+      ${merged(`<td class="num text-right font-500 whitespace-nowrap"${rs}>${rp(modal(v))}</td>`)}
+      ${merged(`<td class="num text-right text-[var(--muted)] whitespace-nowrap"${rs}>${money(v.penawaran)}</td>`)}
+      ${merged(`<td class="num text-right text-[var(--muted)] whitespace-nowrap"${rs}>${money(v.targetNett)}</td>`)}
+      ${merged(`<td class="num text-right whitespace-nowrap"${rs}>${v.jual?rp(v.jual.harga):'—'}</td>`)}
+      ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${v.jual?fmtDate(v.jual.tgl):'—'}</td>`)}
+      ${merged(`<td class="whitespace-nowrap"${rs}>${v.jual?(v.jual.mediator||'—'):'—'}</td>`)}
+      ${merged(`<td class="num text-right font-600 whitespace-nowrap" style="color:${v.jual?(lk>=0?'var(--pos)':'var(--neg)'):'var(--muted)'}"${rs}>${v.jual?(lk>=0?'+':'')+rp(lk):'—'}</td>`)}
+      ${merged(`<td class="num text-right text-[var(--muted)] whitespace-nowrap"${rs}>${v.jual?rp(fee):'—'}</td>`)}
+      ${merged(`<td class="num text-right font-600 whitespace-nowrap" style="color:${v.jual?(lb>=0?'var(--pos)':'var(--neg)'):'var(--muted)'}"${rs}>${v.jual?(lb>=0?'+':'')+rp(lb):'—'}</td>`)}
+      ${merged(payCells)}
+    </tr>`;
+      }).join('') + (showTotal?`<tr class="click" onclick="openVehicle('${v.kode}')" style="background:var(--amber-soft)">
+      <td class="text-[13px] font-700 whitespace-nowrap">Total Pengeluaran</td>
+      <td class="num text-right font-700 whitespace-nowrap">${rp(pengTotal(v))}</td>
+    </tr>`:'');
+    }).join('')||`<tr><td colspan="31" class="text-center text-[var(--muted)] py-10">Tidak ada unit yang cocok.</td></tr>`}</tbody>`;
+}
+
+/* ===== detail ===== */
+function openVehicle(kode){
+  currentVehicle=VEHICLES.find(v=>v.kode===kode);
+  document.getElementById('kendaraanList').style.display='none';
+  document.getElementById('kendaraanDetail').style.display='';
+  switchTab('info'); renderVehicleDetail(); window.scrollTo(0,0);
+}
+function backToList(){
+  document.getElementById('kendaraanDetail').style.display='none';
+  document.getElementById('kendaraanList').style.display='';
+  renderKendaraan();
+}
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  ['info','perawatan','penjualan'].forEach(k=>document.getElementById('tab-'+k).style.display=(k===t)?'':'none');
+}
+function renderVehicleDetail(){
+  const v=currentVehicle;
+  document.getElementById('vhead').innerHTML=`
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="num text-[13px] font-600 px-2.5 py-1 rounded-md bg-[var(--ink)] text-white">${v.kode}</span>
+        <h2 class="g text-[22px] font-bold">${nama(v)}</h2>
+        ${badge(v.status)}
+      </div>
+      <div class="text-right">
+        <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">Total modal</p>
+        <p class="num text-[18px] font-600">${rp(modal(v))}</p>
+      </div>
+    </div>`;
+
+  const infoRows=[
+    ['Merk',v.merk],['Model',v.model],['Type',v.type||'—'],['Transmisi',v.trans],['Warna',v.warna],['Tahun',v.thn,'num'],
+    ['No. Polisi',v.nopol,'num'],['Odometer',odoFmt(v.odo),'num'],['Bahan Bakar',v.bbm],
+    ['No. Rangka',v.rangka,'num'],['No. Mesin',v.mesin,'num'],
+    ['Jt. Tempo Pajak Tahunan',fmtDate(v.pajakThn),'num'],['Pajak 5 Tahunan',fmtDate(v.pajak5Thn),'num'],
+    ['Tanggal Pembelian',fmtDate(v.tglBeli),'num'],['Harga Beli',rp(v.beli),'num'],['Kas/Bank Pembelian',v.kasBeli?kasLabel(v.kasBeli):'—'],
+    ['Harga Penawaran',v.penawaran?rp(v.penawaran):'—','num'],['Target Nett Price',v.targetNett?rp(v.targetNett):'—','num'],['Status',v.status]
+  ];
+  document.getElementById('tab-info').innerHTML=`
+    <div class="card p-6"><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+      ${infoRows.map(([l,val,cls])=>`<div class="field"><label>${l}</label><p class="val ${cls||''}">${val}</p></div>`).join('')}
+    </div></div>`;
+
+  const totPeng=pengTotal(v);
+  document.getElementById('tab-perawatan').innerHTML=`
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
+        <div><h3 class="g font-bold text-[15px]">Rincian Pengeluaran</h3><p class="text-[12px] text-[var(--muted)] mt-0.5">${v.peng.length} item · biaya rekondisi & kelengkapan unit</p></div>
+        <span class="text-[11px] text-[var(--muted)]">Hanya lihat · ubah lewat menu Edit</span>
+      </div>
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th>No. Transaksi</th><th>Tanggal</th><th>Akun Biaya</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Nilai (Rp)</th></tr></thead>
+        <tbody>${v.peng.map((p0)=>{const p=pengItem(p0); return `<tr>
+          <td class="num text-[12px] font-500">${pengNoTrx(v,p0)}</td>
+          <td class="num text-[12px] text-[var(--muted)]">${fmtDate(p.tgl)}</td>
+          <td>${p.akun?`<span class="badge" style="background:var(--blue-soft);color:var(--blue)">${akunLabel(p.akun)}</span>`:'—'}</td>
+          <td>${p.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(p.kas)}</span>`:'—'}</td>
+          <td class="font-500">${p.ket||'—'}</td>
+          <td class="num text-right">${rp(p.n)}</td>
+        </tr>`;}).join('')||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-8">Belum ada pengeluaran.</td></tr>`}</tbody>
+        <tfoot>
+          <tr><td colspan="5" class="px-4 py-3 text-right font-600 text-[13px]">Total Pengeluaran</td><td class="num text-right font-700 px-4 py-3 text-[14px]">${rp(totPeng)}</td></tr>
+          <tr style="background:var(--blue-soft)"><td colspan="5" class="px-4 py-3 text-right font-700 text-[13px]">Total Modal <span class="font-400 text-[var(--muted)]">(Harga Beli + Pengeluaran)</span></td><td class="num text-right font-700 px-4 py-3 text-[15px]" style="color:var(--blue)">${rp(modal(v))}</td></tr>
+        </tfoot>
+      </table></div>
+    </div>`;
+
+  const el=document.getElementById('tab-penjualan');
+  if(v.jual){
+    const p=v.jual, lk=laba(v), fee=feeOf(v), lb=lk-fee, marginPct=(lb/modal(v)*100);
+    el.innerHTML=`
+      <div class="grid lg:grid-cols-[1fr_340px] gap-4">
+        <div class="card p-6">
+          <h3 class="g font-bold text-[15px] mb-5">Detail Penjualan</h3>
+          <div class="grid sm:grid-cols-2 gap-x-8 gap-y-5">
+            <div class="field"><label>Tanggal Terjual</label><p class="val num">${fmtDate(p.tgl)}</p></div>
+            <div class="field"><label>Harga Jual</label><p class="val num">${rp(p.harga)}</p></div>
+            <div class="field"><label>Nama Pembeli</label><p class="val">${p.mediator||'—'}</p></div>
+            <div class="field"><label>Metode Pembayaran</label><p class="val">${p.metode||'—'}</p></div>
+          </div>
+          ${p.tt?`
+          <div class="mt-6 pt-5 border-t border-[var(--line)]">
+            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--amber)] font-700 mb-3">Tukar Tambah</p>
+            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+              <div class="field"><label>Mobil Diterima</label><p class="val">${[p.tt.merk,p.tt.model,p.tt.thn].filter(Boolean).join(' ')||'—'}</p></div>
+              <div class="field"><label>No. Polisi</label><p class="val num">${p.tt.nopol||'—'}</p></div>
+              <div class="field"><label>Nilai Taksir</label><p class="val num">${rp(p.tt.nilai||0)}</p></div>
+            </div>
+          </div>`:''}
+          ${p.leasing?`
+          <div class="mt-6 pt-5 border-t border-[var(--line)]">
+            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--blue)] font-700 mb-3">Pembiayaan Leasing</p>
+            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+              <div class="field"><label>Perusahaan</label><p class="val">${p.leasing.perusahaan||'—'}</p></div>
+              <div class="field"><label>Uang Muka / DP</label><p class="val num">${rp(p.leasing.dp||0)}</p></div>
+              <div class="field"><label>Tenor</label><p class="val num">${p.leasing.tenor?p.leasing.tenor+' bulan':'—'}</p></div>
+              <div class="field"><label>Angsuran / bulan</label><p class="val num">${p.leasing.angsuran?rp(p.leasing.angsuran):'—'}</p></div>
+            </div>
+          </div>`:''}
+        </div>
+        <div class="card p-6" style="background:${lb>=0?'var(--pos-soft)':'var(--neg-soft)'};border-color:${lb>=0?'#bfe6d3':'#f0c9c9'}">
+          <h3 class="g font-bold text-[15px] mb-4">Perhitungan Laba</h3>
+          <div class="space-y-2.5 text-[13.5px]">
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span class="num">${rp(p.harga)}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Harga pembelian</span><span class="num">(${rp(v.beli)})</span></div>
+            <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Biaya perawatan</span><span class="num">(${rp(pengTotal(v))})</span></div>
+            <div class="flex justify-between pt-2 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Total modal</span><span class="num font-600">(${rp(modal(v))})</span></div>
+            <div class="flex justify-between pt-2.5 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Laba kotor</span><span class="num font-600">${lk>=0?'+':''}${rp(lk)}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Komisi${p.feeMode==='pct'&&p.feeRaw?` (${p.feeRaw}%)`:''}</span><span class="num">(${rp(fee)})</span></div>
+            <div class="flex justify-between pt-2.5 mt-1 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-700">Laba bersih</span><span class="num font-700 text-[16px]" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${lb>=0?'+':''}${rp(lb)}</span></div>
+            <p class="text-[12px] text-[var(--muted)] pt-1">Margin ${marginPct.toFixed(1)}% dari modal</p>
+          </div>
+        </div>
+      </div>
+      ${(()=>{ const pays=p.pembayaran||[]; const totBayar=pays.reduce((s,x)=>s+(+x.jumlah||0),0); const ttN=(p.tt&&p.tt.nilai)||0; const sisa=Math.max(0,(p.harga||0)-ttN-totBayar); const lunas=sisa<=0; return `
+      <div class="card overflow-hidden mt-4">
+        <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
+          <h3 class="g font-bold text-[15px]">Riwayat Pembayaran</h3>
+          <span class="badge" style="background:${lunas?'var(--pos-soft)':'var(--neg-soft)'};color:${lunas?'var(--pos)':'var(--neg)'}"><span class="dot" style="background:${lunas?'var(--pos)':'var(--neg)'}"></span>${lunas?'LUNAS':'BELUM LUNAS'}</span>
+        </div>
+        <div class="overflow-x-auto no-sb"><table>
+          <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
+          <tbody>${pays.map(x=>`<tr><td class="num text-[12px] text-[var(--muted)]">${fmtDate(x.tgl)}</td><td>${x.jenis?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${x.jenis}</span>`:'—'}</td><td>${x.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(x.kas)}</span>`:'—'}</td><td class="font-500">${x.ket||'—'}</td><td class="num text-right">${rp(x.jumlah||0)}</td></tr>`).join('')||`<tr><td colspan="5" class="text-center text-[var(--muted)] py-6">Belum ada pembayaran tercatat.</td></tr>`}</tbody>
+          <tfoot>
+            <tr><td colspan="4" class="px-4 py-2.5 text-right font-600 text-[13px]">Total Dibayar</td><td class="num text-right font-700 px-4 py-2.5" style="color:var(--pos)">${rp(totBayar)}</td></tr>
+            <tr style="background:${lunas?'var(--pos-soft)':'var(--neg-soft)'}"><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px]">Sisa Pembayaran</td><td class="num text-right font-700 px-4 py-2.5 text-[15px]" style="color:${lunas?'var(--pos)':'var(--neg)'}">${rp(sisa)}</td></tr>
+          </tfoot>
+        </table></div>
+      </div>`; })()}
+      <div class="card p-5 mt-4">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h3 class="g font-bold text-[15px]">Cetak Dokumen</h3>
+            <p class="text-[12px] text-[var(--muted)] mt-0.5">Dokumen terisi otomatis dari data unit &amp; penjualan. Lengkapi data pembeli/administrasi di menu Edit → tab Penjualan.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button class="btn btn-ghost" onclick="cetakSPK('${v.kode}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+              Surat Pesanan (SPK)
+            </button>
+            <button class="btn btn-ghost" onclick="cetakSerah('${v.kode}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              Serah Terima
+            </button>
+            <button class="btn btn-dark" onclick="cetakKwitansi('${v.kode}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+              Kwitansi
+            </button>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    el.innerHTML=`
+      <div class="grid lg:grid-cols-[1fr_320px] gap-4">
+        <div class="card p-6">
+          <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-[var(--pos)]"></span><h3 class="g font-bold text-[15px]">Masih Ready — Belum Terjual</h3></div>
+          <p class="text-[13px] text-[var(--muted)]">Unit ini belum terjual. Untuk mencatat penjualan (harga jual, pembeli, metode pembayaran, tukar tambah/leasing, dan dokumen), gunakan tombol <b>Edit</b> pada daftar kendaraan lalu buka tab <b>Penjualan</b>.</p>
+        </div>
+        <div class="card p-6">
+          <h3 class="g font-bold text-[15px] mb-4">Target Harga</h3>
+          <div class="space-y-3 text-[13.5px]">
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Harga Penawaran</span><span class="num">${v.penawaran?rp(v.penawaran):'—'}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Target Nett Price</span><span class="num">${v.targetNett?rp(v.targetNett):'—'}</span></div>
+            <div class="flex justify-between pt-2.5 border-t" style="border-color:var(--line)"><span class="text-[var(--muted)]">Total Modal</span><span class="num">${rp(modal(v))}</span></div>
+            <div class="flex justify-between"><span class="font-600">Estimasi laba (nett)</span><span class="num font-600" style="color:var(--pos)">${v.targetNett?'+'+rp(v.targetNett-modal(v)):'—'}</span></div>
+          </div>
+        </div>
+      </div>`;
+  }
+}
+/* --- penomoran transaksi pengeluaran otomatis per bulan --- */
+function pengNoTrx(v, p){
+  const it=pengItem(p);
+  if(!it.tgl) return '—';
+  const ym=it.tgl.slice(0,7);
+  const all=[];
+  VEHICLES.forEach(vv=>vv.peng.forEach((pp)=>{ const x=pengItem(pp); if(x.tgl && x.tgl.slice(0,7)===ym) all.push({ref:pp,tgl:x.tgl,vk:vv.kode}); }));
+  all.sort((a,b)=> a.tgl.localeCompare(b.tgl) || a.vk.localeCompare(b.vk));
+  const pos=all.findIndex(x=>x.ref===p);
+  const seq=(pos>=0?pos:all.length)+1;
+  const [y,m]=ym.split('-');
+  return `PGL/${y}${m}/${String(seq).padStart(3,'0')}`;
+}
+
+/* --- popup Tambah/Edit Pengeluaran (mengubah draft editPeng di halaman Edit) --- */
+let pengEditIdx=null;
+function openPengModal(idx){
+  const editing=(typeof idx==='number');
+  pengEditIdx=editing?idx:null;
+  document.getElementById('pengModalTitle').textContent=editing?'Edit Pengeluaran':'Tambah Pengeluaran';
+  document.getElementById('pm_akun').innerHTML=akunOptions('');
+  document.getElementById('pm_kas').innerHTML=kasOptions('');
+  if(editing){
+    const p=pengItem(editPeng[idx]);
+    document.getElementById('pm_tgl').value=p.tgl||'';
+    document.getElementById('pm_akun').value=p.akun||'';
+    document.getElementById('pm_kas').value=p.kas||'';
+    document.getElementById('pm_ket').value=p.ket||'';
+    document.getElementById('pm_nom').value=(p.n||'');
+  }else{
+    document.getElementById('pm_tgl').value=new Date().toISOString().slice(0,10);
+    document.getElementById('pm_akun').value='';
+    document.getElementById('pm_kas').value='';
+    document.getElementById('pm_ket').value='';
+    document.getElementById('pm_nom').value='';
+  }
+  document.getElementById('pengModal').classList.add('open');
+}
+function closePengModal(){ document.getElementById('pengModal').classList.remove('open'); }
+function savePengModal(){
+  const tgl=document.getElementById('pm_tgl').value||null;
+  const akun=document.getElementById('pm_akun').value||'';
+  const kas=document.getElementById('pm_kas').value||'';
+  const ket=document.getElementById('pm_ket').value.trim();
+  const n=+document.getElementById('pm_nom').value||0;
+  if(!akun && !ket){ alert('Pilih akun biaya atau isi keterangan.'); return; }
+  if(!n){ alert('Isi nilai pengeluaran.'); return; }
+  if(pengEditIdx!=null){ editPeng[pengEditIdx]={tgl,akun,ket,n,kas}; }
+  else { editPeng.push({tgl,akun,ket,n,kas}); }
+  closePengModal();
+  renderEditPeng(); updateEditTotals();
+}
+function deletePeng(idx){
+  const p=pengItem(editPeng[idx]);
+  if(!confirm('Hapus pengeluaran'+(p.ket?' "'+p.ket+'"':'')+'?')) return;
+  editPeng.splice(idx,1);
+  renderEditPeng(); updateEditTotals();
+}
+function catatPenjualan(){
+  const tgl=document.getElementById('jlDate').value, harga=+document.getElementById('jlHarga').value, mediator=document.getElementById('jlMediator').value.trim()||'—', fee=+document.getElementById('jlFee').value||0;
+  if(!harga){alert('Isi harga jual.');return;}
+  currentVehicle.jual={tgl,harga,mediator,fee}; currentVehicle.status='SOLD';
+  renderVehicleDetail(); switchTab('penjualan');
+}
+
+/* ===== tambah / edit unit — halaman ber-tab (editable) ===== */
+let editingKode=null;    // null = tambah unit baru
+let editPeng=[];         // draft rincian pengeluaran
+
+const esc = s => String(s==null?'':s).replace(/"/g,'&quot;');
+const gv = id => { const el=document.getElementById(id); return el?el.value.trim():''; };
+const gn = id => { const el=document.getElementById(id); if(!el||el.value==='') return null; const x=+el.value; return isNaN(x)?null:x; };
+const sv = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=(val==null?'':val); };
+
+function openAddForm(){ editingKode=null; editPeng=[]; renderEditPage(null); }
+function openEditForm(kode){
+  const v=VEHICLES.find(x=>x.kode===kode); if(!v) return;
+  editingKode=kode;
+  editPeng=v.peng.map(p=>pengItem(p));
+  renderEditPage(v);
+}
+function closeEdit(){
+  document.getElementById('kendaraanEdit').style.display='none';
+  document.getElementById('kendaraanList').style.display='';
+  renderKendaraan();
+}
+
+function editSwitchTab(t){
+  document.querySelectorAll('#kendaraanEdit .tab').forEach(x=>x.classList.toggle('active',x.dataset.etab===t));
+  ['info','perawatan','penjualan'].forEach(k=>{ const el=document.getElementById('etab-'+k); if(el) el.style.display=(k===t)?'':'none'; });
+}
+
+function renderEditPage(v){
+  document.getElementById('kendaraanList').style.display='none';
+  document.getElementById('kendaraanDetail').style.display='none';
+  document.getElementById('kendaraanEdit').style.display='';
+  window.scrollTo(0,0);
+
+  const isEdit=!!v;
+  // Tab Pengeluaran & Penjualan hanya tampil saat edit (data sudah ada)
+  document.querySelector('#kendaraanEdit .tab[data-etab="perawatan"]').style.display = isEdit?'':'none';
+  document.querySelector('#kendaraanEdit .tab[data-etab="penjualan"]').style.display = isEdit?'':'none';
+  editSwitchTab('info');
+
+  document.getElementById('ehead').innerHTML=`
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="num text-[13px] font-600 px-2.5 py-1 rounded-md bg-[var(--ink)] text-white">${isEdit?v.kode:'UNIT BARU'}</span>
+      <h2 class="g text-[22px] font-bold">${isEdit?'Edit Unit':'Tambah Unit'}</h2>
+      <span id="eStatusBadge">${badge(isEdit?v.status:'READY')}</span>
+    </div>
+    <p class="text-[12.5px] text-[var(--muted)] mt-1">${isEdit?'Isi ketiga tab di bawah lalu klik Simpan. Status otomatis menjadi SOLD bila data penjualan diisi.':'Isi data kendaraan lalu klik Simpan. Pengeluaran &amp; penjualan bisa dilengkapi setelah unit tersimpan melalui menu Edit.'}</p>`;
+
+  const opt=(arr,cur)=>arr.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
+  const thnNow=new Date().getFullYear()+1;
+  const tahunOptions=(cur)=>{ let s=`<option value="" ${!cur?'selected':''}>— Pilih —</option>`; for(let y=thnNow;y>=2000;y--) s+=`<option ${(''+y===''+cur)?'selected':''}>${y}</option>`; return s; };
+  document.getElementById('etab-info').innerHTML=`
+    <div class="card p-6"><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+      <div class="field"><label>Merk *</label><input id="ef_merk" class="inp" list="dlMerk" value="${esc(v&&v.merk)}" placeholder="Pilih / ketik merk" autocomplete="off" oninput="refreshEditLists()"></div>
+      <div class="field"><label>Model *</label><input id="ef_model" class="inp" list="dlModel" value="${esc(v&&v.model)}" placeholder="Pilih / ketik model" autocomplete="off" oninput="refreshEditLists()"></div>
+      <div class="field"><label>Type</label><input id="ef_type" class="inp" list="dlType" value="${esc(v&&v.type)}" placeholder="Pilih / ketik type" autocomplete="off"></div>
+      <div class="field"><label>Transmisi</label><select id="ef_trans" class="inp">${opt(['AT','MT','CVT'], v?v.trans:'AT')}</select></div>
+      <div class="field"><label>Warna</label><input id="ef_warna" class="inp" list="dlWarna" value="${esc(v&&v.warna)}" placeholder="Pilih / ketik warna" autocomplete="off"></div>
+      <div class="field"><label>Tahun *</label><select id="ef_thn" class="inp">${tahunOptions(v&&v.thn)}</select></div>
+      <div class="field"><label>No. Polisi</label><input id="ef_nopol" class="inp" value="${esc(v&&v.nopol)}" placeholder="D 1234 ABC"></div>
+      <div class="field"><label>Odometer (km)</label><input id="ef_odo" class="inp" value="${esc(v&&v.odo)}" placeholder="50000"></div>
+      <div class="field"><label>Bahan Bakar</label><select id="ef_bbm" class="inp">${opt(['Bensin','Diesel','Listrik','Hybrid'], v?v.bbm:'Bensin')}</select></div>
+      <div class="field"><label>No. Rangka</label><input id="ef_rangka" class="inp" value="${esc(v&&v.rangka)}"></div>
+      <div class="field"><label>No. Mesin</label><input id="ef_mesin" class="inp" value="${esc(v&&v.mesin)}"></div>
+      <div class="field"><label>JTP Pajak Tahunan</label><input id="ef_pajakThn" type="date" class="inp" value="${esc(v&&v.pajakThn)}"></div>
+      <div class="field"><label>JTP Pajak 5 Tahunan</label><input id="ef_pajak5" type="date" class="inp" value="${esc(v&&v.pajak5Thn)}"></div>
+      <div class="field"><label>Tanggal Pembelian</label><input id="ef_tglBeli" type="date" class="inp" value="${esc(v&&v.tglBeli)}"></div>
+      <div class="field"><label>Harga Pembelian (Rp) *</label><input id="ef_beli" type="number" class="inp" value="${esc(v&&v.beli)}" placeholder="0" oninput="updateEditTotals()"></div>
+      <div class="field"><label>Kas / Bank Pembelian</label><select id="ef_kasBeli" class="inp">${kasOptions(v&&v.kasBeli)}</select></div>
+      <div class="field"><label>Harga Penawaran (Rp)</label><input id="ef_penawaran" type="number" class="inp" value="${esc(v&&v.penawaran)}" placeholder="0"></div>
+      <div class="field"><label>Target Nett Price (Rp)</label><input id="ef_target" type="number" class="inp" value="${esc(v&&v.targetNett)}" placeholder="0"></div>
+    </div>
+    ${dlHTML('dlMerk',[])}${dlHTML('dlModel',[])}${dlHTML('dlType',[])}${dlHTML('dlWarna',[])}
+    </div>`;
+
+  refreshEditLists();
+  renderEditPeng();
+  renderEditJual(v);
+  updateEditTotals();
+}
+
+/* --- tab Pengeluaran (Edit): tabel + pop-up --- */
+function pengNoTrxEdit(i){
+  const it=pengItem(editPeng[i]);
+  if(!it.tgl) return '—';
+  const ym=it.tgl.slice(0,7); const all=[];
+  VEHICLES.forEach(vv=>{ if(vv.kode===editingKode) return; vv.peng.forEach(pp=>{ const x=pengItem(pp); if(x.tgl&&x.tgl.slice(0,7)===ym) all.push({tgl:x.tgl,vk:vv.kode,ref:pp}); }); });
+  editPeng.forEach((pp)=>{ const x=pengItem(pp); if(x.tgl&&x.tgl.slice(0,7)===ym) all.push({tgl:x.tgl,vk:editingKode||'ZZZ',ref:pp}); });
+  all.sort((a,b)=> a.tgl.localeCompare(b.tgl) || (a.vk||'').localeCompare(b.vk||''));
+  const pos=all.findIndex(x=>x.ref===editPeng[i]);
+  const seq=(pos>=0?pos:all.length)+1; const [y,m]=ym.split('-');
+  return `PGL/${y}${m}/${String(seq).padStart(3,'0')}`;
+}
+function editPengTotal(){ return editPeng.reduce((s,p)=>s+(+p.n||0),0); }
+function renderEditPeng(){
+  const beli=+((document.getElementById('ef_beli')||{}).value)||0;
+  const totPeng=editPengTotal();
+  const rows=editPeng.map((p0,i)=>{const p=pengItem(p0); return `<tr>
+      <td><div class="flex items-center justify-center gap-1.5">
+        <button class="act" title="Edit" onclick="openPengModal(${i})" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+        <button class="act" title="Hapus" onclick="deletePeng(${i})" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>
+      </div></td>
+      <td class="num text-[12px] font-500">${pengNoTrxEdit(i)}</td>
+      <td class="num text-[12px] text-[var(--muted)]">${fmtDate(p.tgl)}</td>
+      <td>${p.akun?`<span class="badge" style="background:var(--blue-soft);color:var(--blue)">${akunLabel(p.akun)}</span>`:'—'}</td>
+      <td>${p.kas?`<span class="badge" style="background:var(--paper-2,#eef);color:var(--ink)">${kasLabel(p.kas)}</span>`:'—'}</td>
+      <td class="font-500">${p.ket||'—'}</td>
+      <td class="num text-right">${rp(p.n)}</td>
+    </tr>`;}).join('');
+  document.getElementById('etab-perawatan').innerHTML=`
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
+        <div><h3 class="g font-bold text-[15px]">Rincian Pengeluaran</h3><p class="text-[12px] text-[var(--muted)] mt-0.5">Tambah, edit, atau hapus item biaya pemeliharaan kendaraan</p></div>
+        <button class="btn btn-amber" onclick="openPengModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah</button>
+      </div>
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th class="text-center" style="width:78px">Aksi</th><th>No. Transaksi</th><th>Tanggal</th><th>Akun Biaya</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Nilai (Rp)</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="7" class="text-center text-[var(--muted)] py-8">Belum ada item. Klik "Tambah".</td></tr>`}</tbody>
+        <tfoot>
+          <tr><td colspan="6" class="px-4 py-3 text-right font-600 text-[13px]">Total Pengeluaran</td><td id="eTotPeng" class="num text-right font-700 px-4 py-3 text-[14px]">${rp(totPeng)}</td></tr>
+          <tr style="background:var(--blue-soft)"><td colspan="6" class="px-4 py-3 text-right font-700 text-[13px]">Total Modal <span class="font-400 text-[var(--muted)]">(Harga Beli + Pengeluaran)</span></td><td id="eTotModal" class="num text-right font-700 px-4 py-3 text-[15px]" style="color:var(--blue)">${rp(beli+totPeng)}</td></tr>
+        </tfoot>
+      </table></div>
+    </div>`;
+}
+function syncEditPeng(){ /* draft dikelola via pop-up; tidak ada input inline untuk dibaca */ }
+
+/* --- tab Penjualan (editable) --- */
+function renderEditJual(v){
+  const j=v?v.jual:null, tt=j&&j.tt, ls=j&&j.leasing, metode=(j&&j.metode)||'Tunai';
+  const dok=(j&&j.dok)||{};
+  editPay = (j&&Array.isArray(j.pembayaran)) ? j.pembayaran.map(x=>({...x}))
+          : ((j&&j.dok&&j.dok.jumlahBayar) ? [{tgl:j.tgl||null,jenis:'Tanda Jadi / DP',ket:'',jumlah:j.dok.jumlahBayar}] : []);
+  const rek={ bank:dok.rekBank||REK_DEFAULT.bank, atasNama:dok.rekAtasNama||REK_DEFAULT.atasNama, no:dok.rekNo||REK_DEFAULT.no };
+  const ck=dok.checklist||[];
+  const feeMode=(j&&j.feeMode)||'rp';
+  const feeRaw=(j? (feeMode==='pct'? (j.feeRaw!=null?j.feeRaw:'') : (j.fee!=null?j.fee:'')) : '');
+  const mopt=['Tunai','Transfer','Kredit (Leasing)','Tukar Tambah'].map(o=>`<option ${o===metode?'selected':''}>${o}</option>`).join('');
+  const topt=['','12','24','36','48','60'].map(o=>`<option value="${o}" ${(''+((ls&&ls.tenor)||''))===o?'selected':''}>${o?o+' bulan':'— Pilih —'}</option>`).join('');
+  document.getElementById('etab-penjualan').innerHTML=`
+    <div class="grid lg:grid-cols-[1fr_340px] gap-4">
+      <div class="card p-6">
+        <h3 class="g font-bold text-[15px] mb-1">Data Penjualan</h3>
+        <p class="text-[13px] text-[var(--muted)] mb-5">Isi bila unit sudah terjual; kosongkan bila masih Ready. Status mengikuti otomatis.</p>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="field"><label>Tanggal Penjualan</label><input id="ef_jTgl" type="date" class="inp" value="${esc(j&&j.tgl)}"></div>
+          <div class="field"><label>Harga Penjualan (Rp)</label><input id="ef_jHarga" type="number" class="inp" value="${esc(j&&j.harga)}" placeholder="0" oninput="updateEditTotals()"></div>
+          <div class="field"><label>Nama Pembeli</label><input id="ef_jPembeli" class="inp" value="${esc(j&&j.mediator)}" placeholder="Nama pembeli / mediator"></div>
+          <div class="field"><label>Metode Pembayaran</label><select id="ef_jMetode" class="inp" onchange="onMetodeChange()">${mopt}</select></div>
+          <div class="field"><label>Komisi</label>
+            <div class="flex gap-2">
+              <input id="ef_jFee" type="number" step="any" class="inp" value="${esc(feeRaw)}" placeholder="0" oninput="updateEditTotals()">
+              <select id="ef_jFeeMode" class="inp" style="width:78px" onchange="updateEditTotals()">
+                <option value="rp" ${feeMode!=='pct'?'selected':''}>Rp</option>
+                <option value="pct" ${feeMode==='pct'?'selected':''}>%</option>
+              </select>
+            </div>
+            <p id="ef_jFeeHint" class="text-[11px] text-[var(--muted)] mt-1"></p>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-[var(--line)]">
+          <label class="flex items-center gap-2.5 cursor-pointer text-[13.5px] font-600"><input type="checkbox" id="ef_jTTon" ${tt?'checked':''} onchange="toggleTT()" class="w-4 h-4 accent-[color:var(--blue)]"> Sertakan tukar tambah (terima mobil dari pembeli)</label>
+          <div id="ttFields" style="display:${tt?'':'none'}" class="grid sm:grid-cols-2 gap-3 mt-3">
+            <div class="field"><label>Merk Mobil Trade-in</label><input id="ef_ttMerk" class="inp" list="dlMerk" value="${esc(tt&&tt.merk)}" placeholder="TOYOTA" autocomplete="off"></div>
+            <div class="field"><label>Model</label><input id="ef_ttModel" class="inp" value="${esc(tt&&tt.model)}" placeholder="AVANZA"></div>
+            <div class="field"><label>Tahun</label><input id="ef_ttThn" type="number" class="inp" value="${esc(tt&&tt.thn)}" placeholder="2018"></div>
+            <div class="field"><label>Warna</label><input id="ef_ttWarna" class="inp" list="dlWarna" value="${esc(tt&&tt.warna)}" placeholder="Hitam" autocomplete="off"></div>
+            <div class="field"><label>No. Polisi</label><input id="ef_ttNopol" class="inp" value="${esc(tt&&tt.nopol)}" placeholder="D 1234 ABC"></div>
+            <div class="field sm:col-span-2"><label>Nilai Taksir Tukar Tambah (Rp)</label><input id="ef_ttNilai" type="number" class="inp" value="${esc(tt&&tt.nilai)}" placeholder="0" oninput="updateEditTotals()"></div>
+            <label class="sm:col-span-2 flex items-center gap-2.5 cursor-pointer text-[12.5px] text-[var(--muted)]"><input type="checkbox" id="ef_ttStock" ${tt&&tt.addStock?'checked':''} class="w-4 h-4 accent-[color:var(--pos)]"> Masukkan mobil trade-in sebagai unit stok baru (READY) saat disimpan</label>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <label class="flex items-center gap-2.5 cursor-pointer text-[13.5px] font-600"><input type="checkbox" id="ef_jLSon" ${ls?'checked':''} onchange="toggleLS()" class="w-4 h-4 accent-[color:var(--blue)]"> Pembiayaan melalui leasing</label>
+          <div id="lsFields" style="display:${ls?'':'none'}" class="grid sm:grid-cols-2 gap-3 mt-3">
+            <div class="field"><label>Perusahaan Leasing</label><input id="ef_lsPerusahaan" class="inp" list="dlLeasing" value="${esc(ls&&ls.perusahaan)}" placeholder="mis. BCA Finance" autocomplete="off"></div>
+            <div class="field"><label>Uang Muka / DP (Rp)</label><input id="ef_lsDp" type="number" class="inp" value="${esc(ls&&ls.dp)}" placeholder="0" oninput="updateEditTotals()"></div>
+            <div class="field"><label>Tenor</label><select id="ef_lsTenor" class="inp">${topt}</select></div>
+            <div class="field"><label>Angsuran / bulan (Rp)</label><input id="ef_lsAngsuran" type="number" class="inp" value="${esc(ls&&ls.angsuran)}" placeholder="0"></div>
+          </div>
+          ${dlHTML('dlLeasing',LEASING_UMUM)}
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <div id="payWrap"></div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <h4 class="text-[13.5px] font-700 mb-3">Data Pembeli & Dokumen</h4>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="field sm:col-span-2"><label>Alamat Pembeli</label><input id="ef_dAlamat" class="inp" value="${esc(dok.alamat)}" placeholder="Jl. ..., Kota"></div>
+            <div class="field"><label>No. Telepon Pembeli</label><input id="ef_dTelp" class="inp" value="${esc(dok.telp)}" placeholder="0857 xxxx xxxx"></div>
+            <div class="field"><label>No. SPK</label><input id="ef_dNoSPK" class="inp" value="${esc(dok.noSPK)}" placeholder="SPK/..."></div>
+            <div class="field"><label>Tanggal Pesanan (SPK)</label><input id="ef_dTglPesan" type="date" class="inp" value="${esc(dok.tglPesan)}"></div>
+            <div class="field"><label>No. Kwitansi</label><input id="ef_dNoKwitansi" class="inp" value="${esc(dok.noKwitansi)}" placeholder="KW/..."></div>
+            <div class="field"><label>Tanggal Serah Terima</label><input id="ef_dTglSerah" type="date" class="inp" value="${esc(dok.tglSerah)}"></div>
+            <div class="field"><label>Petugas Penyerahan</label><input id="ef_dPenyerah" class="inp" value="${esc(dok.namaPenyerah)}" placeholder="Nama petugas"></div>
+            <div class="field"><label>Petugas / Kasir (Kwitansi)</label><input id="ef_dKasir" class="inp" value="${esc(dok.namaKasir)}" placeholder="Nama kasir"></div>
+            <div class="field"><label>Bank</label><input id="ef_dRekBank" class="inp" value="${esc(rek.bank)}"></div>
+            <div class="field"><label>Rekening a/n</label><input id="ef_dRekNama" class="inp" value="${esc(rek.atasNama)}"></div>
+            <div class="field sm:col-span-2"><label>No. Rekening</label><input id="ef_dRekNo" class="inp" value="${esc(rek.no)}"></div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <h4 class="text-[13.5px] font-700 mb-1">Kelengkapan Serah Terima</h4>
+          <p class="text-[12px] text-[var(--muted)] mb-3">Centang dokumen/barang yang diserahkan ke pembeli.</p>
+          <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+            ${CHECKLIST_ITEMS.map((it,i)=>`<label class="flex items-center gap-2.5 cursor-pointer text-[13px]"><input type="checkbox" id="ef_ck${i}" ${ck.includes(it)?'checked':''} class="w-4 h-4 accent-[color:var(--pos)]"> ${it}</label>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="g font-bold text-[15px] mb-4">Perhitungan Laba</h3>
+        <div class="space-y-2.5 text-[13.5px]">
+          <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span id="eL_jual" class="num">—</span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Harga pembelian</span><span id="eL_beli" class="num text-[var(--muted)]">—</span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Biaya perawatan</span><span id="eL_rawat" class="num text-[var(--muted)]">—</span></div>
+          <div class="flex justify-between pt-2 border-t" style="border-color:var(--line)"><span class="font-600">Total modal</span><span id="eL_modal" class="num font-600">—</span></div>
+          <div class="flex justify-between pt-2.5 border-t" style="border-color:var(--line)"><span class="font-600">Laba kotor</span><span id="eL_kotor" class="num font-600">—</span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted)]">Komisi</span><span id="eL_fee" class="num">—</span></div>
+          <div class="flex justify-between pt-2.5 mt-1 border-t" style="border-color:var(--line)"><span class="font-700">Laba bersih</span><span id="eL_bersih" class="num font-700 text-[16px]">—</span></div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <h4 class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-700 mb-2.5">Rincian Pembayaran</h4>
+          <div class="space-y-2 text-[13px]">
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span id="eP_harga" class="num">—</span></div>
+            <div class="flex justify-between" id="eP_ttRow" style="display:none"><span class="text-[var(--muted)]">Tukar tambah (potong)</span><span id="eP_tt" class="num" style="color:var(--amber)">—</span></div>
+            <div class="flex justify-between" id="eP_bayarRow" style="display:none"><span class="text-[var(--muted)]">Total dibayar</span><span id="eP_bayar" class="num" style="color:var(--pos)">—</span></div>
+            <div class="flex justify-between pt-2 border-t" style="border-color:var(--line)"><span class="font-600" id="eP_sisaLbl">Sisa pembayaran</span><span id="eP_sisa" class="num font-600" style="color:var(--blue)">—</span></div>
+            <div class="flex justify-between"><span class="text-[var(--muted)]">Status</span><span id="eP_status" class="num font-600">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  renderEditPay();
+}
+function toggleTT(){ const on=document.getElementById('ef_jTTon').checked; document.getElementById('ttFields').style.display=on?'':'none'; updateEditTotals(); }
+function toggleLS(){ const on=document.getElementById('ef_jLSon').checked; document.getElementById('lsFields').style.display=on?'':'none'; updateEditTotals(); }
+function onMetodeChange(){
+  const m=document.getElementById('ef_jMetode').value;
+  if(m==='Tukar Tambah' && !document.getElementById('ef_jTTon').checked){ document.getElementById('ef_jTTon').checked=true; toggleTT(); }
+  if(m==='Kredit (Leasing)' && !document.getElementById('ef_jLSon').checked){ document.getElementById('ef_jLSon').checked=true; toggleLS(); }
+}
+
+/* --- riwayat pembayaran / pelunasan --- */
+let editPay=[]; let payEditIdx=null;
+const PAY_JENIS=['Tanda Jadi / DP','Angsuran','Pelunasan','Pembayaran Tunai','Transfer','Pencairan Leasing','Lain-lain'];
+const payJenisOptions=cur=>`<option value="" ${!cur?'selected':''}>— Pilih —</option>`+PAY_JENIS.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
+function payTotal(){ return editPay.reduce((s,p)=>s+(+p.jumlah||0),0); }
+function renderEditPay(){
+  const rows=editPay.map((p,i)=>`<tr>
+      <td><div class="flex items-center justify-center gap-1.5">
+        <button class="act" title="Edit" onclick="openPayModal(${i})" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+        <button class="act" title="Hapus" onclick="deletePay(${i})" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>
+      </div></td>
+      <td class="num text-[12px] text-[var(--muted)]">${fmtDate(p.tgl)}</td>
+      <td>${p.jenis?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${esc(p.jenis)}</span>`:'—'}</td>
+      <td>${p.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(p.kas)}</span>`:'—'}</td>
+      <td class="font-500">${esc(p.ket)||'—'}</td>
+      <td class="num text-right">${rp(p.jumlah||0)}</td>
+    </tr>`).join('');
+  document.getElementById('payWrap').innerHTML=`
+    <div class="flex items-center justify-between mb-2">
+      <div><h4 class="text-[13.5px] font-700">Pembayaran & Pelunasan</h4><p class="text-[12px] text-[var(--muted)] mt-0.5">Catat DP, angsuran, dan pelunasan. Sisa & status dihitung otomatis.</p></div>
+      <button class="btn btn-amber" onclick="openPayModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Pembayaran</button>
+    </div>
+    <div class="border border-[var(--line)] rounded-xl overflow-hidden">
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th class="text-center" style="width:78px">Aksi</th><th>Tanggal</th><th>Jenis</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-6">Belum ada pembayaran. Klik "Tambah Pembayaran".</td></tr>`}</tbody>
+        <tfoot><tr style="background:var(--pos-soft)"><td colspan="5" class="px-4 py-2.5 text-right font-700 text-[13px]">Total Dibayar</td><td class="num text-right font-700 px-4 py-2.5 text-[14px]" style="color:var(--pos)">${rp(payTotal())}</td></tr></tfoot>
+      </table></div>
+    </div>`;
+}
+function openPayModal(idx){
+  const editing=(typeof idx==='number');
+  payEditIdx=editing?idx:null;
+  document.getElementById('payModalTitle').textContent=editing?'Edit Pembayaran':'Tambah Pembayaran';
+  document.getElementById('pay_jenis').innerHTML=payJenisOptions('');
+  document.getElementById('pay_kas').innerHTML=kasOptions('');
+  if(editing){
+    const p=editPay[idx];
+    document.getElementById('pay_tgl').value=p.tgl||'';
+    document.getElementById('pay_jenis').value=p.jenis||'';
+    document.getElementById('pay_kas').value=p.kas||'';
+    document.getElementById('pay_ket').value=p.ket||'';
+    document.getElementById('pay_jml').value=(p.jumlah||'');
+  }else{
+    document.getElementById('pay_tgl').value=new Date().toISOString().slice(0,10);
+    document.getElementById('pay_jenis').value='';
+    document.getElementById('pay_kas').value='';
+    document.getElementById('pay_ket').value='';
+    document.getElementById('pay_jml').value='';
+  }
+  document.getElementById('payModal').classList.add('open');
+}
+function closePayModal(){ document.getElementById('payModal').classList.remove('open'); }
+function savePayModal(){
+  const tgl=document.getElementById('pay_tgl').value||null;
+  const jenis=document.getElementById('pay_jenis').value||'';
+  const kas=document.getElementById('pay_kas').value||'';
+  const ket=document.getElementById('pay_ket').value.trim();
+  const jumlah=+document.getElementById('pay_jml').value||0;
+  if(!jenis){ alert('Pilih jenis pembayaran.'); return; }
+  if(!jumlah){ alert('Isi jumlah pembayaran.'); return; }
+  if(payEditIdx!=null){ editPay[payEditIdx]={tgl,jenis,ket,jumlah,kas}; }
+  else { editPay.push({tgl,jenis,ket,jumlah,kas}); }
+  closePayModal();
+  renderEditPay(); updateEditTotals();
+}
+function deletePay(idx){
+  if(!confirm('Hapus pembayaran ini?')) return;
+  editPay.splice(idx,1);
+  renderEditPay(); updateEditTotals();
+}
+
+function updateEditTotals(){
+  const tot=editPeng.reduce((s,p)=>s+(+p.n||0),0);
+  const beli=+((document.getElementById('ef_beli')||{}).value)||0;
+  const md=beli+tot;
+  const tp=document.getElementById('eTotPeng'); if(tp) tp.textContent=rp(tot);
+  const tm=document.getElementById('eTotModal'); if(tm) tm.textContent=rp(md);
+  const hj=+((document.getElementById('ef_jHarga')||{}).value)||0;
+  const feeMode=(document.getElementById('ef_jFeeMode')||{}).value||'rp';
+  const feeRaw=+((document.getElementById('ef_jFee')||{}).value)||0;
+  const fee=feeMode==='pct'?Math.round(hj*feeRaw/100):feeRaw;
+  const set=(id,val,color)=>{ const el=document.getElementById(id); if(el){ el.textContent=val; if(color)el.style.color=color; } };
+  const hint=document.getElementById('ef_jFeeHint');
+  if(hint) hint.textContent = feeMode==='pct' ? (feeRaw?`${feeRaw}% dari harga jual = ${rp(fee)}`:'Persen dari harga jual') : (fee?`= ${rp(fee)}`:'Nilai komisi dalam Rupiah');
+  if(hj>0){
+    const lk=hj-md, lb=lk-fee;
+    set('eL_jual',rp(hj)); set('eL_beli','('+rp(beli)+')'); set('eL_rawat','('+rp(tot)+')'); set('eL_modal','('+rp(md)+')');
+    set('eL_kotor',(lk>=0?'+':'')+rp(lk), lk>=0?'var(--pos)':'var(--neg)');
+    set('eL_fee','('+rp(fee)+')'+(feeMode==='pct'&&feeRaw?` · ${feeRaw}%`:''));
+    set('eL_bersih',(lb>=0?'+':'')+rp(lb), lb>=0?'var(--pos)':'var(--neg)');
+  }else{
+    set('eL_jual','—','var(--ink)'); set('eL_beli',rp(beli),'var(--ink)'); set('eL_rawat',rp(tot),'var(--ink)'); set('eL_modal',rp(md),'var(--ink)');
+    set('eL_kotor','—','var(--ink)'); set('eL_fee','—','var(--ink)'); set('eL_bersih','—','var(--ink)');
+  }
+  const sb=document.getElementById('eStatusBadge'); if(sb) sb.innerHTML=badge(hj>0?'SOLD':'READY');
+
+  // rincian pembayaran (tukar tambah + riwayat pembayaran)
+  const ttOn=(document.getElementById('ef_jTTon')||{}).checked;
+  const ttNilai=ttOn?(+((document.getElementById('ef_ttNilai')||{}).value)||0):0;
+  const lsOn=(document.getElementById('ef_jLSon')||{}).checked;
+  const totalBayar=(typeof editPay!=='undefined'?editPay:[]).reduce((s,p)=>s+(+p.jumlah||0),0);
+  const setP=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+  const setC=(id,val,color)=>{const el=document.getElementById(id); if(el){ el.textContent=val; if(color) el.style.color=color; }};
+  const showRow=(id,show)=>{const el=document.getElementById(id); if(el) el.style.display=show?'':'none';};
+  setP('eP_harga', hj?rp(hj):'—');
+  showRow('eP_ttRow', ttOn); setP('eP_tt', '- '+rp(ttNilai));
+  showRow('eP_bayarRow', totalBayar>0); setP('eP_bayar', '- '+rp(totalBayar));
+  const sisa=Math.max(0, hj-ttNilai-totalBayar);
+  setP('eP_sisa', hj?rp(sisa):'—');
+  const lbl=document.getElementById('eP_sisaLbl'); if(lbl) lbl.textContent = lsOn?'Sisa dibiayai leasing':'Sisa pembayaran';
+  const lunas = hj>0 && sisa<=0;
+  setC('eP_status', hj?(lunas?'LUNAS':'BELUM LUNAS'):'—', hj?(lunas?'var(--pos)':'var(--neg)'):'var(--ink)');
+}
+
+async function saveVehicle(){
+  const merk=gv('ef_merk'), model=gv('ef_model'), thn=gn('ef_thn'), beli=gn('ef_beli');
+  if(!merk||!model){ alert('Merk dan Model wajib diisi (tab Informasi Kendaraan).'); editSwitchTab('info'); return; }
+  if(thn==null){ alert('Tahun wajib diisi.'); editSwitchTab('info'); return; }
+  if(beli==null){ alert('Harga Pembelian wajib diisi.'); editSwitchTab('info'); return; }
+  syncEditPeng();
+  const peng=editPeng.filter(p=>p.akun||p.ket||p.n>0).map(p=>({tgl:p.tgl||null,akun:p.akun||'',ket:(p.ket||'').trim(),n:p.n||0,kas:p.kas||''}));
+  const odoRaw=gv('ef_odo');
+  const jHarga=gn('ef_jHarga');
+  let jual=null, status='READY';
+  if(jHarga){
+    const feeMode=(document.getElementById('ef_jFeeMode')||{}).value||'rp';
+    const feeRaw=+((document.getElementById('ef_jFee')||{}).value)||0;
+    const feeVal=feeMode==='pct'?Math.round(jHarga*feeRaw/100):feeRaw;
+    jual={ tgl:gv('ef_jTgl')||null, harga:jHarga, mediator:gv('ef_jPembeli')||'—', fee:feeVal, feeMode:feeMode, feeRaw:feeRaw, metode:document.getElementById('ef_jMetode').value };
+    if((document.getElementById('ef_jTTon')||{}).checked){
+      jual.tt={ merk:gv('ef_ttMerk'), model:gv('ef_ttModel'), thn:gn('ef_ttThn'), warna:gv('ef_ttWarna')||'', nopol:gv('ef_ttNopol')||'—', nilai:gn('ef_ttNilai')||0, addStock:(document.getElementById('ef_ttStock')||{}).checked };
+    }
+    if((document.getElementById('ef_jLSon')||{}).checked){
+      jual.leasing={ perusahaan:gv('ef_lsPerusahaan')||'—', dp:gn('ef_lsDp')||0, tenor:gn('ef_lsTenor')||null, angsuran:gn('ef_lsAngsuran')||0 };
+    }
+    const checklist=CHECKLIST_ITEMS.filter((it,i)=>(document.getElementById('ef_ck'+i)||{}).checked);
+    jual.pembayaran = editPay.filter(p=>(+p.jumlah||0)>0 || p.jenis).map(p=>({tgl:p.tgl||null,jenis:p.jenis||'',ket:(p.ket||'').trim(),jumlah:+p.jumlah||0,kas:p.kas||''}));
+    jual.dok={
+      alamat:gv('ef_dAlamat'), telp:gv('ef_dTelp'),
+      noSPK:gv('ef_dNoSPK'), tglPesan:gv('ef_dTglPesan')||null,
+      noKwitansi:gv('ef_dNoKwitansi'),
+      tglSerah:gv('ef_dTglSerah')||null, namaPenyerah:gv('ef_dPenyerah'), namaKasir:gv('ef_dKasir'),
+      rekBank:gv('ef_dRekBank')||REK_DEFAULT.bank, rekAtasNama:gv('ef_dRekNama')||REK_DEFAULT.atasNama, rekNo:gv('ef_dRekNo')||REK_DEFAULT.no,
+      checklist:checklist
+    };
+    status='SOLD';
+  }
+  const fields={
+    merk:merk.toUpperCase(), model:model.toUpperCase(), type:gv('ef_type'),
+    trans:document.getElementById('ef_trans').value, warna:gv('ef_warna')||'—', thn:thn,
+    nopol:gv('ef_nopol')||'—', odo:(odoRaw===''?null:(isNaN(+odoRaw)?odoRaw:+odoRaw)),
+    rangka:gv('ef_rangka')||'—', mesin:gv('ef_mesin')||'—', bbm:document.getElementById('ef_bbm').value,
+    pajakThn:gv('ef_pajakThn')||null, pajak5Thn:gv('ef_pajak5')||null,
+    tglBeli:gv('ef_tglBeli')||null, beli:beli, kasBeli:(document.getElementById('ef_kasBeli')||{}).value||'',
+    penawaran:gn('ef_penawaran'), targetNett:gn('ef_target'),
+    peng:peng, jual:jual, status:status
+  };
+  const btn=document.getElementById('btnSimpanUnit'); const btnOldHTML=btn?btn.innerHTML:'';
+  if(btn){ btn.disabled=true; btn.innerHTML='Menyimpan...'; }
+  try{
+    let ttToAdd=null;
+    if(jual && jual.tt && jual.tt.addStock && (jual.tt.merk||jual.tt.model)) ttToAdd=jual.tt;
+    if(ttToAdd) fields.jual.tt.addStock=false; // cegah duplikat saat edit ulang di kemudian hari
+
+    if(editingKode){
+      await apiPut('/api/vehicles/'+encodeURIComponent(editingKode), fields);
+    }else{
+      await apiPost('/api/vehicles', fields);
+    }
+    // masukkan mobil tukar tambah sebagai unit stok baru (sekali saja)
+    if(ttToAdd){
+      await apiPost('/api/vehicles', {
+        merk:(ttToAdd.merk||'-').toUpperCase(), model:(ttToAdd.model||'-').toUpperCase(), type:'',
+        trans:'AT', warna:ttToAdd.warna||'—', thn:ttToAdd.thn||null, nopol:ttToAdd.nopol||'—', odo:null,
+        rangka:'—', mesin:'—', bbm:'Bensin', pajakThn:null, pajak5Thn:null,
+        tglBeli:jual.tgl||null, beli:ttToAdd.nilai||0, penawaran:null, targetNett:null,
+        peng:[], jual:null, status:'READY'
+      });
+    }
+    await loadAllFromServer();
+    closeEdit();
+  }catch(e){
+    console.error(e); alert('Gagal menyimpan ke database: '+e.message);
+  }finally{
+    if(btn){ btn.disabled=false; btn.innerHTML=btnOldHTML; }
+  }
+}
+
+async function deleteVehicle(kode){
+  const v=VEHICLES.find(x=>x.kode===kode); if(!v) return;
+  if(!confirm('Hapus unit '+kode+' — '+nama(v)+'?\nTindakan ini tidak bisa dibatalkan.')) return;
+  try{
+    await apiDelete('/api/vehicles/'+encodeURIComponent(kode));
+    await loadAllFromServer();
+    if(currentVehicle && currentVehicle.kode===kode) backToList();
+    renderKendaraan();
+  }catch(e){ console.error(e); alert('Gagal menghapus dari database: '+e.message); }
+}
+
+/* ===== cetak dokumen ===== */
+function openPrint(title, html){
+  document.getElementById('printTitle').textContent=title;
+  document.getElementById('printDoc').innerHTML=html;
+  document.getElementById('printArea').classList.add('open');
+  window.scrollTo(0,0);
+}
+function closePrint(){ document.getElementById('printArea').classList.remove('open'); }
+function docHeader(){
+  return `<div class="dhead">
+    <div class="brand"><div class="b1">GARASI</div><div class="b2">JAVA MOBILINDO</div></div>
+    <div class="cinfo">${COMPANY.alamat}<br>Telepon: ${COMPANY.telp}<br>Email: ${COMPANY.email}</div>
+  </div>`;
+}
+function cetakSPK(kode){
+  const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{}, tt=j.tt;
+  const tunai=(j.metode==='Tunai'||j.metode==='Transfer');
+  const html=`<div class="doc">${docHeader()}
+    <h1>SURAT PESANAN KENDARAAN</h1>
+    <table class="bx"><tr>
+      <td style="width:42%"><table class="kv"><tr><td class="lbl">No Surat Pesanan</td><td>: ${esc(d.noSPK)||'&nbsp;'}</td></tr>
+      <tr><td class="lbl">Tanggal Pesanan</td><td>: ${fmtTglPanjang(d.tglPesan)}</td></tr></table></td>
+      <td><table class="kv"><tr><td class="lbl">NAMA PEMESAN</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
+      <tr><td class="lbl">ALAMAT</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
+      <tr><td class="lbl">NO TELP</td><td>: ${esc(d.telp)||'&nbsp;'}</td></tr></table></td>
+    </tr></table>
+    <table class="bx" style="border-top:none"><tr>
+      <td style="width:42%;font-size:11px"><b>Ketentuan:</b>
+        <ol style="margin:4px 0 0 16px;padding:0;line-height:1.4">
+          <li>Harga yang tercantum dalam Surat Pesanan ini mengikat.</li>
+          <li>Surat Pesanan ini bukan bukti Pembayaran.</li>
+          <li>Surat Pesanan ini sah apabila telah ditandatangani oleh pemesan.</li>
+          <li>Pembayaran baru sah apabila ada Kwitansi/tanda terima resmi dari Showroom.</li>
+          <li>Apabila pesanan dibatalkan, Uang Muka dipotong 5% oleh pihak Showroom.</li>
+          <li>Surat Pesanan harus dikembalikan saat pengambilan kendaraan atau pembatalan.</li>
+        </ol></td>
+      <td><div style="text-align:center;font-weight:700;margin-bottom:4px">SPESIFIKASI KENDARAAN</div>
+        <table class="kv"><tr><td class="lbl">Merk/Type</td><td>: ${esc(nama(v))}</td></tr>
+        <tr><td class="lbl">Warna</td><td>: ${esc(v.warna)}</td></tr>
+        <tr><td class="lbl">Tahun</td><td>: ${esc(v.thn)}</td></tr>
+        <tr><td class="lbl">No. Polisi</td><td>: ${esc(v.nopol)}</td></tr>
+        <tr><td class="lbl">No. Rangka</td><td>: ${esc(v.rangka)}</td></tr>
+        <tr><td class="lbl">No. Mesin</td><td>: ${esc(v.mesin)}</td></tr>
+        <tr><td class="lbl">Harga</td><td>: ${j.harga?rp(j.harga):'&nbsp;'}</td></tr>
+        <tr><td class="lbl">Tanda Jadi/Uang Muka</td><td>: ${d.jumlahBayar?rp(d.jumlahBayar):'Rp -'}</td></tr></table></td>
+    </tr></table>
+    <div style="text-align:center;font-weight:700;margin:10px 0 4px">SYARAT PEMBAYARAN</div>
+    <table class="bx"><tr>
+      <td style="width:33%;vertical-align:top"><b>TUNAI</b><br>${tunai&&j.harga?rp(j.harga):'Rp ................'}</td>
+      <td style="width:34%;vertical-align:top"><b>KREDIT</b>
+        <table class="kv"><tr><td class="lbl" style="width:88px">Jangka Waktu</td><td>: ${j.leasing&&j.leasing.tenor?j.leasing.tenor+' bulan':'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:88px">Leasing</td><td>: ${esc(j.leasing&&j.leasing.perusahaan)||'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:88px">Uang Muka</td><td>: ${j.leasing&&j.leasing.dp?rp(j.leasing.dp):'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:88px">Angsuran</td><td>: ${j.leasing&&j.leasing.angsuran?rp(j.leasing.angsuran)+'/bln':'&nbsp;'}</td></tr></table></td>
+      <td style="vertical-align:top"><b>Dipesan Oleh:</b><div style="height:50px"></div><div style="text-align:center">( ${esc(j.mediator)||'..................'} )</div></td>
+    </tr>
+    <tr>
+      <td colspan="1" style="vertical-align:top"><b>TRADE IN</b>
+        <table class="kv"><tr><td class="lbl" style="width:68px">Merk/Type</td><td>: ${tt?esc([tt.merk,tt.model].filter(Boolean).join(' ')):'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:68px">Warna</td><td>: ${tt?esc(tt.warna):'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:68px">Tahun</td><td>: ${tt?esc(tt.thn):'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:68px">Harga</td><td>: ${tt&&tt.nilai?rp(tt.nilai):'&nbsp;'}</td></tr></table></td>
+      <td colspan="2"></td>
+    </tr></table>
+    <div style="text-align:center;font-weight:700;margin:10px 0 4px">TANDA TERIMA UANG MUKA (SEMENTARA)</div>
+    <table class="bx"><tr>
+      <td style="width:52%">Telah diterima uang muka utk SPK No. ${esc(d.noSPK)||'..........'}
+        <table class="kv" style="margin-top:6px"><tr><td class="lbl" style="width:82px">Dari</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:82px">Alamat</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
+        <tr><td class="lbl" style="width:82px">Pada Tanggal</td><td>: ${fmtTglPanjang(d.tglPesan)}</td></tr>
+        <tr><td class="lbl" style="width:82px">Penerima</td><td>: ${esc(d.namaKasir)||'&nbsp;'}</td></tr></table></td>
+      <td style="vertical-align:top">Dengan Rincian:<br><br>Uang Muka / Tanda Jadi:<br><b>${d.jumlahBayar?rp(d.jumlahBayar):'Rp -'}</b></td>
+    </tr></table>
+  </div>`;
+  openPrint('Surat Pesanan Kendaraan (SPK)', html);
+}
+function cetakSerah(kode){
+  const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{}, ck=(d.checklist||[]);
+  const html=`<div class="doc">${docHeader()}
+    <h1>BUKTI SERAH TERIMA KENDARAAN</h1>
+    <p><b>Kepada Yth. Bapak/Ibu</b></p>
+    <table class="kv"><tr><td class="lbl">Nama</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
+    <tr><td class="lbl">Alamat</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
+    <tr><td class="lbl">No Telepon</td><td>: ${esc(d.telp)||'&nbsp;'}</td></tr></table>
+    <p style="margin-top:12px"><b>Telah menerima dalam keadaan baik:</b></p>
+    <table style="width:60%"><tbody>${CHECKLIST_ITEMS.map(it=>`<tr><td style="width:22px;font-size:15px">${ck.includes(it)?'&#9745;':'&#9744;'}</td><td>${it}</td></tr>`).join('')}</tbody></table>
+    <p style="margin-top:12px"><b>Dengan data kendaraan sebagai berikut:</b></p>
+    <table class="kv"><tr><td class="lbl">Merk/Type</td><td>: ${esc(nama(v))}</td></tr>
+    <tr><td class="lbl">Tahun</td><td>: ${esc(v.thn)}</td></tr>
+    <tr><td class="lbl">No Polisi</td><td>: ${esc(v.nopol)}</td></tr>
+    <tr><td class="lbl">Warna</td><td>: ${esc(v.warna)}</td></tr>
+    <tr><td class="lbl">No Rangka</td><td>: ${esc(v.rangka)}</td></tr>
+    <tr><td class="lbl">No Mesin</td><td>: ${esc(v.mesin)}</td></tr></table>
+    <p style="margin-top:12px"><b>Catatan:</b> Mobil yang sudah diterima konsumen tidak dapat dikembalikan, kecuali ingin tukar tambah unit di kemudian hari.</p>
+    <p style="margin-top:22px">Bandung, ${fmtTglPanjang(d.tglSerah||j.tgl)}</p>
+    <table style="width:100%;margin-top:6px"><tr>
+      <td style="text-align:center;width:50%">Yang Menyerahkan,<div style="height:62px"></div>( ${esc(d.namaPenyerah)||'..................'} )</td>
+      <td style="text-align:center">Yang Menerima,<div style="height:62px"></div>( ${esc(j.mediator)||'..................'} )</td>
+    </tr></table>
+  </div>`;
+  openPrint('Bukti Serah Terima Kendaraan', html);
+}
+function cetakKwitansi(kode){
+  const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{};
+  const pays=j.pembayaran||[];
+  const totBayar=pays.reduce((s,x)=>s+(+x.jumlah||0),0) || (d.jumlahBayar||0);
+  const ttNilai=(j.tt&&j.tt.nilai)||0;
+  const jumlah=totBayar>0?totBayar:(j.harga||0);
+  const sisa=Math.max(0,(j.harga||0)-ttNilai-jumlah);
+  const html=`<div class="doc">${docHeader()}
+    <h1 style="text-decoration:none;letter-spacing:2px">KWITANSI</h1>
+    <table class="kv" style="font-size:13px"><tr><td class="lbl" style="width:150px">No.</td><td>: ${esc(d.noKwitansi)||'&nbsp;'}</td></tr>
+    <tr><td class="lbl"><i>Sudah Terima Dari</i></td><td>: <b>${esc(j.mediator)||'&nbsp;'}</b></td></tr>
+    <tr><td class="lbl"><i>Banyaknya Uang</i></td><td>: <span style="font-style:italic;background:#eee;padding:2px 10px">${terbilang(jumlah)}</span></td></tr></table>
+    <p style="margin-top:10px"><b>Untuk Pembayaran 1 unit Mobil dengan spesifikasi sebagai berikut:</b></p>
+    <table class="kv"><tr><td class="lbl">Merk/Type</td><td>: ${esc(nama(v))}</td></tr>
+    <tr><td class="lbl">Tahun</td><td>: ${esc(v.thn)}</td></tr>
+    <tr><td class="lbl">No Polisi</td><td>: ${esc(v.nopol)}</td></tr>
+    <tr><td class="lbl">Warna</td><td>: ${esc(v.warna)}</td></tr>
+    <tr><td class="lbl">No Rangka</td><td>: ${esc(v.rangka)}</td></tr>
+    <tr><td class="lbl">No Mesin</td><td>: ${esc(v.mesin)}</td></tr></table>
+    <table style="width:100%;margin-top:14px"><tr>
+      <td style="width:56%;vertical-align:top">
+        <div><i>Jumlah :</i></div><div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:2px">${rp(jumlah)}</div>
+        <div style="margin-top:8px"><i>Sisa Pelunasan :</i></div><div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:2px">${sisa>0?rp(sisa):'Rp -'}</div>
+        <div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:8px">Catatan : ${sisa>0?'Belum Lunas':'Lunas'}</div>
+        <p style="margin-top:10px;font-size:11px">Pembayaran dapat ditransfer ke rekening:<br>Bank ${esc(d.rekBank||REK_DEFAULT.bank)}<br>a/n : ${esc(d.rekAtasNama||REK_DEFAULT.atasNama)}<br>a/c : ${esc(d.rekNo||REK_DEFAULT.no)}</p>
+      </td>
+      <td style="text-align:center;vertical-align:top">Bandung, ${fmtTglPanjang(j.tgl)}<div style="height:72px"></div>( ${esc(d.namaKasir)||'..................'} )</td>
+    </tr></table>
+  </div>`;
+  openPrint('Kwitansi', html);
+}
+
+/* ===== navigasi menu / halaman ===== */
+let currentPage='kendaraan';
+let sidebarCollapsed=false;
+function toggleSidebarCollapse(){
+  sidebarCollapsed=!sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('scrim').classList.toggle('open'); }
+function go(page){
+  currentPage=page;
+  document.querySelectorAll('.navlink').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
+  const sec=document.getElementById('page-'+page); if(sec) sec.classList.add('show');
+  const T={dashboard:['Dashboard','Ikhtisar kinerja & ekspor data'],kendaraan:['Data Kendaraan','Garasi Java Mobilindo · Stok Juni 2026'],operasional:['Biaya Operasional','Pengeluaran di luar unit'],labarugi:['Laporan Laba Rugi','Ikhtisar pendapatan & beban'],users:['Manajemen User','Kelola akun pengguna aplikasi'],permissions:['Hak Akses','Atur menu & fungsi yang bisa diakses role Staff']};
+  document.getElementById('ptitle').textContent=T[page][0];
+  document.getElementById('psub').textContent=T[page][1];
+  if(page==='dashboard'){ renderDashboard(); }
+  else if(page==='kendaraan'){ backToList(); renderKendaraan(); }
+  else if(page==='operasional'){ renderOperasional(); }
+  else if(page==='labarugi'){ renderLabaRugi(); }
+  else if(page==='users'){ renderUsers(); }
+  else if(page==='permissions'){ renderPermissionsPage(); }
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('scrim').classList.remove('open');
+  if(window.innerWidth>860 && !sidebarCollapsed){
+    sidebarCollapsed=true;
+    document.getElementById('sidebar').classList.add('collapsed');
+  }
+  window.scrollTo(0,0);
+}
+
+/* ===== Biaya Operasional ===== */
+let opEditIdx=null;
+function renderOperasional(){
+  const btnTambahB=document.getElementById('btnTambahBiaya'); if(btnTambahB) btnTambahB.style.display=can('operasional_tambah')?'':'none';
+  const btnExportO=document.getElementById('btnExportOperasional'); if(btnExportO) btnExportO.style.display=can('operasional_export')?'':'none';
+  // filter akun
+  const fsel=document.getElementById('opfilter');
+  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+OP_AKUN.map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
+  // filter bulan & tahun
+  const msel=document.getElementById('opMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(''); msel.dataset.init='1'; }
+  const ysel=document.getElementById('opYear'); if(ysel){ const c=ysel.value; ysel.innerHTML=yearOptions(c); }
+  const q=(document.getElementById('opsearch')?.value||'').toLowerCase();
+  const fa=document.getElementById('opfilter')?.value||'';
+  const fm=document.getElementById('opMonth')?.value||'';
+  const fy=document.getElementById('opYear')?.value||'';
+  const list=OPCOSTS.map((o,i)=>({...o,_i:i})).filter(o=>(!fa||o.akun===fa) && inPeriod(o.tgl,fy,fm) && ((o.ket||'')+' '+(o.akun||'')).toLowerCase().includes(q))
+    .sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||''));
+  const total=list.reduce((s,o)=>s+(+o.jumlah||0),0);
+  // KPI (mengikuti filter)
+  const byAkun={}; list.forEach(o=>byAkun[o.akun]=(byAkun[o.akun]||0)+(+o.jumlah||0));
+  const topAkun=Object.entries(byAkun).sort((a,b)=>b[1]-a[1])[0];
+  const months=new Set(list.map(o=>(o.tgl||'').slice(0,7))); months.delete('');
+  const avg=months.size?total/months.size:0;
+  const kpi=[['Total Biaya Operasional',rp(total),'var(--neg)'],['Jumlah Transaksi',list.length,'var(--ink)'],['Rata-rata / Bulan',rp(Math.round(avg)),'var(--amber)'],['Pos Terbesar',topAkun?topAkun[0]:'—','var(--blue)']];
+  document.getElementById('opStrip').innerHTML=kpi.map(k=>`<div class="card p-4"><p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)]">${k[0]}</p><p class="num font-700 text-[19px] mt-1" style="color:${k[2]}">${typeof k[1]==='number'?k[1]:k[1]}</p></div>`).join('');
+  const rows=list.map(o=>`<tr>
+      <td><div class="flex items-center justify-center gap-1.5">
+        ${can('operasional_edit')?`<button class="act" title="Edit" onclick="openOpModal(${o._i})" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>`:''}
+        ${can('operasional_hapus')?`<button class="act" title="Hapus" onclick="deleteOp(${o._i})" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>`:''}
+      </div></td>
+      <td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${fmtDate(o.tgl)}</td>
+      <td>${o.akun?`<span class="badge" style="background:var(--neg-soft);color:var(--neg)">${opLabel(o.akun)}</span>`:'—'}</td>
+      <td>${o.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(o.kas)}</span>`:'—'}</td>
+      <td class="font-500">${esc(o.ket)||'—'}</td>
+      <td class="num text-right whitespace-nowrap">${rp(o.jumlah)}</td>
+    </tr>`).join('');
+  document.getElementById('opTableWrap').innerHTML=`
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th class="text-center" style="width:78px">Aksi</th><th>Tanggal</th><th>Akun / Kategori</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-10">Belum ada biaya operasional.</td></tr>`}</tbody>
+        <tfoot><tr style="background:var(--neg-soft)"><td colspan="5" class="px-4 py-3 text-right font-700 text-[13px]">Total ${fa?'('+fa+')':'Keseluruhan'}</td><td class="num text-right font-700 px-4 py-3 text-[15px]" style="color:var(--neg)">${rp(total)}</td></tr></tfoot>
+      </table></div>
+    </div>`;
+}
+function openOpModal(idx){
+  const editing=(typeof idx==='number'); opEditIdx=editing?idx:null;
+  document.getElementById('opModalTitle').textContent=editing?'Edit Biaya Operasional':'Tambah Biaya Operasional';
+  document.getElementById('op_akun').innerHTML=opAkunOptions('');
+  document.getElementById('op_kas').innerHTML=kasOptions('');
+  if(editing){ const o=OPCOSTS[idx];
+    document.getElementById('op_tgl').value=o.tgl||''; document.getElementById('op_akun').value=o.akun||'';
+    document.getElementById('op_kas').value=o.kas||''; document.getElementById('op_ket').value=o.ket||''; document.getElementById('op_jml').value=(o.jumlah||'');
+  }else{
+    document.getElementById('op_tgl').value=new Date().toISOString().slice(0,10);
+    document.getElementById('op_akun').value=''; document.getElementById('op_kas').value=''; document.getElementById('op_ket').value=''; document.getElementById('op_jml').value='';
+  }
+  document.getElementById('opModal').classList.add('open');
+}
+function closeOpModal(){ document.getElementById('opModal').classList.remove('open'); }
+async function saveOpModal(){
+  const tgl=document.getElementById('op_tgl').value||null;
+  const akun=document.getElementById('op_akun').value||'';
+  const kas=document.getElementById('op_kas').value||'';
+  const ket=document.getElementById('op_ket').value.trim();
+  const jumlah=+document.getElementById('op_jml').value||0;
+  if(!akun){ alert('Pilih akun/kategori biaya.'); return; }
+  if(!jumlah){ alert('Isi jumlah biaya.'); return; }
+  try{
+    if(opEditIdx!=null){
+      await apiPut('/api/opcosts/'+OPCOSTS[opEditIdx].id, {tgl,akun,ket,jumlah,kas});
+    }else{
+      await apiPost('/api/opcosts', {tgl,akun,ket,jumlah,kas});
+    }
+    await loadAllFromServer();
+    closeOpModal(); renderOperasional();
+  }catch(e){ console.error(e); alert('Gagal menyimpan ke database: '+e.message); }
+}
+async function deleteOp(idx){
+  if(!confirm('Hapus biaya operasional ini?')) return;
+  try{
+    await apiDelete('/api/opcosts/'+OPCOSTS[idx].id);
+    await loadAllFromServer();
+    renderOperasional();
+  }catch(e){ console.error(e); alert('Gagal menghapus dari database: '+e.message); }
+}
+
+/* ===== Laporan Laba Rugi ===== */
+function summary(year,month){
+  year=year||''; month=month||'';
+  const sold=VEHICLES.filter(v=>v.jual && inPeriod(v.jual.tgl,year,month));
+  const pendapatan=sold.reduce((s,v)=>s+(v.jual.harga||0),0);
+  const hppBeli=sold.reduce((s,v)=>s+(v.beli||0),0);
+  const hppRawat=sold.reduce((s,v)=>s+pengTotal(v),0);
+  const hpp=hppBeli+hppRawat;
+  const labaKotor=pendapatan-hpp;
+  const komisi=sold.reduce((s,v)=>s+feeOf(v),0);
+  const ops=OPCOSTS.filter(o=>inPeriod(o.tgl,year,month));
+  const opByAkun={}; ops.forEach(o=>opByAkun[o.akun]=(opByAkun[o.akun]||0)+(+o.jumlah||0));
+  const opTot=ops.reduce((s,o)=>s+(+o.jumlah||0),0);
+  const labaBersih=labaKotor-komisi-opTot;
+  return {sold:sold.length,pendapatan,hppBeli,hppRawat,hpp,labaKotor,komisi,opByAkun,opTot,labaBersih};
+}
+function renderLabaRugi(){
+  const msel=document.getElementById('lrMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(''); msel.dataset.init='1'; }
+  const ysel=document.getElementById('lrYear'); if(ysel){ const c=ysel.value; ysel.innerHTML=yearOptions(c); }
+  const fm=document.getElementById('lrMonth')?.value||'';
+  const fy=document.getElementById('lrYear')?.value||'';
+  const s=summary(fy,fm);
+  const line=(label,val,opt={})=>`<div class="flex justify-between items-center ${opt.pad?'py-2':'py-1.5'} ${opt.border?'border-t border-[var(--line)]':''}">
+    <span class="${opt.bold?'font-700':'text-[var(--muted)]'} ${opt.indent?'pl-4':''} text-[13.5px]">${label}</span>
+    <span class="num ${opt.bold?'font-700':''} text-[13.5px]" style="color:${opt.color||'var(--ink)'}">${opt.neg?'('+rp(val)+')':rp(val)}</span></div>`;
+  const opRows=Object.entries(s.opByAkun).sort((a,b)=>b[1]-a[1]).map(([k,v])=>line(opLabel(k),v,{indent:true,neg:true})).join('');
+  document.getElementById('lrWrap').innerHTML=`
+    <div class="grid lg:grid-cols-[1.4fr_1fr] gap-4">
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-1"><h3 class="g font-bold text-[16px]">Laporan Laba Rugi</h3><span class="badge" style="background:var(--blue-soft);color:var(--blue)">${s.sold} unit terjual</span></div>
+        <p class="text-[12px] text-[var(--muted)] mb-4">Periode: ${periodeLabel(fy,fm)} · Garasi Java Mobilindo</p>
+        <div class="space-y-0.5">
+          ${line('Pendapatan Penjualan',s.pendapatan,{bold:true,color:'var(--pos)'})}
+          <div class="pt-1"></div>
+          ${line('Harga Pembelian Unit (HPP)',s.hppBeli,{indent:true,neg:true})}
+          ${line('Biaya Perawatan Unit',s.hppRawat,{indent:true,neg:true})}
+          ${line('Total HPP',s.hpp,{bold:true,neg:true,border:true})}
+          ${line('LABA KOTOR',s.labaKotor,{bold:true,border:true,pad:true,color:s.labaKotor>=0?'var(--pos)':'var(--neg)'})}
+          <div class="pt-2 text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-700">Beban Usaha</div>
+          ${line('Komisi / Fee Penjualan',s.komisi,{indent:true,neg:true})}
+          ${opRows}
+          ${line('Total Beban Usaha',s.komisi+s.opTot,{bold:true,neg:true,border:true})}
+          ${line('LABA BERSIH',s.labaBersih,{bold:true,border:true,pad:true,color:s.labaBersih>=0?'var(--pos)':'var(--neg)'})}
+        </div>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="card p-5">
+          <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)]">Laba Bersih</p>
+          <p class="num font-700 text-[26px] mt-1" style="color:${s.labaBersih>=0?'var(--pos)':'var(--neg)'}">${s.labaBersih>=0?'+':''}${rp(s.labaBersih)}</p>
+          <p class="text-[12px] text-[var(--muted)] mt-1">Margin ${s.pendapatan?((s.labaBersih/s.pendapatan)*100).toFixed(1):'0'}% dari pendapatan</p>
+        </div>
+        <div class="card p-5 space-y-3">
+          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Pendapatan</span><span class="num font-600" style="color:var(--pos)">${rp(s.pendapatan)}</span></div>
+          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Laba Kotor</span><span class="num font-600">${rp(s.labaKotor)}</span></div>
+          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Komisi</span><span class="num">(${rp(s.komisi)})</span></div>
+          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Biaya Operasional</span><span class="num">(${rp(s.opTot)})</span></div>
+          <div class="flex justify-between text-[13.5px] pt-2 border-t border-[var(--line)]"><span class="font-700">Laba Bersih</span><span class="num font-700" style="color:${s.labaBersih>=0?'var(--pos)':'var(--neg)'}">${rp(s.labaBersih)}</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ===== export excel (.xls via HTML table) ===== */
+function xlsEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function xlsDate(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function periodeFile(fy,fm){ if(!fy&&!fm) return 'Semua'; if(fy&&fm) return fy+'-'+fm; if(fm) return 'bulan-'+fm; return fy; }
+function downloadXLS(filename, headers, rows){
+  let t='<table><thead><tr>'+headers.map(x=>`<th style="background:#12233D;color:#fff;border:1px solid #999">${xlsEsc(x)}</th>`).join('')+'</tr></thead><tbody>';
+  t+=rows.map(r=>'<tr>'+r.map(c=>{ const isNum=(typeof c==='number'); return `<td style="border:1px solid #ccc"${isNum?' data-t="n"':''}>${xlsEsc(c)}</td>`; }).join('')+'</tr>').join('');
+  t+='</tbody></table>';
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>'+t+'</body></html>';
+  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+const VEH_HEADERS=['No. Polisi','Merk','Model','Type','Transmisi','Warna','Tahun','Odometer (km)','No. Rangka','No. Mesin','Bahan Bakar','JTP Pajak Tahunan','JTP Pajak 5 Thn','Status','Harga Pembelian','Tgl Pembelian','Kas/Bank Pembelian','Jenis Pengeluaran','Nominal (Rp)','Total Modal','Harga Penawaran','Target Nett Price','Harga Penjualan','Tgl Penjualan','Nama Pembeli','Metode','Laba Kotor','Komisi','Laba Bersih','Jumlah Bayar','Sisa Bayar','Status Bayar'];
+function vehCommonCells(v){
+  const pi=payInfo(v), lk=laba(v), fee=feeOf(v), lb=lk-fee;
+  return {
+    before:[v.nopol,v.merk,v.model,v.type||'',v.trans,v.warna,v.thn,(typeof v.odo==='number'?v.odo:(v.odo||'')),v.rangka,v.mesin,v.bbm,xlsDate(v.pajakThn),xlsDate(v.pajak5Thn),v.status,v.beli||0,xlsDate(v.tglBeli),v.kasBeli||''],
+    after:[modal(v),v.penawaran||'',v.targetNett||'',v.jual?v.jual.harga:'',v.jual?xlsDate(v.jual.tgl):'',v.jual?(v.jual.mediator||''):'',v.jual?(v.jual.metode||''):'',v.jual?lk:'',v.jual?fee:'',v.jual?lb:'',pi.sold?pi.total:'',pi.sold?pi.sisa:'',pi.sold?(pi.lunas?'LUNAS':'BELUM LUNAS'):'']
+  };
+}
+function vehRowsHTML(v){
+  const {before,after}=vehCommonCells(v);
+  const items=v.peng.map(p=>pengItem(p));
+  const rows=items.length?items:[null];
+  const showTotal=items.length>1;
+  const n=rows.length+(showTotal?1:0);
+  const cell=(val,rs)=>{ const isNum=typeof val==='number'; return `<td style="border:1px solid #ccc"${rs?` rowspan="${n}"`:''}${isNum?' data-t="n"':''}>${xlsEsc(val)}</td>`; };
+  let out='';
+  rows.forEach((it,i)=>{
+    out+='<tr>';
+    if(i===0) before.forEach(v2=>out+=cell(v2,true));
+    out+=cell(it?(it.ket||it.akun||'—'):'—',false);
+    out+=cell(it?it.n:'',false);
+    if(i===0) after.forEach(v2=>out+=cell(v2,true));
+    out+='</tr>';
+  });
+  if(showTotal){
+    out+=`<tr><td style="border:1px solid #ccc;font-weight:bold">Total Pengeluaran</td><td style="border:1px solid #ccc;font-weight:bold" data-t="n">${xlsEsc(pengTotal(v))}</td></tr>`;
+  }
+  return out;
+}
+function downloadVehicleXLS(filename, list){
+  if(!list.length){ alert('Tidak ada data untuk diekspor.'); return; }
+  let t='<table><thead><tr>'+VEH_HEADERS.map(x=>`<th style="background:#12233D;color:#fff;border:1px solid #999">${xlsEsc(x)}</th>`).join('')+'</tr></thead><tbody>';
+  t+=list.map(vehRowsHTML).join('');
+  t+='</tbody></table>';
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>'+t+'</body></html>';
+  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+const OP_HEADERS=['Tanggal','Kode Akun','Akun / Kategori','Kas/Bank','Keterangan','Jumlah'];
+function opRow(o){ return [xlsDate(o.tgl),opKode(o.akun),o.akun||'',o.kas||'',o.ket||'',o.jumlah||0]; }
+function currentOpList(){
+  const q=(document.getElementById('opsearch')?.value||'').toLowerCase();
+  const fa=document.getElementById('opfilter')?.value||'';
+  const fm=document.getElementById('opMonth')?.value||'';
+  const fy=document.getElementById('opYear')?.value||'';
+  return OPCOSTS.filter(o=>(!fa||o.akun===fa)&&inPeriod(o.tgl,fy,fm)&&((o.ket||'')+' '+(o.akun||'')).toLowerCase().includes(q)).sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||''));
+}
+function exportKendaraanList(){ const list=currentVehicleList(); downloadVehicleXLS('Data-Kendaraan.xls', list); }
+function exportKendaraanPeriode(){ const fm=document.getElementById('dashMonth').value, fy=document.getElementById('dashYear').value; const list=VEHICLES.filter(v=>v.jual && inPeriod(v.jual.tgl,fy,fm)); if(!list.length){alert('Tidak ada unit terjual pada periode '+periodeLabel(fy,fm)+'.');return;} downloadVehicleXLS(`Data-Kendaraan_${periodeFile(fy,fm)}.xls`, list); }
+function exportOperasionalList(){ const list=currentOpList(); if(!list.length){alert('Tidak ada data untuk diekspor.');return;} downloadXLS('Biaya-Operasional.xls', OP_HEADERS, list.map(opRow)); }
+function exportOperasionalPeriode(){ const fm=document.getElementById('dashMonth').value, fy=document.getElementById('dashYear').value; const list=OPCOSTS.filter(o=>inPeriod(o.tgl,fy,fm)).sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||'')); if(!list.length){alert('Tidak ada biaya operasional pada periode '+periodeLabel(fy,fm)+'.');return;} downloadXLS(`Biaya-Operasional_${periodeFile(fy,fm)}.xls`, OP_HEADERS, list.map(opRow)); }
+
+/* ===== Dashboard ===== */
+function renderDashboard(){
+  const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
+  const msel=document.getElementById('dashMonth'); if(msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(mmNow); msel.dataset.init='1'; }
+  const ysel=document.getElementById('dashYear'); { const c=ysel.dataset.init==='1'?ysel.value:yyNow; ysel.innerHTML=yearOptions(c); ysel.dataset.init='1'; }
+  const fm=msel.value, fy=ysel.value;
+  const s=summary(fy,fm);
+  const soldP=VEHICLES.filter(v=>v.jual && inPeriod(v.jual.tgl,fy,fm));
+  const opP=OPCOSTS.filter(o=>inPeriod(o.tgl,fy,fm));
+  const ready=VEHICLES.filter(v=>v.status==='READY').length, soldAll=VEHICLES.filter(v=>v.status==='SOLD').length;
+  const nilaiStok=VEHICLES.filter(v=>!v.jual).reduce((a,v)=>a+modal(v),0);
+  const belum=VEHICLES.filter(v=>{const pi=payInfo(v);return pi.sold&&!pi.lunas;});
+  const kpi=(l,val,c)=>`<div class="card p-4"><p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)]">${l}</p><p class="num font-700 text-[20px] mt-1" style="color:${c}">${val}</p></div>`;
+  const opByAkun=Object.entries(s.opByAkun).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('dashWrap').innerHTML=`
+    <div class="flex items-center gap-2 mb-3"><span class="badge" style="background:var(--blue-soft);color:var(--blue)">Periode: ${periodeLabel(fy,fm)}</span><span class="text-[12px] text-[var(--muted)]">${soldP.length} unit terjual · ${opP.length} transaksi biaya</span></div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+      ${kpi('Pendapatan (periode)',rp(s.pendapatan),'var(--pos)')}
+      ${kpi('Laba Kotor (periode)',rp(s.labaKotor),s.labaKotor>=0?'var(--pos)':'var(--neg)')}
+      ${kpi('Biaya Operasional (periode)',rp(s.opTot),'var(--neg)')}
+      ${kpi('Laba Bersih (periode)',(s.labaBersih>=0?'+':'')+rp(s.labaBersih),s.labaBersih>=0?'var(--pos)':'var(--neg)')}
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      ${kpi('Total Unit',VEHICLES.length,'var(--ink)')}
+      ${kpi('Ready',ready,'var(--pos)')}
+      ${kpi('Sold',soldAll,'var(--blue)')}
+      ${kpi('Nilai Stok Aktif',rpShort(nilaiStok),'var(--amber)')}
+    </div>
+    <div class="grid lg:grid-cols-2 gap-4">
+      <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between"><h3 class="g font-bold text-[15px]">Penjualan Periode</h3><span class="text-[12px] text-[var(--muted)]">${periodeLabel(fy,fm)}</span></div>
+        <div class="overflow-x-auto no-sb"><table>
+          <thead><tr><th>Unit</th><th>Tgl Jual</th><th>Pembeli</th><th class="text-right">Harga</th><th class="text-right">Laba Bersih</th><th class="text-center">Bayar</th></tr></thead>
+          <tbody>${soldP.map(v=>{const lk=laba(v),lb=lk-feeOf(v),pi=payInfo(v);return `<tr><td class="font-500 whitespace-nowrap">${esc(nama(v))}</td><td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${fmtDate(v.jual.tgl)}</td><td class="whitespace-nowrap">${esc(v.jual.mediator||'—')}</td><td class="num text-right whitespace-nowrap">${rp(v.jual.harga)}</td><td class="num text-right whitespace-nowrap" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${(lb>=0?'+':'')+rp(lb)}</td><td class="text-center">${pi.lunas?'<span class="badge" style="background:var(--pos-soft);color:var(--pos)">LUNAS</span>':'<span class="badge" style="background:var(--neg-soft);color:var(--neg)">BELUM</span>'}</td></tr>`;}).join('')||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-8">Belum ada penjualan pada periode ini.</td></tr>`}</tbody>
+        </table></div>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b border-[var(--line)]"><h3 class="g font-bold text-[15px]">Biaya Operasional per Akun</h3></div>
+          <div class="p-5 space-y-2">${opByAkun.map(([k,val])=>`<div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">${opLabel(k)}</span><span class="num">${rp(val)}</span></div>`).join('')||`<p class="text-[13px] text-[var(--muted)] text-center py-4">Tidak ada biaya pada periode ini.</p>`}
+            ${opByAkun.length?`<div class="flex justify-between pt-2 border-t border-[var(--line)] text-[13.5px]"><span class="font-700">Total</span><span class="num font-700" style="color:var(--neg)">${rp(s.opTot)}</span></div>`:''}</div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between"><h3 class="g font-bold text-[15px]">Piutang (Belum Lunas)</h3><span class="badge" style="background:${belum.length?'var(--neg-soft)':'var(--pos-soft)'};color:${belum.length?'var(--neg)':'var(--pos)'}">${belum.length} unit</span></div>
+          <p class="num font-700 text-[22px] mt-2" style="color:${belum.length?'var(--neg)':'var(--pos)'}">${rp(belum.reduce((a,v)=>a+payInfo(v).sisa,0))}</p>
+          <p class="text-[12px] text-[var(--muted)] mt-1">Total sisa pembayaran dari seluruh unit terjual</p>
+        </div>
+      </div>
+    </div>
+    <div class="card overflow-hidden mt-4">
+      <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between flex-wrap gap-3">
+        <div><h3 class="g font-bold text-[15px]">Grafik Penjualan vs Biaya</h3><p class="text-[12px] text-[var(--muted)] mt-0.5">Perbandingan per bulan · biaya = perawatan + operasional</p></div>
+        <div class="flex items-center gap-2"><span class="text-[12px] text-[var(--muted)]">Tahun</span><select id="chartYear" class="inp w-auto" onchange="dashChartYear=this.value;renderTrenChart();"></select></div>
+      </div>
+      <div id="trenChart" class="p-4"></div>
+    </div>`;
+  const cy=document.getElementById('chartYear');
+  if(!dashChartYear) dashChartYear=String(new Date().getFullYear());
+  cy.innerHTML=dataYears().map(y=>`<option ${y===dashChartYear?'selected':''}>${y}</option>`).join('');
+  dashChartYear=cy.value;
+  renderTrenChart();
+}
+let dashChartYear='';
+function niceMax(v){ if(v<=0) return 1; const pow=Math.pow(10,Math.floor(Math.log10(v))); const n=v/pow; let step; if(n<=1)step=1; else if(n<=1.5)step=1.5; else if(n<=2)step=2; else if(n<=3)step=3; else if(n<=5)step=5; else step=10; return step*pow; }
+function axisRp(v){ if(v>=1e9) return (v/1e9).toFixed(v%1e9?1:0)+'M'; if(v>=1e6) return Math.round(v/1e6)+'Jt'; if(v>=1e3) return Math.round(v/1e3)+'rb'; return ''+v; }
+function renderTrenChart(){
+  const Y=dashChartYear||String(new Date().getFullYear());
+  const MM=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const key=i=>Y+'-'+String(i+1).padStart(2,'0');
+  const penjualan=MM.map((_,i)=>VEHICLES.filter(v=>v.jual&&v.jual.tgl&&v.jual.tgl.slice(0,7)===key(i)).reduce((s,v)=>s+(v.jual.harga||0),0));
+  const rawat=MM.map((_,i)=>VEHICLES.reduce((s,v)=>s+v.peng.reduce((a,p)=>{const it=pengItem(p);return a+((it.tgl&&it.tgl.slice(0,7)===key(i))?it.n:0);},0),0));
+  const op=MM.map((_,i)=>OPCOSTS.filter(o=>o.tgl&&o.tgl.slice(0,7)===key(i)).reduce((s,o)=>s+(+o.jumlah||0),0));
+  const biaya=MM.map((_,i)=>rawat[i]+op[i]);
+  const totJual=penjualan.reduce((a,b)=>a+b,0), totBiaya=biaya.reduce((a,b)=>a+b,0);
+  const maxV=Math.max(...penjualan,...biaya,0);
+  const W=780,H=360,padL=52,padR=14,padT=16,padB=30;
+  const x0=padL,x1=W-padR,y0=padT,y1=H-padB, plotW=x1-x0, plotH=y1-y0;
+  const max=niceMax(maxV), steps=4;
+  let grid='',ylab='';
+  for(let i=0;i<=steps;i++){ const val=max*i/steps; const y=y1-plotH*i/steps;
+    grid+=`<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x1}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" ${i?'':'stroke-width="1.4"'}/>`;
+    ylab+=`<text x="${x0-8}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--muted)" class="num">${i?axisRp(val):'0'}</text>`;
+  }
+  const gw=plotW/12, bw=Math.min(16,gw*0.3), gap=4;
+  let bars='';
+  for(let i=0;i<12;i++){
+    const gx=x0+gw*i+gw/2;
+    const hj=max?plotH*penjualan[i]/max:0, hb=max?plotH*biaya[i]/max:0;
+    const xj=gx-bw-gap/2, xb=gx+gap/2;
+    const tip=`${MM[i]} ${Y}\nPenjualan: ${rp(penjualan[i])}\nBiaya: ${rp(biaya[i])}\n  · Perawatan: ${rp(rawat[i])}\n  · Operasional: ${rp(op[i])}`;
+    bars+=`<g><title>${tip}</title>
+      <rect x="${xj.toFixed(1)}" y="${(y1-hj).toFixed(1)}" width="${bw}" height="${hj.toFixed(1)}" rx="3" fill="url(#gJual)"/>
+      <rect x="${xb.toFixed(1)}" y="${(y1-hb).toFixed(1)}" width="${bw}" height="${hb.toFixed(1)}" rx="3" fill="url(#gBiaya)"/>
+    </g>`;
+    bars+=`<text x="${gx.toFixed(1)}" y="${y1+16}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${MM[i]}</text>`;
+  }
+  const empty=(totJual+totBiaya)===0?`<text x="${(W/2)}" y="${(H/2)}" text-anchor="middle" font-size="13" fill="var(--muted)">Belum ada data untuk tahun ${Y}</text>`:'';
+  document.getElementById('trenChart').innerHTML=`
+    <div class="flex items-center justify-center gap-6 mb-2 text-[12.5px]">
+      <span class="flex items-center gap-2"><span style="width:14px;height:14px;border-radius:4px;background:var(--pos);display:inline-block"></span>Penjualan</span>
+      <span class="flex items-center gap-2"><span style="width:14px;height:14px;border-radius:4px;background:var(--neg);display:inline-block"></span>Biaya (perawatan + operasional)</span>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">
+      <defs>
+        <linearGradient id="gJual" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3F7259"/><stop offset="1" stop-color="#2E5943"/></linearGradient>
+        <linearGradient id="gBiaya" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8534A"/><stop offset="1" stop-color="#8A3B32"/></linearGradient>
+      </defs>
+      ${grid}${ylab}${bars}${empty}
+    </svg>
+    <div class="grid grid-cols-3 gap-3 mt-3 px-1">
+      <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Total Penjualan ${Y}</p><p class="num font-700 text-[15px]" style="color:var(--pos)">${rp(totJual)}</p></div>
+      <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Total Biaya ${Y}</p><p class="num font-700 text-[15px]" style="color:var(--neg)">${rp(totBiaya)}</p></div>
+      <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Selisih</p><p class="num font-700 text-[15px]" style="color:${totJual-totBiaya>=0?'var(--pos)':'var(--neg)'}">${(totJual-totBiaya>=0?'+':'')+rp(totJual-totBiaya)}</p></div>
+    </div>`;
+}
+
+/* ===== koneksi ke database (PostgreSQL) via API backend ===== */
+function handle401(status){ if(status===401){ showLoginScreen(); } }
+async function apiGet(url){ const r=await fetch(url); if(r.status===401){ handle401(401); throw new Error('Sesi login habis, silakan masuk lagi.'); } if(!r.ok) throw new Error('GET '+url+' -> '+r.status); return r.json(); }
+async function apiPost(url,body){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if(r.status===401){ handle401(401); throw new Error('Sesi login habis, silakan masuk lagi.'); } if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||('POST '+url+' -> '+r.status)); return r.json(); }
+async function apiPut(url,body){ const r=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if(r.status===401){ handle401(401); throw new Error('Sesi login habis, silakan masuk lagi.'); } if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||('PUT '+url+' -> '+r.status)); return r.json(); }
+async function apiDelete(url){ const r=await fetch(url,{method:'DELETE'}); if(r.status===401){ handle401(401); throw new Error('Sesi login habis, silakan masuk lagi.'); } if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||('DELETE '+url+' -> '+r.status)); return r.json(); }
+
+async function loadAllFromServer(){
+  const [vehicles, opcosts] = await Promise.all([apiGet('/api/vehicles'), apiGet('/api/opcosts')]);
+  VEHICLES.length=0; VEHICLES.push(...vehicles);
+  OPCOSTS.length=0; OPCOSTS.push(...opcosts);
+}
+function setDbStatus(kind){
+  const el=document.getElementById('dbStatus'); if(!el) return;
+  const map={ loading:['Menghubungkan ke database...',''], online:['Terhubung ke database PostgreSQL','var(--pos)'],
+    offline:['⚠ Tidak dapat terhubung ke server/database','#ffb4b4'], saving:['Menyimpan ke database...',''] };
+  const m=map[kind]||['',''];
+  el.textContent=m[0]; el.style.color=m[1];
+}
+
+/* ===== Login / Logout ===== */
+let currentUser=null;
+function showLoginScreen(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPassword').value='';
+}
+function hideLoginScreen(){ document.getElementById('loginScreen').style.display='none'; }
+function applyUserUI(){
+  const label=document.getElementById('currentUserLabel');
+  if(label) label.textContent = currentUser ? (currentUser.name+' · '+(currentUser.role==='admin'?'Admin':'Staff')) : '';
+  const isAdmin = currentUser && currentUser.role==='admin';
+  const navUsers=document.getElementById('navUsers');
+  if(navUsers) navUsers.style.display = isAdmin ? '' : 'none';
+  const navPerms=document.getElementById('navPermissions');
+  if(navPerms) navPerms.style.display = isAdmin ? '' : 'none';
+  const navK=document.querySelector('.navlink[data-page="kendaraan"]');
+  const navO=document.querySelector('.navlink[data-page="operasional"]');
+  const navL=document.querySelector('.navlink[data-page="labarugi"]');
+  if(navK) navK.style.display = (isAdmin || can('menu_kendaraan')) ? '' : 'none';
+  if(navO) navO.style.display = (isAdmin || can('menu_operasional')) ? '' : 'none';
+  if(navL) navL.style.display = (isAdmin || can('menu_labarugi')) ? '' : 'none';
+}
+let currentPerms={};
+function can(key){ return !!(currentUser && currentUser.role==='admin') || !!currentPerms[key]; }
+async function loadPermissions(){
+  try{ currentPerms = await apiGet('/api/permissions'); }
+  catch(e){ console.error('Gagal memuat hak akses:', e); currentPerms={}; }
+}
+async function doLogin(){
+  const username=document.getElementById('loginUsername').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('btnLogin');
+  errEl.style.display='none';
+  if(!username||!password){ errEl.textContent='Isi username dan password.'; errEl.style.display='block'; return; }
+  btn.disabled=true; const oldTxt=btn.textContent; btn.textContent='Memproses...';
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.error||'Login gagal.');
+    currentUser=data.user;
+    hideLoginScreen();
+    await loadPermissions();
+    applyUserUI();
+    await onLoggedIn();
+  }catch(e){
+    errEl.textContent=e.message; errEl.style.display='block';
+  }finally{
+    btn.disabled=false; btn.textContent=oldTxt;
+  }
+}
+async function doLogout(){
+  if(!confirm('Keluar dari aplikasi?')) return;
+  try{ await fetch('/api/logout',{method:'POST'}); }catch(e){}
+  location.reload();
+}
+async function onLoggedIn(){
+  setDbStatus('loading');
+  try{
+    await loadAllFromServer();
+    setDbStatus('online');
+  }catch(e){
+    console.error('Gagal memuat data dari server:', e);
+    setDbStatus('offline');
+  }
+  renderKendaraan();
+  go('dashboard');
+}
+async function checkAuthAndStart(){
+  try{
+    const r=await fetch('/api/me');
+    if(r.ok){
+      const data=await r.json();
+      currentUser=data.user;
+      await loadPermissions();
+      applyUserUI();
+      await onLoggedIn();
+    }else{
+      showLoginScreen();
+    }
+  }catch(e){
+    showLoginScreen();
+  }
+  document.getElementById('appShell').style.visibility='visible';
+}
+
+/* ===== Manajemen User ===== */
+let USERS=[], userEditId=null;
+async function renderUsers(){
+  try{ USERS=await apiGet('/api/users'); }catch(e){ document.getElementById('usersTableWrap').innerHTML=`<p class="text-[13px] text-[var(--muted)] py-6 text-center">Gagal memuat data user.</p>`; return; }
+  const rows=USERS.map(u=>`<tr>
+    <td class="font-500 whitespace-nowrap">${esc(u.name)}</td>
+    <td class="whitespace-nowrap">${esc(u.username)}</td>
+    <td><span class="badge" style="background:${u.role==='admin'?'var(--amber-soft)':'var(--blue-soft)'};color:${u.role==='admin'?'var(--amber)':'var(--blue)'}">${u.role==='admin'?'Admin':'Staff'}</span></td>
+    <td class="text-center"><span class="badge" style="background:${u.active?'var(--pos-soft)':'var(--neg-soft)'};color:${u.active?'var(--pos)':'var(--neg)'}">${u.active?'Aktif':'Nonaktif'}</span></td>
+    <td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${u.last_login?fmtDate(u.last_login.slice(0,10)):'Belum pernah'}</td>
+    <td class="text-center"><div class="flex items-center justify-center gap-1.5">
+      <button class="act" title="Edit" onclick="openUserModal('${u.id}')" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+      <button class="act" title="Hapus" onclick="deleteUserRow('${u.id}')" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>
+    </div></td>
+  </tr>`).join('');
+  document.getElementById('usersTableWrap').innerHTML=`
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th class="text-center">Status</th><th>Terakhir Login</th><th class="text-center">Aksi</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-10">Belum ada user.</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+function openUserModal(id){
+  const editing=(id!=null);
+  userEditId=editing?id:null;
+  document.getElementById('userModalTitle').textContent=editing?'Edit User':'Tambah User';
+  document.getElementById('um_pwLabel').textContent=editing?'Ganti Password (kosongkan jika tidak diubah)':'Password';
+  document.getElementById('um_activeWrap').style.display=editing?'':'none';
+  document.getElementById('um_username').disabled=!!editing;
+  if(editing){
+    const u=USERS.find(x=>String(x.id)===String(id));
+    document.getElementById('um_name').value=u.name;
+    document.getElementById('um_username').value=u.username;
+    document.getElementById('um_password').value='';
+    document.getElementById('um_role').value=u.role;
+    document.getElementById('um_active').checked=u.active;
+  }else{
+    document.getElementById('um_name').value='';
+    document.getElementById('um_username').value='';
+    document.getElementById('um_password').value='';
+    document.getElementById('um_role').value='staff';
+    document.getElementById('um_active').checked=true;
+  }
+  document.getElementById('userModal').classList.add('open');
+}
+function closeUserModal(){ document.getElementById('userModal').classList.remove('open'); }
+async function saveUserModal(){
+  const name=document.getElementById('um_name').value.trim();
+  const username=document.getElementById('um_username').value.trim();
+  const password=document.getElementById('um_password').value;
+  const role=document.getElementById('um_role').value;
+  const active=document.getElementById('um_active').checked;
+  if(!name){ alert('Isi nama lengkap.'); return; }
+  try{
+    if(userEditId!=null){
+      await apiPut('/api/users/'+userEditId, {name, role, active, password: password||undefined});
+    }else{
+      if(!username){ alert('Isi username.'); return; }
+      if(!password || password.length<6){ alert('Password minimal 6 karakter.'); return; }
+      await apiPost('/api/users', {username, password, name, role});
+    }
+    closeUserModal();
+    renderUsers();
+  }catch(e){ alert('Gagal menyimpan: '+e.message); }
+}
+async function deleteUserRow(id){
+  const u=USERS.find(x=>String(x.id)===String(id));
+  if(!confirm('Hapus user "'+(u?u.name:'')+'"?\nTindakan ini tidak bisa dibatalkan.')) return;
+  try{ await apiDelete('/api/users/'+id); renderUsers(); }
+  catch(e){ alert('Gagal menghapus: '+e.message); }
+}
+
+/* ===== Pengaturan Hak Akses ===== */
+const PERM_KEYS=['menu_kendaraan','menu_operasional','menu_labarugi','kendaraan_tambah','kendaraan_edit','kendaraan_hapus','kendaraan_export','operasional_tambah','operasional_edit','operasional_hapus','operasional_export'];
+async function renderPermissionsPage(){
+  let perms={};
+  try{ perms=await apiGet('/api/permissions'); }catch(e){ alert('Gagal memuat hak akses: '+e.message); return; }
+  PERM_KEYS.forEach(k=>{ const el=document.getElementById('perm_'+k); if(el) el.checked=!!perms[k]; });
+}
+async function savePermissions(){
+  const body={};
+  PERM_KEYS.forEach(k=>{ const el=document.getElementById('perm_'+k); body[k]=el?el.checked:false; });
+  try{
+    await apiPut('/api/permissions', body);
+    currentPerms=body;
+    applyUserUI();
+    alert('Hak akses berhasil disimpan.');
+  }catch(e){ alert('Gagal menyimpan: '+e.message); }
+}
+
+checkAuthAndStart();
+</script>
+</body>
+</html>
