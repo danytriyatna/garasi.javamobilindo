@@ -3,7 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const { pool } = require('./db');
-const { seedIfEmpty, seedDefaultAdmin, seedDefaultSettings, DEFAULT_STAFF_PERMS } = require('./seed');
+const { seedIfEmpty, seedDefaultAdmin, seedDefaultSettings, seedDefaultAccounts, DEFAULT_STAFF_PERMS } = require('./seed');
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
@@ -152,6 +152,46 @@ app.delete('/api/users/:id', requireAuth, requireAdmin, async (req, res) => {
     await pool.query('DELETE FROM users WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Gagal menghapus user' }); }
+});
+
+// ---------------------------------------------------------------
+// Data Akun (Chart of Accounts) — baca boleh siapa saja yang login
+// (dipakai untuk dropdown Kas Masuk/Keluar), ubah khusus admin.
+// ---------------------------------------------------------------
+app.get('/api/accounts', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT kode, nama FROM accounts ORDER BY kode');
+    res.json(rows);
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Gagal mengambil data akun' }); }
+});
+
+app.post('/api/accounts', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { kode, nama } = req.body || {};
+    if (!kode || !nama) return res.status(400).json({ error: 'Kode dan nama akun wajib diisi.' });
+    if (!/^[1-6]\d{3}$/.test(kode)) return res.status(400).json({ error: 'Kode akun harus 4 digit, diawali angka 1-6 (kepala kelompok).' });
+    await pool.query('INSERT INTO accounts(kode, nama) VALUES ($1,$2)', [kode, nama]);
+    res.json({ ok: true });
+  } catch (e) {
+    if (e.code === '23505') return res.status(400).json({ error: 'Kode akun sudah dipakai.' });
+    console.error(e); res.status(500).json({ error: 'Gagal menambah akun' });
+  }
+});
+
+app.put('/api/accounts/:kode', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { nama } = req.body || {};
+    if (!nama) return res.status(400).json({ error: 'Nama akun wajib diisi.' });
+    await pool.query('UPDATE accounts SET nama=$1 WHERE kode=$2', [nama, req.params.kode]);
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Gagal menyimpan akun' }); }
+});
+
+app.delete('/api/accounts/:kode', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM accounts WHERE kode=$1', [req.params.kode]);
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Gagal menghapus akun' }); }
 });
 
 // ---------------------------------------------------------------
@@ -353,14 +393,16 @@ app.get('/api/health', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 async function waitForDb(maxTries = 30, delayMs = 1000) {
+  let lastErr;
   for (let i = 1; i <= maxTries; i++) {
     try { await pool.query('SELECT 1'); return; }
     catch (e) {
-      console.log(`Menunggu database siap... (${i}/${maxTries})`);
+      lastErr = e;
+      console.log(`Menunggu database siap... (${i}/${maxTries}) - alasan: ${e.message}`);
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
-  throw new Error('Database tidak bisa dihubungi setelah beberapa kali percobaan.');
+  throw new Error('Database tidak bisa dihubungi setelah beberapa kali percobaan. Alasan terakhir: ' + (lastErr && lastErr.message));
 }
 
 (async () => {
@@ -369,6 +411,7 @@ async function waitForDb(maxTries = 30, delayMs = 1000) {
     await seedIfEmpty(pool);
     await seedDefaultAdmin(pool);
     await seedDefaultSettings(pool);
+    await seedDefaultAccounts(pool);
     app.listen(PORT, () => console.log(`Garasi Java Mobilindo server jalan di http://localhost:${PORT}`));
   } catch (e) {
     console.error('Gagal memulai server:', e);

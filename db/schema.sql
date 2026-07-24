@@ -172,3 +172,10 @@ CREATE TABLE IF NOT EXISTS settings (
   value jsonb NOT NULL
 );
 
+-- ---------- DATA AKUN (CHART OF ACCOUNTS) ----------
+-- kode: 1 digit kepala (1 Aset,2 Kewajiban,3 Ekuitas,4 Pendapatan,5 HPP/Biaya Unit,6 Beban Usaha) + 3 digit urut
+CREATE TABLE IF NOT EXISTS accounts (
+  kode text PRIMARY KEY,
+  nama text NOT NULL
+);
+

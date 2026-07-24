@@ -121,3 +121,71 @@ async function seedDefaultSettings(pool) {
 }
 module.exports.seedDefaultSettings = seedDefaultSettings;
 module.exports.DEFAULT_STAFF_PERMS = DEFAULT_STAFF_PERMS;
+
+// Referensi Data Akun (Chart of Accounts) untuk usaha jual-beli kendaraan bekas.
+// Hanya di-seed sekali saat tabel accounts masih kosong -- tidak pernah menimpa
+// akun yang sudah pernah ditambah/diubah sendiri oleh pengguna.
+const DEFAULT_ACCOUNTS = [
+  // 1xxx — Aset / Kas & Bank
+  ['1001','Kas Tunai'],
+  ['1002','Bank BCA'],
+  ['1003','Bank Mandiri'],
+  ['1004','Bank BRI'],
+  ['1005','Bank BNI'],
+  ['1006','Piutang Usaha (Belum Lunas)'],
+  ['1007','Persediaan Kendaraan (Stok Unit)'],
+  ['1008','Uang Muka Pembelian Unit'],
+  ['1009','Peralatan Kantor & Bengkel'],
+  ['1010','Kendaraan Operasional'],
+  // 2xxx — Kewajiban / Hutang
+  ['2001','Hutang Usaha (Pemasok/Mitra)'],
+  ['2002','Hutang Leasing/Bank (Pembiayaan Unit)'],
+  ['2003','Titipan DP Pelanggan'],
+  ['2004','Hutang Pajak'],
+  ['2005','Hutang Gaji Karyawan'],
+  // 3xxx — Ekuitas / Modal
+  ['3001','Modal Pemilik'],
+  ['3002','Prive (Pengambilan Pribadi Pemilik)'],
+  ['3003','Laba Ditahan'],
+  // 4xxx — Pendapatan / Kas Masuk
+  ['4001','Pendapatan Penjualan Kendaraan'],
+  ['4002','Pendapatan Komisi Mediator/Perantara'],
+  ['4003','Pendapatan Jasa Titip Jual (Konsinyasi)'],
+  ['4004','Pendapatan Tukar Tambah'],
+  ['4005','Pendapatan Jasa Cuci/Detailing'],
+  ['4006','Pendapatan Lain-lain'],
+  // 5xxx — Biaya Perawatan Unit (HPP, langsung terkait 1 unit)
+  ['5001','Servis & Tune-up'],
+  ['5002','Ganti Oli & Filter'],
+  ['5003','Perbaikan Body & Cat (Salon/Cat Body)'],
+  ['5004','Ban & Velg'],
+  ['5005','Aki & Kelistrikan'],
+  ['5006','AC Mobil'],
+  ['5007','Detailing & Poles'],
+  ['5008','Pajak Kendaraan (STNK/Pajak Tahunan)'],
+  ['5009','Biaya Balik Nama (BBN)'],
+  ['5010','Biaya Derek/Transportasi Unit'],
+  ['5011','Kunci & Aksesoris'],
+  ['5012','Lain-lain (Biaya Perawatan)'],
+  // 6xxx — Beban Usaha / Kas Keluar (operasional, tidak terkait 1 unit tertentu)
+  ['6001','Gaji Karyawan'],
+  ['6002','Sewa Showroom/Kantor'],
+  ['6003','Listrik & Air'],
+  ['6004','Internet & Telepon'],
+  ['6005','Marketing & Iklan'],
+  ['6006','Komisi Mediator/Sales'],
+  ['6007','Perlengkapan Kantor (ATK)'],
+  ['6008','Transportasi & BBM Operasional'],
+  ['6009','Pajak & Perizinan Usaha'],
+  ['6010','Biaya Bank/Admin'],
+  ['6011','Lain-lain (Beban Usaha)'],
+];
+async function seedDefaultAccounts(pool) {
+  const { rows } = await pool.query('SELECT count(*)::int AS c FROM accounts');
+  if (rows[0].c > 0) return;
+  for (const [kode, nama] of DEFAULT_ACCOUNTS) {
+    await pool.query('INSERT INTO accounts(kode,nama) VALUES ($1,$2) ON CONFLICT (kode) DO NOTHING', [kode, nama]);
+  }
+  console.log(`Referensi Data Akun dibuat (${DEFAULT_ACCOUNTS.length} akun, kepala 1-6).`);
+}
+module.exports.seedDefaultAccounts = seedDefaultAccounts;

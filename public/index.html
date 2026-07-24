@@ -138,6 +138,33 @@
   .navlink{display:flex;align-items:center;gap:12px;padding:12px 18px 12px 24px;color:#94A3B8;font-size:13.5px;font-weight:500;border-left:3px solid transparent;cursor:pointer;transition:all .2s;}
   .navlink:hover{color:#F1F5F9;background:rgba(255,255,255,.03);}
   .navlink.active{color:#fff;border-left-color:var(--amber);background:rgba(255,255,255,.06);font-weight:600;}
+  .nav-sub-items .navlink {
+    padding: 10px 18px 10px 48px;
+    font-size: 12.5px;
+    border-left: none;
+    color: #64748B;
+  }
+  .nav-sub-items .navlink:hover {
+    color: #F1F5F9;
+    background: rgba(255,255,255,.02);
+  }
+  .nav-sub-items .navlink.active {
+    color: #fff;
+    background: rgba(255,255,255,.04);
+    font-weight: 600;
+  }
+  .sub-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .navlink.active .sub-dot {
+    opacity: 1;
+    background-color: var(--amber);
+  }
   .navlink svg{width:18px;height:18px;flex-shrink:0;}
   .page{display:none;} .page.show{display:block;}
   @media(max-width:860px){
@@ -185,38 +212,67 @@
         <span class="navlabel">Data Kendaraan</span>
       </div>
       <div class="navlink" data-page="operasional" onclick="go('operasional')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        <span class="navlabel">Biaya Operasional</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V2m-5 3h7.5a3.5 3.5 0 010 7H9M6 14h6.5a3.5 3.5 0 010 7H6"/></svg>
+        <span class="navlabel">Kas/Bank Keluar</span>
+      </div>
+      <div class="navlink" data-page="kasmasuk" onclick="go('kasmasuk')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M12 17V7M9 10l3-3 3 3"/></svg>
+        <span class="navlabel">Kas/Bank Masuk</span>
       </div>
       <div class="navlink" data-page="labarugi" onclick="go('labarugi')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg>
         <span class="navlabel">Laporan Laba Rugi</span>
       </div>
-      <div class="navlink" id="navUsers" data-page="users" onclick="go('users')" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        <span class="navlabel">Manajemen User</span>
-      </div>
-      <div class="navlink" id="navPermissions" data-page="permissions" onclick="go('permissions')" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        <span class="navlabel">Hak Akses</span>
+      <!-- Group Utilitas (Hanya untuk Admin) -->
+      <div id="navUtilitasGroup" style="display:none" class="flex flex-col">
+        <div class="navlink flex items-center justify-between" onclick="toggleNavGroup('utilitas')">
+          <div class="flex items-center gap-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="navlabel">Utilitas</span>
+          </div>
+          <svg id="chevron-utilitas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;margin:0" class="transition-transform duration-200 transform"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div id="sub-utilitas" class="nav-sub-items hidden flex flex-col">
+          <div class="navlink" data-page="accounts" onclick="go('accounts')">
+            <span class="sub-dot"></span>
+            <span class="navlabel">Data Akun</span>
+          </div>
+          <div class="navlink" data-page="users" onclick="go('users')">
+            <span class="sub-dot"></span>
+            <span class="navlabel">Pengguna</span>
+          </div>
+          <div class="navlink" data-page="roles" onclick="go('roles')">
+            <span class="sub-dot"></span>
+            <span class="navlabel">Role</span>
+          </div>
+          <div class="navlink" data-page="permissions" onclick="go('permissions')">
+            <span class="sub-dot"></span>
+            <span class="navlabel">Hak Akses</span>
+          </div>
+        </div>
       </div>
     </nav>
   </aside>
   <div id="scrim" onclick="toggleSidebar()"></div>
 
   <!-- LAYAR LOGIN -->
-  <div id="loginScreen" style="position:fixed;inset:0;z-index:200;background:radial-gradient(circle at center, #1E293B, #0F172A);display:none;align-items:center;justify-content:center;padding:16px;">
-    <div class="card" style="width:360px;max-width:90vw;padding:36px 28px">
-      <div class="flex items-center justify-center mb-6">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAI4AAAA9CAYAAAB7o1HTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89+bN/rXXPues852zzwfACAyWSDNRNYAMqUIeEeCDx8TG4eQuQIEKJHAAEAizZCFz/SMBAPh+PDwrIsAHvgABeNMLCADATZvAMByH/w/qQplcAYCEAcB0kThLCIAUAEB6jkKmAEBGAYCdmCZTAKAEAGDLY2LjAFAtAGAnf+bTAICd+Jl7AQBblCEVAaCRACATZYhEAGg7AKzPVopFAFgwABRmS8Q5ANgtADBJV2ZIALC3AMDOEAuyAAgMADBRiIUpAAR7AGDIIyN4AISZABRG8lc88SuuEOcqAAB4mbI8uSQ5RYFbCC1xB1dXLh4ozkkXKxQ2YQJhmkAuwnmZGTKBNA/g88wAAKCRFRHgg/P9eM4Ors7ONo62Dl8t6r8G/yJiYuP+5c+rcEAAAOF0ftH+LC+zGoA7BoBt/qIl7gRoXgugdfeLZrIPQLUAoOnaV/Nw+H48PEWhkLnZ2eXk5NhKxEJbYcpXff5nwl/AV/1s+X48/Pf14L7iJIEyXYFHBPjgwsz0TKUcz5IJhGLc5o9H/LcL//wd0yLESWK5WCoU41EScY5EmozzMqUiiUKSKcUl0v9k4t8s+wM+3zUAsGo+AXuRLahdYwP2SycQWHTA4vcAAPK7b8HUKAgDgGiD4c93/+8//UegJQCAZkmScQAAXkQkLlTKsz/HCAAARKCBKrBBG/TBGCzABhzBBdzBC/xgNoRCJMTCQhBCCmSAHHJgKayCQiiGzbAdKmAv1EAdNMBRaIaTcA4uwlW4Dj1wD/phCJ7BKLyBCQRByAgTYSHaiAFiilgjjggXmYX4IcFIBBKLJCDJiBRRIkuRNUgxUopUIFVIHfI9cgI5h1xGupE7yAAygvyGvEcxlIGyUT3UDLVDuag3GoRGogvQZHQxmo8WoJvQcrQaPYw2oefQq2gP2o8+Q8cwwOgYBzPEbDAuxsNCsTgsCZNjy7EirAyrxhqwVqwDu4n1Y8+xdwQSgUXACTYEd0IgYR5BSFhMWE7YSKggHCQ0EdoJNwkDhFHCJyKTqEu0JroR+cQYYjIxh1hILCPWEo8TLxB7iEPENyQSiUMyJ7mQAkmxpFTSEtJG0m5SI+ksqZs0SBojk8naZGuyBzmULCAryIXkneTD5DPkG+Qh8lsKnWJAcaT4U+IoUspqShnlEOU05QZlmDJBVaOaUt2ooVQRNY9aQq2htlKvUYeoEzR1mjnNgxZJS6WtopXTGmgXaPdpr+h0uhHdlR5Ol9BX0svpR+iX6AP0dwwNhhWDx4hnKBmbGAcYZxl3GK+YTKYZ04sZx1QwNzHrmOeZD5lvVVgqtip8FZHKCpVKlSaVGyovVKmqpqreqgtV81XLVI+pXlN9rkZVM1PjqQnUlqtVqp1Q61MbU2epO6iHqmeob1Q/pH5Z/YkGWcNMw09DpFGgsV/jvMYgC2MZs3gsIWsNq4Z1gTXEJrHN2Xx2KruY/R27iz2qqaE5QzNKM1ezUvOUZj8H45hx+Jx0TgnnKKeX836K3hTvKeIpG6Y0TLkxZVxrqpaXllirSKtRq0frvTau7aedpr1Fu1n7gQ5Bx0onXCdHZ4/OBZ3nU9lT3acKpxZNPTr1ri6qa6UbobtEd79up+6Ynr5egJ5Mb6feeb3n+hx9L/1U/W36p/VHDFgGswwkBtsMzhg8xTVxbzwdL8fb8VFDXcNAQ6VhlWGX4YSRudE8o9VGjUYPjGnGXOMk423GbcajJgYmISZLTepN7ppSTbmmKaY7TDtMx83MzaLN1pk1mz0x1zLnm+eb15vft2BaeFostqi2uGVJsuRaplnutrxuhVo5WaVYVVpds0atna0l1rutu6cRp7lOk06rntZnw7Dxtsm2qbcZsOXYBtuutm22fWFnYhdnt8Wuw+6TvZN9un2N/T0HDYfZDqsdWh1+c7RyFDpWOt6azpzuP33F9JbpL2dYzxDP2DPjthPLKcRpnVOb00dnF2e5c4PziIuJS4LLLpc+Lpsbxt3IveRKdPVxXeF60vWdm7Obwu2o26/uNu5p7ofcn8w0nymeWTNz0MPIQ+BR5dE/C5+VMGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4KtguXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3ENz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/87fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHcJnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsmdlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUFK4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1YfqGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7ht7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw6217nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4ydlZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdOo8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAEy9JREFUeNrsPGt4VNW1a+/zmGcmmcxJIkkIEARJFKUNL4XLQyIqIl64pf2uitr2flQ/qhWRl3KhVfvxKqaiaKFW71W8PvCCRRRq8AEWBXmUK5oAmoSEJJDkTGYyycycmfNY90dmcBjOJJNkQhKa9X2HJHuvvfZaa9Zer30G4t4xHK4k2OlYPyoJXPeZwVNg0VyDWJANMhh9fppU4yQDXr5dXPFaZ+huF4qsRvBPB0AOkbpUwn6vAFs9R1wYvFyy7Z9c0qO6vdPOXPid7euG8oGw5vYUrF8gaFVjkpWalJsCb1KJpsgeJqOxiWZ800zsH0pg3j1LXPxdV/ZhQUlPxfO/TtHqRiQrNQ4OfZTVJNpgHa15GcEvUZu3mQpnmkB430es788Sl5yAKxhIX/Q4u4VnHrBj/f058vEb073HDARUaDTlK+e5a6vOMUNfmC6uKuquvbcLRTwL8jVmbJlrA+cUu1qbb1cqky3yedYUOA8AGvgMWVhvvL65hs373A1pW+5wLt95pXmcPmM47wtrbxKw5umrA1/+S6rvBMdoEvgMA/G05ZaTtXToSgnMxXPEhU09wdt2oSiZh+AIFoM32KHuniy5ZEyG75iJUzygMgY4bxknfcff+EojpC+dIy5s6TecywB7HSufGqR+81CmdNRhkSoJAEC1baq/kvvxnnqS+dhscdGZ3sj3LmHt5GRseMih1UwcKH2VmeQvI07LKLXMOOGLsc5Nk/oNp3tOsMmODesHq8fnDWoqtlGUQaMGqE6a5P2OG79xmvj0E30ptO4QNmQ6sP73ufLhn6UEK4wBJlkrMRa+20Cy7utIct1vOG0YTCrUb8yXPrk/veUQF2IRqpILvSe5iaumi6s29PWkcpewZuJVWuWG3MCBgiYu23uaHb/cC0mvzhEX+vurqk7A547H35kQePuujOaveAANACjU2iZKpfzkomni00/kQHGfMIxQvjOKB+nHPEj5HAbSvcR2cLr429UAADPFZX8HgHHbhSKrHRueMaNnipckvRq53oDSZAP4R/Mg5TKgWgGQuCFtSxLAB/8UVdV2ocjKgpIOiA5KMImgZmWImk5BTaaoJlGiWQzoyxssH52W5fnc2GowrdBgHaOcNEz+XwQmQEG1hoa11n9oAIFKAEA1oC0aYSSCGqMB06wRGgiJ5kUgwRCOD4AEInnDEC0CyBIAU5g+Ac1CQDNT0AwE0MqAkkxRtTCg2CioBgqagUHFRInKMygbOZSSDOg1mzS3yai6OQaDRCEm9DGpQR9jb26kmV83woDn9Sqr7UIRYwT/XSnY8MskzTnCoZ7JSg5W8AgsqNSAPsah+GmK30sdzmpm+ErLtXPeuGJC1Q5hQyaPwesM4L/JBC0/MmHzIDM2pRs1j9WgtRgMmofh1WbKaj7CaAFgNAkIykBQbYcyhUhDih9oq2EQCkgoACIgZQGB0Ts3QEADgipgeARVoKh2aO8gZ4cmQ67i4ga7nTTreBNJf9sHltf08pedwvpcK7oXpGln/3WA/E2O0HLsgtf3mIZrtcYbGurpkL1uEJ6b5Vxy+IoJVTsd68YkgXueA2tuT5dP50xveY5jNT9hVR8wqjeBbGpdWkdQAxK2BlXuIi8UZNYKMpOEEuvQPGyWz81knvUQ4YiXJH2qAlcRBP5orFI73KQcqHw99ZbmIpMxWEcIqoCEgQbrGLnCMPawkwzYLIFp/2xx0ZkRfSAks/F6lXSs+VO6eubGKb6XHTb/aXKldEA1yoPCWCHIJKPE2lU/tQf9TIpPBqNPJgZvgJgbAmA5IxHTySCYvpgpLt2XCl/H1aRM184+7FArh09tft5iDtRc0JnbnK9VGUefqaeD3ywUn1qR1nK4z+mtTcN5T/hDRgaefW2q7+XCFF8pbU/5KjWARlhE4EAjDCBQREJbwwQhiEABgQISiirhsFNJGWIoFBEgiICk9fNQCR92UagBixqhqBJeUYFTVOBklXCyQnhJBqNHJoamIBjOKcRQFURDhUK4Ehm4agTqmSMubOxs38YI3skpWsMdWfKJUdNdq/lIDyzxGdBgvM5/hvvRzgaS9fAccWFDXz5wMQ3nI+F3i26Stq3+oSwGQMKCxKeDi7864GazGlpoapUE1tNBMJxVCVurAiNqwLgRiA+BNAMQSQUqE0C/BowMAEEACF7Oi8FuSPh5AloGj8E8C3hm2/H8lDSlbPDUlhcNxmAdYTTphwNFOGi0XK9UGMYdbiBZz84Qn3x3IHx8RXhqXcPZ71iydZLnxXuMwToAoHA+aVywmhv1f01U+MwLSa/PEpecyOzOD2d0qVewoDlyTPQS35wjeZZuNopUFpUhLAkOYUEezGNgKAeBrFDCn8ZrXvP44A6DWWngLcFayimX3nAgYaDRfL1SYxhZKZKBf3UTYUU8PZo+bzj7HYvfmOB+/m5GbZVVYSzgZrNdRmwRAmi6Zprz6S7f+u4U1udS0AbPFJd+ojcfbTSxxgAAPhFWrDejZzSLspkSldeQkVsDGdLWtFbhWwMcQRaCJgoqz2KQZzDIsxDkOE3iWPQzvOZjCr0vUgYlYLUAoZoEjOoHim0n1ipjBokTsJnLluu5YVX1ZNCrzST5v2aLi2rhCoaLDOdvwlMPT2167oLRAACwajOMcG3LAAA4Yb8PY+VCBgjcTEG1y2A4GcsgfqhRtLRh6uE3PxR+v2CG+OS7XRFABcZDQWWM6Mmwqo2pJs1lMCsNnFF2klaPgAlRFBIGZDYZJFbQWtir5BY2zeOmV51qJqmfe8H28ixxcflV8AX8s8CFPs52oYifKL3VEpnTREJt0qTAQcPsjPAN9A5hQ2YmnvmfnODx8Ta5iucVNyGogkYN4OcErYEf4a5iR265WXxmuR69vY6VT+TJ+/7zH/yM22aKS/dF9St0P+1J+/LbreZaX3tQBlHQMhmQh7AgD2RAtVFQbRQ1IwNyCgcBO0XVxIBsZEA2UWz1TiphZA3YgEo4nwxcswyGeo2wPhVYlwrsORn5b1XCVCvAVfRE+OmVd1VfOh7dc6Pzj7fqLRCtBcohw0/+Ldz9/ERYsX6ktOfRtJYj7MWnkgWC2kU9mFP2n9SfomNnRjezAAC+td9dZdFcyYObdicnynCuZOh1DcCdwvphN7e8NF1lLHAk5Rf7OAgkWzVnFqtJvIfJqK2k+XPuEh8/CQBwwLHovUnu5+5ilWZQ2CQ4bx7jr+XyjrhJ2gcqsNUEwGQE77g0tWp6jnRo4DWud9Md1vIvdglrb40OYaeZgvGTg/9d9aXjkeIbnRtvgX7oWzlOEroetkrl5B+pv/x2nPP5KdFIo0I/P3U88ewkd9FdjOqHs7ZpvlJ+0orp4qqibLgkpXm51SDX5aebqzeNdr8y5SZ846MdwoYhs8VFZ8NIs8VFtccc80/c0LJ92i5h7biZ4tJDHWF+6/WlZ3PsmJ0oZYhe4guqILUE4LQvCF8+8n3eY5Hzm4aXvj5yAN4bva7MSUp//k1efqL42Hh16bOjsnBh9HhJHdmdn4Ezwn9XuUi3yj8qCx+LnacCQLZack+QS4VqOnx+7AbXmsKx3q2PMqofTtjvKx/o+djS3iuas8QlJeOdG6d+Yn98Ga966HXKgWPRONUw7D8YTSLpWLW+w1bPgDmRp0iwoDnThqnD03D8qCxcuGtcSbBoaOmS8LxHgpWScmm2PdSBeZF4XYHVOaVDch34a705vwyfXU75PRIEj1YTXbnoDmHD4AHScft31tvO3ikujVkWDNRObrJIVaTE/u+1I12vDe0IQ9PF3679wvrzRQOkY46/CU89eJFxORcfrbROrs/37p64XSiy9iZ3bDMCV5CNa8NGsbwqr6LcSfbo4Q4T8JlE7Gk3wyabETg9r1aQjet6Qn4946E2cM9nMEAqmWsXt9UYG+rbP6zFmIsnmbGjOsPEdHFV0QnLrI+v0ioejZ6roddsswSqiIDnn++N8TzSKB48mTfDI4Gsp+RNw0tf78o+6waXTs514G3R45IC2NACD/UG+S94uxSt/tYgtWkzxCffjrUwGRofN8nnycGUB9/vyh1LA8n+Ta52YtdfhT+MCCfbAABeYnsvyNkXOLSzhR2h5/bDIQAyLhHKSTWj3cgCiXXyNl5d+mw45yl3khf0cpBhaXjPaql05fKqvIrO8JBmhZf0eCh3kj1LzuTt2z+opMfkP15Dnr3TDhdyHjYJxZx6Q54r2X8qJtFkTSz08ZlYRwY+0BXmZolLSj4SfvtngnjR1YEM3CmVGDBZPe/oCL0HT+bNSOTJKhpaumSQHVbpdal5Fi687fDI93mPvZVUen+mDVMjcYwsELsZNgHAjM7sXeDAvOhxjwSyywcL9NZEJsqJgKPVJC75AQAor3mN9UzuwbYI8uBNbeRzfZ29OY7Kd1bPci4+elH/B2hdkEnCJKXW8Gb6nwf0lEteWJa3rtoNm/XmrDyMvCipd8NvYnyYt68bXDq5o3sPsMFSvfFKF3m7sx6so1CQjXHLT1XCy35iPd4WQRV4n58mt3QXw3PEhUGZWjST3ECN6B/Wk/lMdAkeq4J5vCJva5mTlOrhZtpga0f23DS89PVo7wUAUOshjQtO5827nPLHKsGj5afVTP57Epj3tEXMS1JOKWD0dS/LBKgWBAYUW19pgp33wB165XmOHbPjLc9X55QOGWTHn+nNnfPA2l7bAJzsXPOLdpNQImzWKL2vu5jYLhSZpvr+QkPvIksdrURSzbAm1QzXx7pB7y5YXpVX8Sdz6Z78DLw9em6QHVYBQLvlc6zyu8pFqheW5bW7/mAl6RH5aTxIM8Vleyc513Wb4bCgDGDRR5pMw1UKalK860Id1k+Hp+H4y2007ZXnggXN7ZXnscrv1jAF97a39/Ea0mPyU+gFwEFwnEFpIn83zht3h7hsR7wufkQGPhqrhLycUO4kL+j2P9LwntU5pUM6Wn6X1JHdS87k7WtrzwMVpEfl7xVfyGMheLXEpqKReKe/lvGWb3Acayw8PKynNEkBrHKRQ4oGrs7yoxd62kuoO1qexyq/JQUwVvndm+QnOxuVXpV0Ha0mSwqyca2eQozsDx6ypI58qCfgV1Vk3tgc3NpFNlCvwsm0Ycw+01dV5N6xOfi6Ht/Ha8jU8YNwXxQ9p14ldeIc2TpyALZbSfWE/L8aRB29KlRFQooJHtAbb/SRuE5QApTWKRibg7rluZEFkmaFl6KMQ7f8Fr3EF4/R9Ab5e43hHKggQ0rqyIdDddw3AIBfhrq+Wp4PdWBe+KLwQAWJWX5XuuB3faUV0aUc56sqcm92CjyXCEYmDLn0BEaCLwhH4+Wpp7zOhCFYUVJHdMvzUGd4XVvldyJuvy+X/F0yHKsB7tZzuYkGSQGM14WPSMdXSurI3Z2WiYeROfbOv+Du8sECjwSnoo0j04apopd4cx1oilV+59i7rqvLJX+f+M8jy51kT34GRoeuzwDgkpNtMwKXb+xYVZRor3PiHHlb703BWL2WkjqyOzp5bg96Wn7a242mzElK9W6BC7JxnV4+0Rtg5ACcV+shcV0Ix1t+9zb5e63heCSQj9eQoqEOjPku78k68sfLxU9LAE53BD/W7bmeDBOGYKduv3tSftqbDKXWQxpPN5CDx2tIkc0IfFsvSwO03uQerCRTypykVPSSbruErfWQxkYfLOtoWXy0miyNxZdHAvnEObK1PRl7q/wEEaEf+uGKy3H6od9w+qHfcPoUNELr3UtjN9ApDo1hN+yXKAjzV9ybDGdpBGNhZc2Pc+38CCWHn6XdoDh71M/uppOo/Xo1dDU5jrU4FaDNa307AJTFUC7phhOXCNrvhPh1AcBPIzxOYRRtPbye9jgAAHsBIGHfz++uzvF8gDbfl53bB0/kTxOM15/jhOCWKMNpL8TprdODwtApPhIV1qKfIwCwGQAK4oj3bT3FMfgPh9V34vBMsXKcuaH5snZ4aAzxMbeNg1esE+r1nq7qtSyEdzEviNiVJxIAEY9E/D0/xprCCJwjMeiEn7nYcWhExNwYPHYE5seQtThirFiH7+IEyoKhdYmgU5xIXhIdqraETn34VGyJEcYi8dsLeWHYFnpcMXKmuREhcD6Abqe3ve5vQcTJmh8Hfx0N32Eob4d2YUTutDQktx6do1FzerCmC3oN87L0El4S7HEAEcsixgqi8HMj5sraoRM9bm+HF3uM0xWLdqynrB1eOutxIiE3AXzEoxOIQyfx0DgSzUt39HG2tJHrzO2At4kGVxfn44Xyy5BblicIJxEyuzqD012G44owHLtOUuxKcBjohyugc+yKEZMjjWhbAj1EP1whhgNRPZz5OmGrM9+JtndxPl6c3D70+dkTIEun9NZdDcDyUKeyMMT8kYj+yt4O5BF7I6qLzXFUVZHVhh6N4naqkIIIZR/tpcbSEXni0cnmOKqqgktodENVpdeviYTCDtDpbL8hNwE05ndjVRWPbot7s066GqpcbWTme0N9k0icZaHxeOlsC7Xwt8XhpcK9kdFRuGEae+PMq/YCwK+6IXl3JagSipQn3nzzlhg6iVevYfwLOul/A7AfOgX/PwCXH5/NSHKS/gAAAABJRU5ErkJggg==" alt="Java Mobilindo" class="h-14 w-auto" style="object-fit:contain">
+  <div id="loginScreen" style="position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 28% 15%,#1F4A73 0%,#0B2740 55%,#081B30 100%);display:none;align-items:center;justify-content:center;padding:16px;overflow:hidden;">
+    <div style="position:absolute;top:-130px;right:-90px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(224,162,51,.16),transparent 70%);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-150px;left:-130px;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle,rgba(22,104,179,.35),transparent 70%);pointer-events:none;"></div>
+    <div style="width:380px;max-width:92vw;border-radius:16px;"><div style="border-radius:16px;overflow:hidden;box-shadow:0 30px 80px -18px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);">
+      <div style="background:linear-gradient(160deg,#1B4C78,#0B2740);padding:40px 28px 26px;text-align:center;">
+        <img src="data:image/png;base64,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" alt="Java Mobilindo" class="h-14 w-auto mx-auto" style="object-fit:contain">
+        <div style="height:2px;width:56px;background:var(--amber);margin:20px auto 0;border-radius:2px;"></div>
       </div>
-      <h1 class="g font-bold text-[20px] text-center mb-1" style="color:var(--ink)">Masuk ke Aplikasi</h1>
-      <p class="text-[13px] text-center text-[var(--muted)] mb-6">Garasi Java Mobilindo</p>
-      <div class="field mb-4"><label>Username</label><input id="loginUsername" class="inp" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="field mb-2"><label>Password</label><input id="loginPassword" type="password" class="inp" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <p id="loginError" class="text-[12.5px] mb-3" style="color:var(--neg);display:none"></p>
-      <button id="btnLogin" class="btn btn-dark w-full justify-center" onclick="doLogin()">Masuk</button>
-    </div>
+      <div style="background:var(--panel);padding:34px 28px 30px;">
+        <h1 class="g font-bold text-[21px] text-center mb-1" style="color:var(--ink)">Masuk ke Aplikasi</h1>
+        <p class="text-[11.5px] text-center text-[var(--muted)] mb-7" style="letter-spacing:.12em">GARASI JAVA MOBILINDO</p>
+        <div class="field mb-4"><label>Username</label><input id="loginUsername" class="inp" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="field mb-2"><label>Password</label><input id="loginPassword" type="password" class="inp" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <p id="loginError" class="text-[12.5px] mb-3" style="color:var(--neg);display:none"></p>
+        <button id="btnLogin" class="btn btn-dark w-full justify-center" onclick="doLogin()" style="padding:12px 0;letter-spacing:.03em;">Masuk</button>
+      </div>
+    </div></div>
   </div>
 
   <!-- MAIN -->
@@ -373,14 +429,55 @@
         <div id="opTableWrap"></div>
       </section>
 
+      <!-- ============ KAS / BANK MASUK ============ -->
+      <section id="page-kasmasuk" class="page">
+        <div id="inflowStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4"></div>
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <div class="flex items-center gap-2 border border-[var(--line)] rounded-lg px-3 py-2 bg-white flex-1 min-w-[220px] max-w-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="inflowsearch" class="w-full text-[13.5px] outline-none" placeholder="Cari keterangan atau akun..." oninput="renderKasMasuk()">
+          </div>
+          <select id="inflowfilter" class="inp w-auto" onchange="renderKasMasuk()"><option value="">Semua akun</option></select>
+          <select id="inflowMonth" class="inp w-auto" onchange="renderKasMasuk()"></select>
+          <select id="inflowYear" class="inp w-auto" onchange="renderKasMasuk()"></select>
+          <button id="btnExportKasMasuk" class="btn btn-ghost ml-auto" onclick="exportKasMasukList()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export Excel</button>
+          <button id="btnTambahKasMasuk" class="btn btn-amber" onclick="openInflowModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Kas Masuk</button>
+        </div>
+        <div id="inflowTableWrap"></div>
+      </section>
+
       <!-- ============ LAPORAN LABA RUGI ============ -->
       <section id="page-labarugi" class="page">
-        <div class="flex flex-wrap items-center gap-3 mb-4">
-          <span class="text-[13px] text-[var(--muted)]">Periode:</span>
-          <select id="lrMonth" class="inp w-auto" onchange="renderLabaRugi()"></select>
-          <select id="lrYear" class="inp w-auto" onchange="renderLabaRugi()"></select>
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="text-[13px] text-[var(--muted)]">Dari:</span>
+          <select id="lrFromMonth" class="inp w-auto" onchange="renderLabaRugi()"></select>
+          <select id="lrFromYear" class="inp w-auto" onchange="renderLabaRugi()"></select>
+          <span class="text-[13px] text-[var(--muted)] ml-2">s.d.:</span>
+          <select id="lrToMonth" class="inp w-auto" onchange="renderLabaRugi()"></select>
+          <select id="lrToYear" class="inp w-auto" onchange="renderLabaRugi()"></select>
         </div>
         <div id="lrWrap"></div>
+      </section>
+
+      <!-- ============ MANAJEMEN AKUN (COA) ============ -->
+      <section id="page-accounts" class="page">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2 border border-[var(--line)] rounded-lg px-3 py-2 bg-white flex-1 min-w-[220px] max-w-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="accountsearch" class="w-full text-[13.5px] outline-none" placeholder="Cari kode atau nama akun..." oninput="renderAccounts()">
+          </div>
+          <select id="accountGroupFilter" class="inp w-auto" onchange="renderAccounts()">
+            <option value="">Semua Kategori</option>
+            <option value="1">1 · Aset / Kas &amp; Bank</option>
+            <option value="2">2 · Kewajiban / Hutang</option>
+            <option value="3">3 · Ekuitas / Modal</option>
+            <option value="4">4 · Pendapatan / Kas Masuk</option>
+            <option value="5">5 · Biaya Perawatan Unit / HPP</option>
+            <option value="6">6 · Beban Usaha / Kas Keluar</option>
+          </select>
+          <button class="btn btn-amber ml-auto" onclick="openAccountModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Akun</button>
+        </div>
+        <div id="accountsTableWrap"></div>
       </section>
 
       <!-- ============ MANAJEMEN USER ============ -->
@@ -390,6 +487,39 @@
           <button class="btn btn-amber" onclick="openUserModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah User</button>
         </div>
         <div id="usersTableWrap"></div>
+      </section>
+
+      <!-- ============ MANAJEMEN ROLE ============ -->
+      <section id="page-roles" class="page">
+        <div class="card p-6 max-w-2xl">
+          <div class="flex items-center gap-3 mb-5 p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <div class="p-2 rounded-lg bg-amber-50 text-[var(--amber)] flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <h3 class="g font-bold text-[14px]">Daftar Peran &amp; Kewenangan</h3>
+              <p class="text-[12px] text-[var(--muted)] mt-0.5">Sistem membagi akses menjadi dua tingkat peran utama.</p>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex items-start gap-4 p-4 border border-[var(--line)] rounded-xl bg-white shadow-sm">
+              <div class="p-2.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-[13px] tracking-wider uppercase">ADMIN</div>
+              <div class="space-y-1">
+                <h4 class="font-600 text-[13.5px] text-slate-800">Administrator Utama</h4>
+                <p class="text-[12.5px] text-[var(--muted)]">Memiliki hak akses mutlak dan tidak terbatas. Administrator dapat mengelola database, menambah/mengedit/menghapus semua data kendaraan, transaksi biaya operasional, laporan keuangan laba rugi, serta mengelola hak akses akun staff.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-4 border border-[var(--line)] rounded-xl bg-white shadow-sm">
+              <div class="p-2.5 rounded-lg bg-indigo-50 text-[var(--blue)] font-bold text-[13px] tracking-wider uppercase">STAFF</div>
+              <div class="space-y-1">
+                <h4 class="font-600 text-[13.5px] text-slate-800">Staff Operasional</h4>
+                <p class="text-[12.5px] text-[var(--muted)]">Memiliki hak akses terbatas yang disesuaikan secara dinamis oleh Administrator melalui menu <b>Hak Akses</b>. Tindakan seperti menambah, mengubah, menghapus, atau mengekspor data dapat dinonaktifkan sesuai kebutuhan operasional.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ============ PENGATURAN HAK AKSES ============ -->
@@ -403,7 +533,8 @@
           <h3 class="g font-bold text-[15px] mb-3">Akses Menu</h3>
           <div class="space-y-2.5 mb-6">
             <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Data Kendaraan</span><input type="checkbox" id="perm_menu_kendaraan" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
-            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Biaya Operasional</span><input type="checkbox" id="perm_menu_operasional" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Kas/Bank Keluar</span><input type="checkbox" id="perm_menu_operasional" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Kas/Bank Masuk</span><input type="checkbox" id="perm_menu_kas_masuk" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
             <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Laporan Laba Rugi</span><input type="checkbox" id="perm_menu_labarugi" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
           </div>
 
@@ -415,12 +546,20 @@
             <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Export Excel</span><input type="checkbox" id="perm_kendaraan_export" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
           </div>
 
-          <h3 class="g font-bold text-[15px] mb-3">Fungsi Biaya Operasional</h3>
+          <h3 class="g font-bold text-[15px] mb-3">Fungsi Kas/Bank Keluar</h3>
           <div class="space-y-2.5 mb-6">
-            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Tambah Biaya</span><input type="checkbox" id="perm_operasional_tambah" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
-            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Edit Biaya</span><input type="checkbox" id="perm_operasional_edit" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
-            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Hapus Biaya</span><input type="checkbox" id="perm_operasional_hapus" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Tambah Kas Keluar</span><input type="checkbox" id="perm_operasional_tambah" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Edit Kas Keluar</span><input type="checkbox" id="perm_operasional_edit" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Hapus Kas Keluar</span><input type="checkbox" id="perm_operasional_hapus" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
             <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Export Excel</span><input type="checkbox" id="perm_operasional_export" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+          </div>
+
+          <h3 class="g font-bold text-[15px] mb-3">Fungsi Kas/Bank Masuk</h3>
+          <div class="space-y-2.5 mb-6">
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Tambah Kas Masuk</span><input type="checkbox" id="perm_kas_masuk_tambah" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Edit Kas Masuk</span><input type="checkbox" id="perm_kas_masuk_edit" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Hapus Kas Masuk</span><input type="checkbox" id="perm_kas_masuk_hapus" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
+            <label class="flex items-center justify-between py-1.5"><span class="text-[13.5px]">Export Excel</span><input type="checkbox" id="perm_kas_masuk_export" class="w-4.5 h-4.5 accent-[color:var(--pos)]"></label>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-[var(--line)]">
@@ -455,11 +594,77 @@
     </div>
   </div>
 
-  <!-- POPUP TAMBAH/EDIT BIAYA OPERASIONAL -->
+  <!-- POPUP TAMBAH/EDIT AKUN -->
+  <div id="accountModal" class="modal-scrim" onclick="if(event.target===this)closeAccountModal()">
+    <div class="modal" style="max-width:480px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="accountModalTitle" class="g font-bold text-[16px]">Tambah Akun</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closeAccountModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+
+        <!-- GROUP AKUN -->
+        <div class="field">
+          <label>Group Akun <span class="text-[var(--neg)]">*</span></label>
+          <select id="am_group" class="inp" onchange="onAccountGroupChange()">
+            <option value="">— Pilih Group Akun —</option>
+            <option value="1">1 · Aset / Kas &amp; Bank</option>
+            <option value="2">2 · Kewajiban / Hutang</option>
+            <option value="3">3 · Ekuitas / Modal</option>
+            <option value="4">4 · Pendapatan / Kas Masuk</option>
+            <option value="5">5 · Biaya Perawatan Unit (HPP)</option>
+            <option value="6">6 · Beban Usaha / Kas Keluar</option>
+          </select>
+          <!-- Preview badge group yang dipilih -->
+          <div id="am_group_preview" class="hidden mt-2 flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--line)] bg-slate-50">
+            <span id="am_group_dot" class="w-2.5 h-2.5 rounded-full flex-shrink-0"></span>
+            <span id="am_group_label" class="text-[12.5px] font-600"></span>
+          </div>
+        </div>
+
+        <!-- KODE AKUN (auto-generate) -->
+        <div class="field">
+          <label>Kode Akun <span class="text-[var(--neg)]">*</span></label>
+          <div class="flex items-center gap-2">
+            <!-- Prefix (digit pertama) – read-only, diisi otomatis -->
+            <div class="flex items-center justify-center w-12 h-10 rounded-lg border-2 font-mono font-bold text-[18px] text-center flex-shrink-0 transition-all"
+                 id="am_kode_prefix_box" style="border-color:var(--line);color:var(--muted);background:#f8fafc">
+              <span id="am_kode_prefix">—</span>
+            </div>
+            <span class="text-[var(--muted)] font-bold text-[18px]">–</span>
+            <!-- 3 digit counter, bisa diedit manual -->
+            <input id="am_kode_suffix" class="inp font-mono text-[16px] font-600 text-center tracking-widest" style="width:90px;letter-spacing:.2em"
+                   maxlength="3" placeholder="___" oninput="onAccountSuffixChange()" autocomplete="off">
+            <!-- Preview kode lengkap -->
+            <div class="flex-1 text-right">
+              <span class="text-[11px] text-[var(--muted)] block">Kode Akun</span>
+              <span id="am_kode_preview" class="num font-700 text-[17px]" style="color:var(--muted)">—</span>
+            </div>
+          </div>
+          <p id="am_kode_hint" class="text-[11px] text-[var(--muted)] mt-1.5">Pilih group akun terlebih dahulu untuk mengisi kode otomatis.</p>
+          <!-- Hidden input menyimpan kode lengkap -->
+          <input type="hidden" id="am_kode">
+        </div>
+
+        <!-- NAMA AKUN -->
+        <div class="field">
+          <label>Nama Akun <span class="text-[var(--neg)]">*</span></label>
+          <input id="am_nama" class="inp" placeholder="Contoh: Beban Listrik &amp; Air" autocomplete="off">
+        </div>
+
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closeAccountModal()">Batal</button>
+        <button class="btn btn-dark" onclick="saveAccountModal()">Simpan Akun</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP TAMBAH/EDIT KAS / BANK KELUAR -->
   <div id="opModal" class="modal-scrim" onclick="if(event.target===this)closeOpModal()">
     <div class="modal" style="max-width:560px">
       <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
-        <h3 id="opModalTitle" class="g font-bold text-[16px]">Tambah Biaya Operasional</h3>
+        <h3 id="opModalTitle" class="g font-bold text-[16px]">Tambah Kas/Bank Keluar</h3>
         <button class="act" style="--ac:var(--neg)" onclick="closeOpModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
       <div class="px-6 py-5 grid sm:grid-cols-2 gap-4">
@@ -472,6 +677,27 @@
       <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
         <button class="btn btn-ghost" onclick="closeOpModal()">Batal</button>
         <button class="btn btn-dark" onclick="saveOpModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP TAMBAH/EDIT KAS / BANK MASUK -->
+  <div id="inflowModal" class="modal-scrim" onclick="if(event.target===this)closeInflowModal()">
+    <div class="modal" style="max-width:560px">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <h3 id="inflowModalTitle" class="g font-bold text-[16px]">Tambah Kas Masuk</h3>
+        <button class="act" style="--ac:var(--neg)" onclick="closeInflowModal()" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-5 grid sm:grid-cols-2 gap-4">
+        <div class="field"><label>Tanggal</label><input id="inflow_tgl" type="date" class="inp"></div>
+        <div class="field"><label>Akun / Kategori</label><select id="inflow_akun" class="inp"></select></div>
+        <div class="field"><label>Kas / Bank (penerima)</label><select id="inflow_kas" class="inp"></select></div>
+        <div class="field"><label>Jumlah (Rp)</label><input id="inflow_jml" type="number" class="inp" placeholder="0"></div>
+        <div class="field sm:col-span-2"><label>Keterangan</label><input id="inflow_ket" class="inp" placeholder="mis. Modal pemegang saham"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
+        <button class="btn btn-ghost" onclick="closeInflowModal()">Batal</button>
+        <button class="btn btn-dark" onclick="saveInflowModal()">Simpan</button>
       </div>
     </div>
   </div>
@@ -580,6 +806,9 @@ const MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','De
 const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${+d} ${MON[+m-1]} ${y}`; };
 const nama = v => v.merk+' '+v.model+(v.type?' '+v.type:'');
 const pengTotal = v => v.peng.reduce((s,p)=>s+(p.n||0),0);
+// Merapikan 1 item pengeluaran ke bentuk baku {tgl, akun, ket, n, kas},
+// termasuk kompatibel dengan data lama yang mungkin memakai field 'j' untuk keterangan.
+const pengItem = p => ({ tgl:p.tgl||null, akun:p.akun||'', ket:(p.ket!=null?p.ket:(p.j||'')), n:p.n||0, kas:p.kas||'' });
 const modal = v => v.beli + pengTotal(v);
 const laba = v => v.jual ? v.jual.harga - modal(v) : 0;          // laba kotor
 const feeOf = v => v.jual ? (v.jual.fee||0) : 0;
@@ -600,44 +829,39 @@ function badge(status){
   return `<span class="badge" style="color:${c};background:${bg}"><span class="dot" style="background:${c}"></span>${status}</span>`;
 }
 
-/* ===== akun biaya pemeliharaan kendaraan ===== */
-const AKUN_BIAYA = [
-  {kode:'5201',nama:'Servis & Tune-up'},{kode:'5202',nama:'Ganti Oli'},{kode:'5203',nama:'Ban'},
-  {kode:'5204',nama:'Aki'},{kode:'5205',nama:'Kaki-kaki'},{kode:'5206',nama:'Kelistrikan'},
-  {kode:'5207',nama:'Body & Cat'},{kode:'5208',nama:'Salon & Detailing'},{kode:'5209',nama:'Interior'},
-  {kode:'5210',nama:'Pajak & STNK'},{kode:'5211',nama:'Kelengkapan'},{kode:'5212',nama:'Lain-lain'}
-];
-const akunKode = nama => { const a=AKUN_BIAYA.find(x=>x.nama===nama); return a?a.kode:''; };
-const akunLabel = nama => { const k=akunKode(nama); return k?`${k} · ${nama}`:(nama||''); };
-const akunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+AKUN_BIAYA.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
-// normalisasi item pengeluaran (dukung data lama {j,n})
-const pengItem = p => ({ tgl:p.tgl||null, akun:p.akun||'', ket:(p.ket!=null?p.ket:(p.j||'')), n:p.n||0, kas:p.kas||'' });
+/* ===== data akun terpadu (chart of accounts) ===== */
+let ACCOUNTS = [];
+const getAccountsByHead = (headPrefixes) => ACCOUNTS.filter(a => headPrefixes.some(p => a.kode.startsWith(p)));
+const getAccountByNama = (nama) => ACCOUNTS.find(x => x.nama === nama);
 
-/* ===== master kas / bank ===== */
-const KAS_BANK = [
-  {kode:'1101',nama:'Kas Tunai'},{kode:'1102',nama:'Bank BCA'},{kode:'1103',nama:'Bank Mandiri'},
-  {kode:'1104',nama:'Bank BNI'},{kode:'1105',nama:'Bank BRI'}
-];
-const kasKode = nama => { const a=KAS_BANK.find(x=>x.nama===nama); return a?a.kode:''; };
-const kasLabel = nama => { const k=kasKode(nama); return k?`${k} · ${nama}`:(nama||''); };
-const kasOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih kas/bank —</option>`+KAS_BANK.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+const akunKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
+const akunLabel = nama => { const a = getAccountByNama(nama); return a ? `${a.kode} · ${a.nama}` : (nama || '—'); };
+const akunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+getAccountsByHead(['5']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
 
-/* ===== biaya operasional (akun + data) ===== */
-const OP_AKUN=[
-  {kode:'6101',nama:'Gaji Karyawan'},{kode:'6102',nama:'Sewa Showroom'},{kode:'6103',nama:'Listrik & Air'},
-  {kode:'6104',nama:'Internet & Telepon'},{kode:'6105',nama:'Iklan & Marketing'},{kode:'6106',nama:'Perlengkapan Kantor'},
-  {kode:'6107',nama:'BBM & Transportasi'},{kode:'6108',nama:'Konsumsi'},{kode:'6109',nama:'Perawatan Showroom'},{kode:'6110',nama:'Lain-lain'}
-];
-const opKode = nama => { const a=OP_AKUN.find(x=>x.nama===nama); return a?a.kode:''; };
-const opLabel = nama => { const k=opKode(nama); return k?`${k} · ${nama}`:(nama||''); };
-const opAkunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+OP_AKUN.map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+const kasKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
+const kasLabel = nama => { const a = getAccountByNama(nama); return a ? `${a.kode} · ${a.nama}` : (nama || '—'); };
+const kasOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih kas/bank —</option>`+getAccountsByHead(['1']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+
+// Kas Keluar (Beban kepala 6, Kewajiban kepala 2, Modal kepala 3)
+const opKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
+const opLabel = nama => { const a = getAccountByNama(nama); return a ? `${a.kode} · ${a.nama}` : (nama || '—'); };
+const opAkunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+getAccountsByHead(['6','2','3']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+
+// Kas Masuk (Pendapatan kepala 4, Kewajiban kepala 2, Modal kepala 3)
+const inKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
+const inLabel = nama => { const a = getAccountByNama(nama); return a ? `${a.kode} · ${a.nama}` : (nama || '—'); };
+const inAkunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih akun —</option>`+getAccountsByHead(['4','2','3']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+
 let OPCOSTS=[];
 const opTotal = () => OPCOSTS.reduce((s,o)=>s+(+o.jumlah||0),0);
+let CASH_INFLOW=[];
 
 /* ===== filter periode (bulan & tahun) ===== */
 const monthOptions = cur => `<option value="">Semua bulan</option>`+BULAN.map((b,i)=>{const mm=String(i+1).padStart(2,'0');return `<option value="${mm}" ${mm===cur?'selected':''}>${b}</option>`;}).join('');
-function dataYears(){ const ys=new Set([String(new Date().getFullYear())]); OPCOSTS.forEach(o=>{if(o.tgl)ys.add(o.tgl.slice(0,4));}); VEHICLES.forEach(v=>{if(v.jual&&v.jual.tgl)ys.add(v.jual.tgl.slice(0,4));}); return [...ys].sort(); }
+const monthOptionsStrict = cur => BULAN.map((b,i)=>{const mm=String(i+1).padStart(2,'0');return `<option value="${mm}" ${mm===cur?'selected':''}>${b}</option>`;}).join('');
+function dataYears(){ const ys=new Set([String(new Date().getFullYear())]); OPCOSTS.forEach(o=>{if(o.tgl)ys.add(o.tgl.slice(0,4));}); CASH_INFLOW.forEach(o=>{if(o.tgl)ys.add(o.tgl.slice(0,4));}); VEHICLES.forEach(v=>{if(v.jual&&v.jual.tgl)ys.add(v.jual.tgl.slice(0,4));}); return [...ys].sort(); }
 const yearOptions = cur => `<option value="">Semua tahun</option>`+dataYears().map(y=>`<option ${y===cur?'selected':''}>${y}</option>`).join('');
+const yearOptionsStrict = cur => dataYears().map(y=>`<option ${y===cur?'selected':''}>${y}</option>`).join('');
 function inPeriod(iso,year,month){ if(!iso) return !(year||month); const [y,m]=iso.split('-'); if(year&&y!==year) return false; if(month&&m!==month) return false; return true; }
 function periodeLabel(year,month){ if(!year&&!month) return 'Semua periode'; if(year&&month) return BULAN[+month-1]+' '+year; if(month) return BULAN[+month-1]+' (semua tahun)'; return 'Tahun '+year; }
 
@@ -771,8 +995,8 @@ function renderKendaraan(){
   document.getElementById('vehicleCards').innerHTML = list.map(v=>{
     const lk=laba(v), fee=feeOf(v), lb=lk-fee, pi=payInfo(v);
     const darkIcon = ['putih','silver'].some(x => String(v.warna).toLowerCase().includes(x));
-    return `<div class="card p-5 cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all flex flex-col justify-between" onclick="openVehicle('${v.kode}')">
-      <div>
+    return `<div class="card p-5 hover:-translate-y-1 hover:shadow-lg transition-all flex flex-col justify-between">
+      <div class="cursor-pointer" onclick="openVehicle('${v.kode}')">
         <!-- Visual Header -->
         <div class="h-28 rounded-xl flex items-center justify-center relative mb-4 overflow-hidden border border-slate-100 shadow-sm" style="background:${getVehicleGradient(v.warna)}">
           <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="${darkIcon ? '#475569' : '#FFFFFF'}" stroke-width="1.2" class="opacity-80">
@@ -815,16 +1039,16 @@ function renderKendaraan(){
         </div>` : ''}
       </div>
 
-      <!-- Footer & Action Buttons -->
+      <!-- Footer & Action Buttons — area ini TIDAK propagate ke kartu -->
       <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
         <div class="flex items-center gap-1.5">
           ${badge(v.status)}
           ${pi.sold ? `<span class="badge" style="background:${pi.lunas ? 'var(--pos-soft)' : 'var(--neg-soft)'};color:${pi.lunas ? 'var(--pos)' : 'var(--neg)'}"><span class="dot" style="background:${pi.lunas ? 'var(--pos)' : 'var(--neg)'}"></span>${pi.lunas ? 'LUNAS' : 'BELUM'}</span>` : ''}
         </div>
-        <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-1.5">
           <button class="act" title="Lihat Detail" onclick="openVehicle('${v.kode}')" style="--ac:var(--blue)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           ${can('kendaraan_edit') ? `<button class="act" title="Edit" onclick="openEditForm('${v.kode}')" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>` : ''}
-          ${can('kendaraan_hapus') ? `<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ''}
+          ${can('kendaraan_hapus') ? (v.status==='SOLD' ? `<button class="act" title="Tidak dapat dihapus — unit sudah SOLD" style="--ac:var(--muted);opacity:.4;cursor:not-allowed" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : `<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>`) : ''}
         </div>
       </div>
     </div>`;
@@ -869,9 +1093,11 @@ function renderKendaraan(){
           ${can('kendaraan_edit') ? `<button class="act" title="Edit" onclick="openEditForm('${v.kode}')" style="--ac:var(--amber)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
           </button>` : '' }
-          ${can('kendaraan_hapus') ? `<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)">
+          ${can('kendaraan_hapus') ? (v.status==='SOLD' ? `<button class="act" title="Tidak dapat dihapus — unit sudah SOLD" style="--ac:var(--muted);opacity:.4;cursor:not-allowed" disabled>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/><path d="M10 11v6M14 11v6"/></svg>
-          </button>` : '' }
+          </button>` : `<button class="act" title="Hapus" onclick="deleteVehicle('${v.kode}')" style="--ac:var(--neg)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>`) : '' }
         </div>
       </td>`)}
       ${merged(`<td class="num font-600 whitespace-nowrap"${rs}>${v.nopol}</td>`)}
@@ -942,18 +1168,62 @@ function renderVehicleDetail(){
       </div>
     </div>`;
 
-  const infoRows=[
-    ['Merk',v.merk],['Model',v.model],['Type',v.type||'—'],['Transmisi',v.trans],['Warna',v.warna],['Tahun',v.thn,'num'],
-    ['No. Polisi',v.nopol,'num'],['Odometer',odoFmt(v.odo),'num'],['Bahan Bakar',v.bbm],
-    ['No. Rangka',v.rangka,'num'],['No. Mesin',v.mesin,'num'],
-    ['Jt. Tempo Pajak Tahunan',fmtDate(v.pajakThn),'num'],['Pajak 5 Tahunan',fmtDate(v.pajak5Thn),'num'],
-    ['Tanggal Pembelian',fmtDate(v.tglBeli),'num'],['Harga Beli',rp(v.beli),'num'],['Kas/Bank Pembelian',v.kasBeli?kasLabel(v.kasBeli):'—'],
-    ['Harga Penawaran',v.penawaran?rp(v.penawaran):'—','num'],['Target Nett Price',v.targetNett?rp(v.targetNett):'—','num'],['Status',v.status]
+  const group1 = [
+    ['Merk', v.merk], ['Model', v.model], ['Type', v.type || '—'], ['Tahun', v.thn, 'num'],
+    ['Transmisi', v.trans], ['Bahan Bakar', v.bbm], ['Warna', v.warna], ['Odometer', odoFmt(v.odo), 'num']
   ];
-  document.getElementById('tab-info').innerHTML=`
-    <div class="card p-6"><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
-      ${infoRows.map(([l,val,cls])=>`<div class="field"><label>${l}</label><p class="val ${cls||''}">${val}</p></div>`).join('')}
-    </div></div>`;
+  const group2 = [
+    ['No. Polisi', v.nopol, 'num font-600'], ['No. Rangka', v.rangka, 'num'], ['No. Mesin', v.mesin, 'num'],
+    ['Jt. Tempo Pajak Tahunan', fmtDate(v.pajakThn), 'num'], ['Pajak 5 Tahunan', fmtDate(v.pajak5Thn), 'num']
+  ];
+  const group3 = [
+    ['Tanggal Pembelian', fmtDate(v.tglBeli), 'num'], ['Harga Beli', rp(v.beli), 'num'], ['Kas/Bank Pembelian', v.kasBeli ? kasLabel(v.kasBeli) : '—'],
+    ['Harga Penawaran', v.penawaran ? rp(v.penawaran) : '—', 'num'], ['Target Nett Price', v.targetNett ? rp(v.targetNett) : '—', 'num'], ['Status', v.status]
+  ];
+
+  const fieldHtml = ([l, val, cls]) => `<div class="field"><label>${l}</label><p class="val ${cls || ''}">${val}</p></div>`;
+
+  document.getElementById('tab-info').innerHTML = `
+    <div class="space-y-6">
+      <!-- Identitas Kendaraan -->
+      <div class="card p-6">
+        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+          <div class="p-2 rounded-lg bg-amber-50 text-[var(--amber)] flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M7 17h10"/><path d="M5 12h14"/></svg>
+          </div>
+          <h3 class="g font-bold text-[15px] text-slate-800">Identitas Kendaraan</h3>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-5">
+          ${group1.map(fieldHtml).join('')}
+        </div>
+      </div>
+
+      <!-- Legalitas & Dokumen -->
+      <div class="card p-6">
+        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+          <div class="p-2 rounded-lg bg-indigo-50 text-[var(--blue)] flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3 class="g font-bold text-[15px] text-slate-800">Legalitas &amp; Dokumen</h3>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+          ${group2.map(fieldHtml).join('')}
+        </div>
+      </div>
+
+      <!-- Pembelian & Harga -->
+      <div class="card p-6">
+        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+          <div class="p-2 rounded-lg bg-emerald-50 text-[var(--pos)] flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M12 18v-3"/><path d="M17 12H7"/><path d="M15 8H9"/></svg>
+          </div>
+          <h3 class="g font-bold text-[15px] text-slate-800">Pembelian &amp; Penetapan Harga</h3>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+          ${group3.map(fieldHtml).join('')}
+        </div>
+      </div>
+    </div>`;
 
   const totPeng=pengTotal(v);
   document.getElementById('tab-perawatan').innerHTML=`
@@ -1656,13 +1926,22 @@ async function saveVehicle(){
 
 async function deleteVehicle(kode){
   const v=VEHICLES.find(x=>x.kode===kode); if(!v) return;
-  if(!confirm('Hapus unit '+kode+' — '+nama(v)+'?\nTindakan ini tidak bisa dibatalkan.')) return;
+  if(v.status==='SOLD'){
+    alert('❌ Unit '+kode+' tidak dapat dihapus.\nUnit dengan status SOLD sudah tercatat sebagai transaksi penjualan.');
+    return;
+  }
+  if(!confirm('Nonaktifkan unit '+kode+' — '+nama(v)+'?\n\nUnit akan disembunyikan dari daftar (soft delete).\nData histori tetap tersimpan di database.')) return;
   try{
     await apiDelete('/api/vehicles/'+encodeURIComponent(kode));
     await loadAllFromServer();
     if(currentVehicle && currentVehicle.kode===kode) backToList();
     renderKendaraan();
-  }catch(e){ console.error(e); alert('Gagal menghapus dari database: '+e.message); }
+  }catch(e){
+    console.error(e);
+    // Tampilkan pesan error dari server (termasuk blokir SOLD)
+    const msg = e.message || 'Gagal menonaktifkan dari database.';
+    alert('❌ '+msg);
+  }
 }
 
 /* ===== cetak dokumen ===== */
@@ -1675,7 +1954,7 @@ function openPrint(title, html){
 function closePrint(){ document.getElementById('printArea').classList.remove('open'); }
 function docHeader(){
   return `<div class="dhead">
-    <div class="brand"><div class="b1">GARASI</div><div class="b2">JAVA MOBILINDO</div></div>
+    <div class="brand"><img src="data:image/png;base64,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" alt="Java Mobilindo" style="height:42px;width:auto;object-fit:contain;display:block"></div>
     <div class="cinfo">${COMPANY.alamat}<br>Telepon: ${COMPANY.telp}<br>Email: ${COMPANY.email}</div>
   </div>`;
 }
@@ -1719,7 +1998,7 @@ function cetakSPK(kode){
         <tr><td class="lbl" style="width:88px">Leasing</td><td>: ${esc(j.leasing&&j.leasing.perusahaan)||'&nbsp;'}</td></tr>
         <tr><td class="lbl" style="width:88px">Uang Muka</td><td>: ${j.leasing&&j.leasing.dp?rp(j.leasing.dp):'&nbsp;'}</td></tr>
         <tr><td class="lbl" style="width:88px">Angsuran</td><td>: ${j.leasing&&j.leasing.angsuran?rp(j.leasing.angsuran)+'/bln':'&nbsp;'}</td></tr></table></td>
-      <td style="vertical-align:top"><b>Dipesan Oleh:</b><div style="height:50px"></div><div style="text-align:center">( ${esc(j.mediator)||'..................'} )</div></td>
+      <td style="vertical-align:top;height:1px"><div style="display:flex;flex-direction:column;height:100%;min-height:110px"><b>Dipesan Oleh:</b><div style="flex:1"></div><div style="text-align:center">( ${esc(j.mediator)||'..................'} )</div></div></td>
     </tr>
     <tr>
       <td colspan="1" style="vertical-align:top"><b>TRADE IN</b>
@@ -1820,18 +2099,36 @@ function go(page){
   const T={
     dashboard:['Dashboard','Ikhtisar kinerja & ekspor data'],
     kendaraan:['Data Kendaraan', curPeriodStr],
-    operasional:['Biaya Operasional','Pengeluaran di luar unit'],
+    operasional:['Kas/Bank Keluar','Pengeluaran kas di luar pembelian unit'],
+    kasmasuk:['Kas/Bank Masuk','Penerimaan dana di luar penjualan unit'],
     labarugi:['Laporan Laba Rugi','Ikhtisar pendapatan & beban'],
-    users:['Manajemen User','Kelola akun pengguna aplikasi'],
+    accounts:['Data Akun','Chart of Accounts – kepala 1 s.d. 6'],
+    users:['Manajemen Pengguna','Kelola akun pengguna aplikasi'],
+    roles:['Peran & Jabatan','Daftar level kewenangan pengguna'],
     permissions:['Hak Akses','Atur menu & fungsi yang bisa diakses role Staff']
   };
   document.getElementById('ptitle').textContent=T[page][0];
   document.getElementById('psub').textContent=T[page][1];
+  
+  // Expand parent if active sublink is selected
+  const sublink = document.querySelector(`.nav-sub-items .navlink[data-page="${page}"]`);
+  if(sublink){
+    const parentContainer = sublink.closest('.nav-sub-items');
+    if(parentContainer){
+      parentContainer.classList.remove('hidden');
+      const chevron = document.getElementById('chevron-' + parentContainer.id.replace('sub-', ''));
+      if(chevron) chevron.classList.add('rotate-180');
+    }
+  }
+
   if(page==='dashboard'){ renderDashboard(); }
   else if(page==='kendaraan'){ backToList(); renderKendaraan(); }
   else if(page==='operasional'){ renderOperasional(); }
+  else if(page==='kasmasuk'){ renderKasMasuk(); }
   else if(page==='labarugi'){ renderLabaRugi(); }
+  else if(page==='accounts'){ renderAccounts(); }
   else if(page==='users'){ renderUsers(); }
+  else if(page==='roles'){ /* static markup */ }
   else if(page==='permissions'){ renderPermissionsPage(); }
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('scrim').classList.remove('open');
@@ -1842,6 +2139,15 @@ function go(page){
   window.scrollTo(0,0);
 }
 
+function toggleNavGroup(groupName){
+  const el=document.getElementById('sub-'+groupName);
+  const chevron=document.getElementById('chevron-'+groupName);
+  if(el){
+    el.classList.toggle('hidden');
+    if(chevron) chevron.classList.toggle('rotate-180');
+  }
+}
+
 /* ===== Biaya Operasional ===== */
 let opEditIdx=null;
 function renderOperasional(){
@@ -1849,14 +2155,15 @@ function renderOperasional(){
   const btnExportO=document.getElementById('btnExportOperasional'); if(btnExportO) btnExportO.style.display=can('operasional_export')?'':'none';
   // filter akun
   const fsel=document.getElementById('opfilter');
-  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+OP_AKUN.map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
+  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['6','2','3']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
   // filter bulan & tahun
-  const msel=document.getElementById('opMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(''); msel.dataset.init='1'; }
-  const ysel=document.getElementById('opYear'); if(ysel){ const c=ysel.value; ysel.innerHTML=yearOptions(c); }
+  const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
+  const msel=document.getElementById('opMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(mmNow); msel.dataset.init='1'; }
+  const ysel=document.getElementById('opYear'); if(ysel){ const c=ysel.dataset.init==='1'?ysel.value:yyNow; ysel.innerHTML=yearOptions(c); ysel.dataset.init='1'; }
   const q=(document.getElementById('opsearch')?.value||'').toLowerCase();
   const fa=document.getElementById('opfilter')?.value||'';
-  const fm=document.getElementById('opMonth')?.value||'';
-  const fy=document.getElementById('opYear')?.value||'';
+  const fm=msel?.value||'';
+  const fy=ysel?.value||'';
   const list=OPCOSTS.map((o,i)=>({...o,_i:i})).filter(o=>(!fa||o.akun===fa) && inPeriod(o.tgl,fy,fm) && ((o.ket||'')+' '+(o.akun||'')).toLowerCase().includes(q))
     .sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||''));
   const total=list.reduce((s,o)=>s+(+o.jumlah||0),0);
@@ -1865,7 +2172,7 @@ function renderOperasional(){
   const topAkun=Object.entries(byAkun).sort((a,b)=>b[1]-a[1])[0];
   const months=new Set(list.map(o=>(o.tgl||'').slice(0,7))); months.delete('');
   const avg=months.size?total/months.size:0;
-  const kpi=[['Total Biaya Operasional',rp(total),'var(--neg)'],['Jumlah Transaksi',list.length,'var(--ink)'],['Rata-rata / Bulan',rp(Math.round(avg)),'var(--amber)'],['Pos Terbesar',topAkun?topAkun[0]:'—','var(--blue)']];
+  const kpi=[['Total Kas Keluar',rp(total),'var(--neg)'],['Jumlah Transaksi',list.length,'var(--ink)'],['Rata-rata / Bulan',rp(Math.round(avg)),'var(--amber)'],['Pos Terbesar',topAkun?topAkun[0]:'—','var(--blue)']];
   document.getElementById('opStrip').innerHTML=kpi.map(([l,val,c])=>`<div class="card p-5 flex items-center justify-between gap-3">
     <div>
       <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p>
@@ -1890,14 +2197,14 @@ function renderOperasional(){
     <div class="card overflow-hidden">
       <div class="overflow-x-auto no-sb"><table>
         <thead><tr><th class="text-center" style="width:78px">Aksi</th><th>Tanggal</th><th>Akun / Kategori</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
-        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-10">Belum ada biaya operasional.</td></tr>`}</tbody>
+        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-10">Belum ada kas keluar.</td></tr>`}</tbody>
         <tfoot><tr style="background:var(--neg-soft)"><td colspan="5" class="px-4 py-3 text-right font-700 text-[13px]">Total ${fa?'('+fa+')':'Keseluruhan'}</td><td class="num text-right font-700 px-4 py-3 text-[15px]" style="color:var(--neg)">${rp(total)}</td></tr></tfoot>
       </table></div>
     </div>`;
 }
 function openOpModal(idx){
   const editing=(typeof idx==='number'); opEditIdx=editing?idx:null;
-  document.getElementById('opModalTitle').textContent=editing?'Edit Biaya Operasional':'Tambah Biaya Operasional';
+  document.getElementById('opModalTitle').textContent=editing?'Edit Kas/Bank Keluar':'Tambah Kas/Bank Keluar';
   document.getElementById('op_akun').innerHTML=opAkunOptions('');
   document.getElementById('op_kas').innerHTML=kasOptions('');
   if(editing){ const o=OPCOSTS[idx];
@@ -1937,7 +2244,329 @@ async function deleteOp(idx){
   }catch(e){ console.error(e); alert('Gagal menghapus dari database: '+e.message); }
 }
 
+/* ===== Kas / Bank Masuk ===== */
+let inflowEditIdx=null;
+function renderKasMasuk(){
+  const btnTambahB=document.getElementById('btnTambahKasMasuk'); if(btnTambahB) btnTambahB.style.display=can('kas_masuk_tambah')?'':'none';
+  const btnExportO=document.getElementById('btnExportKasMasuk'); if(btnExportO) btnExportO.style.display=can('kas_masuk_export')?'':'none';
+  // filter akun
+  const fsel=document.getElementById('inflowfilter');
+  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['4','2','3']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
+  // filter bulan & tahun
+  const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
+  const msel=document.getElementById('inflowMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(mmNow); msel.dataset.init='1'; }
+  const ysel=document.getElementById('inflowYear'); if(ysel){ const c=ysel.dataset.init==='1'?ysel.value:yyNow; ysel.innerHTML=yearOptions(c); ysel.dataset.init='1'; }
+  const q=(document.getElementById('inflowsearch')?.value||'').toLowerCase();
+  const fa=document.getElementById('inflowfilter')?.value||'';
+  const fm=msel?.value||'';
+  const fy=ysel?.value||'';
+  const list=CASH_INFLOW.map((o,i)=>({...o,_i:i})).filter(o=>(!fa||o.akun===fa) && inPeriod(o.tgl,fy,fm) && ((o.ket||'')+' '+(o.akun||'')).toLowerCase().includes(q))
+    .sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||''));
+  const total=list.reduce((s,o)=>s+(+o.jumlah||0),0);
+  // KPI (mengikuti filter)
+  const byAkun={}; list.forEach(o=>byAkun[o.akun]=(byAkun[o.akun]||0)+(+o.jumlah||0));
+  const topAkun=Object.entries(byAkun).sort((a,b)=>b[1]-a[1])[0];
+  const months=new Set(list.map(o=>(o.tgl||'').slice(0,7))); months.delete('');
+  const avg=months.size?total/months.size:0;
+  const kpi=[['Total Kas Masuk',rp(total),'var(--pos)'],['Jumlah Transaksi',list.length,'var(--ink)'],['Rata-rata / Bulan',rp(Math.round(avg)),'var(--amber)'],['Pos Terbesar',topAkun?topAkun[0]:'—','var(--blue)']];
+  document.getElementById('inflowStrip').innerHTML=kpi.map(([l,val,c])=>`<div class="card p-5 flex items-center justify-between gap-3">
+    <div>
+      <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p>
+      <p class="num font-700 text-[20px] mt-1" style="color:${c}">${val}</p>
+    </div>
+    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+      ${getKpiIcon(l)}
+    </div>
+  </div>`).join('');
+  const rows=list.map(o=>`<tr>
+      <td><div class="flex items-center justify-center gap-1.5">
+        ${can('kas_masuk_edit')?`<button class="act" title="Edit" onclick="openInflowModal(${o._i})" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>`:''}
+        ${can('kas_masuk_hapus')?`<button class="act" title="Hapus" onclick="deleteInflow(${o._i})" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>`:''}
+      </div></td>
+      <td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${fmtDate(o.tgl)}</td>
+      <td>${o.akun?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${inLabel(o.akun)}</span>`:'—'}</td>
+      <td>${o.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(o.kas)}</span>`:'—'}</td>
+      <td class="font-500">${esc(o.ket)||'—'}</td>
+      <td class="num text-right whitespace-nowrap">${rp(o.jumlah)}</td>
+    </tr>`).join('');
+  document.getElementById('inflowTableWrap').innerHTML=`
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th class="text-center" style="width:78px">Aksi</th><th>Tanggal</th><th>Akun / Kategori</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-10">Belum ada kas masuk.</td></tr>`}</tbody>
+        <tfoot><tr style="background:var(--pos-soft)"><td colspan="5" class="px-4 py-3 text-right font-700 text-[13px]">Total ${fa?'('+fa+')':'Keseluruhan'}</td><td class="num text-right font-700 px-4 py-3 text-[15px]" style="color:var(--pos)">${rp(total)}</td></tr></tfoot>
+      </table></div>
+    </div>`;
+}
+function openInflowModal(idx){
+  const editing=(typeof idx==='number'); inflowEditIdx=editing?idx:null;
+  document.getElementById('inflowModalTitle').textContent=editing?'Edit Kas Masuk':'Tambah Kas Masuk';
+  document.getElementById('inflow_akun').innerHTML=inAkunOptions('');
+  document.getElementById('inflow_kas').innerHTML=kasOptions('');
+  if(editing){ const o=CASH_INFLOW[idx];
+    document.getElementById('inflow_tgl').value=o.tgl||''; document.getElementById('inflow_akun').value=o.akun||'';
+    document.getElementById('inflow_kas').value=o.kas||''; document.getElementById('inflow_ket').value=o.ket||''; document.getElementById('inflow_jml').value=(o.jumlah||'');
+  }else{
+    document.getElementById('inflow_tgl').value=new Date().toISOString().slice(0,10);
+    document.getElementById('inflow_akun').value=''; document.getElementById('inflow_kas').value=''; document.getElementById('inflow_ket').value=''; document.getElementById('inflow_jml').value='';
+  }
+  document.getElementById('inflowModal').classList.add('open');
+}
+function closeInflowModal(){ document.getElementById('inflowModal').classList.remove('open'); }
+async function saveInflowModal(){
+  const tgl=document.getElementById('inflow_tgl').value||null;
+  const akun=document.getElementById('inflow_akun').value||'';
+  const kas=document.getElementById('inflow_kas').value||'';
+  const ket=document.getElementById('inflow_ket').value.trim();
+  const jumlah=+document.getElementById('inflow_jml').value||0;
+  if(!akun){ alert('Pilih akun/kategori kas masuk.'); return; }
+  if(!jumlah){ alert('Isi jumlah kas masuk.'); return; }
+  try{
+    if(inflowEditIdx!=null){
+      await apiPut('/api/cashinflow/'+CASH_INFLOW[inflowEditIdx].id, {tgl,akun,ket,jumlah,kas});
+    }else{
+      await apiPost('/api/cashinflow', {tgl,akun,ket,jumlah,kas});
+    }
+    await loadAllFromServer();
+    closeInflowModal(); renderKasMasuk();
+  }catch(e){ console.error(e); alert('Gagal menyimpan ke database: '+e.message); }
+}
+async function deleteInflow(idx){
+  if(!confirm('Hapus data kas masuk ini?')) return;
+  try{
+    await apiDelete('/api/cashinflow/'+CASH_INFLOW[idx].id);
+    await loadAllFromServer();
+    renderKasMasuk();
+  }catch(e){ console.error(e); alert('Gagal menghapus dari database: '+e.message); }
+}
+function exportKasMasukList(){
+  const q=(document.getElementById('inflowsearch')?.value||'').toLowerCase();
+  const fa=document.getElementById('inflowfilter')?.value||'';
+  const fm=document.getElementById('inflowMonth')?.value||'';
+  const fy=document.getElementById('inflowYear')?.value||'';
+  const list=CASH_INFLOW.filter(o=>(!fa||o.akun===fa)&&inPeriod(o.tgl,fy,fm)&&((o.ket||'')+' '+(o.akun||'')).toLowerCase().includes(q)).sort((a,b)=>(b.tgl||'').localeCompare(a.tgl||''));
+  if(!list.length){ alert('Tidak ada data untuk diekspor.'); return; }
+  downloadXLS('Kas-Masuk.xls', ['Tanggal','Akun / Kategori','Kas/Bank','Keterangan','Jumlah'], list.map(o=>[xlsDate(o.tgl),o.akun,o.kas,o.ket,o.jumlah]));
+}
+
+/* ===== Data Akun (COA) ===== */
+const HEAD_LABELS = {'1':'Aset / Kas & Bank','2':'Kewajiban / Hutang','3':'Ekuitas / Modal','4':'Pendapatan / Kas Masuk','5':'Biaya Perawatan Unit (HPP)','6':'Beban Usaha / Kas Keluar'};
+const HEAD_COLORS = {'1':'var(--pos)','2':'var(--neg)','3':'var(--amber)','4':'#0891b2','5':'#7c3aed','6':'#dc2626'};
+const HEAD_SOFTS  = {'1':'var(--pos-soft)','2':'var(--neg-soft)','3':'var(--amber-soft)','4':'#e0f2fe','5':'#ede9fe','6':'#fee2e2'};
+
+let accountEditKode = null;
+function renderAccounts(){
+  const q=(document.getElementById('accountsearch')?.value||'').toLowerCase();
+  const gf=document.getElementById('accountGroupFilter')?.value||'';
+  const list=ACCOUNTS.filter(a=>(gf?a.kode.startsWith(gf):true)&&(a.kode+' '+a.nama).toLowerCase().includes(q));
+
+  // kelompokkan per kepala
+  const byHead={};
+  list.forEach(a=>{const h=a.kode[0]||'?'; if(!byHead[h])byHead[h]=[]; byHead[h].push(a);});
+
+  const html=Object.keys(byHead).sort().map(h=>{
+    const items=byHead[h];
+    const c=HEAD_COLORS[h]||'var(--muted)', s=HEAD_SOFTS[h]||'#f1f5f9';
+    const rows=items.map(a=>`<tr>
+      <td>
+        <span class="font-mono text-[13px] font-700" style="color:${c}">${a.kode}</span>
+      </td>
+      <td>${esc(a.nama)}</td>
+      <td class="text-center">
+        <div class="flex items-center justify-center gap-1.5">
+          <button class="act" title="Edit" onclick="openAccountModal('${a.kode}')" style="--ac:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+          <button class="act" title="Hapus" onclick="deleteAccount('${a.kode}')" style="--ac:var(--neg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6"/></svg></button>
+        </div>
+      </td>
+    </tr>`).join('');
+    return `<div class="card overflow-hidden mb-4">
+      <div class="px-5 py-3 border-b border-[var(--line)] flex items-center gap-3" style="background:${s}">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold text-[13px]" style="background:${c};color:#fff">${h}</span>
+        <span class="font-700 text-[14px]" style="color:${c}">${HEAD_LABELS[h]||'Lainnya'}</span>
+        <span class="badge ml-auto" style="background:${c};color:#fff">${items.length} akun</span>
+      </div>
+      <div class="overflow-x-auto no-sb"><table>
+        <thead><tr><th style="width:90px">Kode</th><th>Nama Akun</th><th class="text-center" style="width:90px">Aksi</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('accountsTableWrap').innerHTML = html || `<div class="card p-10 text-center text-[var(--muted)] text-[13.5px]">Belum ada akun yang cocok dengan pencarian.</div>`;
+}
+function openAccountModal(kode){
+  const editing=(kode!=null); accountEditKode=editing?kode:null;
+  document.getElementById('accountModalTitle').textContent=editing?'Edit Akun':'Tambah Akun';
+  const namaEl=document.getElementById('am_nama');
+  const groupSel=document.getElementById('am_group');
+  const suffixEl=document.getElementById('am_kode_suffix');
+  const hiddenKode=document.getElementById('am_kode');
+
+  if(editing){
+    const a=ACCOUNTS.find(x=>x.kode===kode);
+    const h=kode[0]||'';
+    // Isi semua field dari data yang ada
+    groupSel.value=h; groupSel.disabled=true;
+    suffixEl.value=kode.slice(1); suffixEl.readOnly=true; suffixEl.style.opacity='0.6';
+    hiddenKode.value=kode;
+    namaEl.value=a?a.nama:'';
+    // Update UI preview
+    _refreshAccountKodeUI(h, kode.slice(1));
+  } else {
+    groupSel.value=''; groupSel.disabled=false;
+    suffixEl.value=''; suffixEl.readOnly=false; suffixEl.style.opacity='1';
+    hiddenKode.value='';
+    namaEl.value='';
+    // Reset UI
+    _resetAccountKodeUI();
+  }
+  document.getElementById('accountModal').classList.add('open');
+  // Focus group selector jika tambah baru, nama jika edit
+  setTimeout(()=>{ (editing?namaEl:groupSel).focus(); }, 120);
+}
+
+function closeAccountModal(){
+  document.getElementById('accountModal').classList.remove('open');
+}
+
+/* Dipanggil saat dropdown group berubah */
+function onAccountGroupChange(){
+  const h=document.getElementById('am_group').value;
+  if(!h){ _resetAccountKodeUI(); return; }
+
+  // Hitung kode berikutnya: ambil semua akun di group ini, cari max suffix, +1
+  const existing=ACCOUNTS.filter(a=>a.kode.startsWith(h)).map(a=>parseInt(a.kode.slice(1),10)).filter(n=>!isNaN(n));
+  const nextNum=existing.length ? Math.max(...existing)+1 : parseInt(h+'01',10)%1000||1;
+  const suffix=String(Math.min(nextNum,999)).padStart(3,'0');
+
+  document.getElementById('am_kode_suffix').value=suffix;
+  document.getElementById('am_kode_suffix').readOnly=false;
+  document.getElementById('am_kode_suffix').style.opacity='1';
+  _refreshAccountKodeUI(h, suffix);
+  document.getElementById('am_nama').focus();
+}
+
+/* Dipanggil saat suffix (3 digit) diubah manual */
+function onAccountSuffixChange(){
+  const h=document.getElementById('am_group').value;
+  const suffix=document.getElementById('am_kode_suffix').value.replace(/\D/g,'');
+  document.getElementById('am_kode_suffix').value=suffix; // hanya angka
+  _refreshAccountKodeUI(h, suffix);
+}
+
+/* Helper: render tampilan preview kode */
+function _refreshAccountKodeUI(h, suffix){
+  const c=HEAD_COLORS[h]||'var(--muted)';
+  const full=(h&&suffix.length===3)?h+suffix:'';
+
+  // Prefix box
+  const box=document.getElementById('am_kode_prefix_box');
+  box.style.borderColor=c; box.style.color=c; box.style.background=HEAD_SOFTS[h]||'#f8fafc';
+  document.getElementById('am_kode_prefix').textContent=h||'—';
+
+  // Preview full kode
+  const prev=document.getElementById('am_kode_preview');
+  prev.textContent=full||'—';
+  prev.style.color=full?c:'var(--muted)';
+
+  // Hint
+  const hint=document.getElementById('am_kode_hint');
+  const exists=full?ACCOUNTS.some(a=>a.kode===full && a.kode!==accountEditKode):false;
+  if(exists){ hint.textContent='⚠️ Kode '+full+' sudah digunakan. Ganti 3 digit terakhir.'; hint.style.color='var(--neg)'; }
+  else if(full){ hint.textContent='Kode lengkap: '+full+'. Kamu bisa ubah 3 digit terakhir.'; hint.style.color='var(--pos)'; }
+  else { hint.textContent='Isi 3 digit nomor akun (xxx).'; hint.style.color='var(--muted)'; }
+
+  // Preview badge group
+  const preview=document.getElementById('am_group_preview');
+  const dot=document.getElementById('am_group_dot');
+  const lbl=document.getElementById('am_group_label');
+  if(h){ preview.classList.remove('hidden'); dot.style.background=c; lbl.style.color=c; lbl.textContent=HEAD_LABELS[h]||h; }
+  else { preview.classList.add('hidden'); }
+
+  // Update hidden kode
+  document.getElementById('am_kode').value=full;
+}
+
+function _resetAccountKodeUI(){
+  document.getElementById('am_kode_prefix_box').style.borderColor='var(--line)';
+  document.getElementById('am_kode_prefix_box').style.color='var(--muted)';
+  document.getElementById('am_kode_prefix_box').style.background='#f8fafc';
+  document.getElementById('am_kode_prefix').textContent='—';
+  document.getElementById('am_kode_preview').textContent='—';
+  document.getElementById('am_kode_preview').style.color='var(--muted)';
+  document.getElementById('am_kode_hint').textContent='Pilih group akun terlebih dahulu untuk mengisi kode otomatis.';
+  document.getElementById('am_kode_hint').style.color='var(--muted)';
+  document.getElementById('am_group_preview').classList.add('hidden');
+  document.getElementById('am_kode').value='';
+}
+
+async function saveAccountModal(){
+  const kode=(document.getElementById('am_kode').value||'').trim();
+  const nama=(document.getElementById('am_nama').value||'').trim();
+  const group=document.getElementById('am_group').value;
+  const suffix=document.getElementById('am_kode_suffix').value;
+
+  if(!group && !accountEditKode){ alert('Pilih Group Akun terlebih dahulu.'); document.getElementById('am_group').focus(); return; }
+  if(suffix.length!==3 && !accountEditKode){ alert('3 digit nomor akun harus diisi (misalnya 101).'); document.getElementById('am_kode_suffix').focus(); return; }
+  if(!kode||!/^[1-6]\d{3}$/.test(kode)){ alert('Kode akun tidak valid. Pastikan group dan nomor sudah dipilih.'); return; }
+  if(!nama){ alert('Nama akun wajib diisi.'); document.getElementById('am_nama').focus(); return; }
+
+  // Cek duplikasi kode (hanya saat tambah baru)
+  if(!accountEditKode && ACCOUNTS.some(a=>a.kode===kode)){
+    alert('⚠️ Kode '+kode+' sudah digunakan oleh akun lain.\nGanti 3 digit terakhir terlebih dahulu.');
+    document.getElementById('am_kode_suffix').focus(); return;
+  }
+
+  try{
+    if(accountEditKode){ await apiPut('/api/accounts/'+accountEditKode, {nama}); }
+    else { await apiPost('/api/accounts', {kode, nama}); }
+    await loadAllFromServer();
+    // Set filter ke group yang baru saja ditambah agar user langsung melihat hasilnya
+    if(!accountEditKode){ const gf=document.getElementById('accountGroupFilter'); if(gf) gf.value=group; }
+    closeAccountModal(); renderAccounts();
+  }catch(e){ alert('Gagal menyimpan: '+e.message); }
+}
+
+async function deleteAccount(kode){
+  const a=ACCOUNTS.find(x=>x.kode===kode);
+  if(!confirm(`Hapus akun "${kode} · ${a?.nama||''}"?\nPastikan akun ini tidak digunakan dalam transaksi.`)) return;
+  try{
+    await apiDelete('/api/accounts/'+kode);
+    await loadAllFromServer();
+    renderAccounts();
+  }catch(e){ alert('Gagal menghapus: '+e.message); }
+}
+
 /* ===== Laporan Laba Rugi ===== */
+function inRange(iso, fromYM, toYM){
+  if(!iso) return false;
+  const ym=iso.slice(0,7);
+  if(fromYM && ym<fromYM) return false;
+  if(toYM && ym>toYM) return false;
+  return true;
+}
+function summaryRange(fromYM, toYM){
+  const sold=VEHICLES.filter(v=>v.jual && inRange(v.jual.tgl,fromYM,toYM));
+  const pendapatan=sold.reduce((s,v)=>s+(v.jual.harga||0),0);
+  const hppBeli=sold.reduce((s,v)=>s+(v.beli||0),0);
+  const hppRawat=sold.reduce((s,v)=>s+pengTotal(v),0);
+  const hpp=hppBeli+hppRawat;
+  const labaKotor=pendapatan-hpp;
+  const komisi=sold.reduce((s,v)=>s+feeOf(v),0);
+  const ops=OPCOSTS.filter(o=>inRange(o.tgl,fromYM,toYM) && (getAccountByNama(o.akun)?.kode||o.akun||'').startsWith('6'));
+  const opByAkun={}; ops.forEach(o=>opByAkun[o.akun]=(opByAkun[o.akun]||0)+(+o.jumlah||0));
+  const opTot=ops.reduce((s,o)=>s+(+o.jumlah||0),0);
+  const inflows=CASH_INFLOW.filter(o=>inRange(o.tgl,fromYM,toYM));
+  const revInflows=inflows.filter(o=>(getAccountByNama(o.akun)?.kode||o.akun||'').startsWith('4') && (getAccountByNama(o.akun)?.kode||o.akun||'')!=='4101');
+  const otherRevByAkun={}; revInflows.forEach(o=>otherRevByAkun[o.akun]=(otherRevByAkun[o.akun]||0)+(+o.jumlah||0));
+  const otherRevTot=revInflows.reduce((s,o)=>s+(+o.jumlah||0),0);
+  const labaBersih=labaKotor-komisi-opTot+otherRevTot;
+  return {sold:sold.length,pendapatan,hppBeli,hppRawat,hpp,labaKotor,komisi,opByAkun,opTot,otherRevByAkun,otherRevTot,labaBersih};
+}
+function periodeRangeLabel(fromY,fromM,toY,toM){
+  const a=periodeLabel(fromY,fromM), b=periodeLabel(toY,toM);
+  return a===b ? a : (a+' \u2014 '+b);
+}
 function summary(year,month){
   year=year||''; month=month||'';
   const sold=VEHICLES.filter(v=>v.jual && inPeriod(v.jual.tgl,year,month));
@@ -1947,27 +2576,48 @@ function summary(year,month){
   const hpp=hppBeli+hppRawat;
   const labaKotor=pendapatan-hpp;
   const komisi=sold.reduce((s,v)=>s+feeOf(v),0);
-  const ops=OPCOSTS.filter(o=>inPeriod(o.tgl,year,month));
+  // Hanya pengeluaran berkode kepala-6 yang masuk Beban Usaha di Laba Rugi
+  const ops=OPCOSTS.filter(o=>inPeriod(o.tgl,year,month) && (getAccountByNama(o.akun)?.kode||o.akun||'').startsWith('6'));
   const opByAkun={}; ops.forEach(o=>opByAkun[o.akun]=(opByAkun[o.akun]||0)+(+o.jumlah||0));
   const opTot=ops.reduce((s,o)=>s+(+o.jumlah||0),0);
-  const labaBersih=labaKotor-komisi-opTot;
-  return {sold:sold.length,pendapatan,hppBeli,hppRawat,hpp,labaKotor,komisi,opByAkun,opTot,labaBersih};
+
+  // Inflow Kas Masuk (Pendapatan Non-Operasional) — kepala-4 kecuali Modal Pemilik
+  const inflows = CASH_INFLOW.filter(o=>inPeriod(o.tgl,year,month));
+  const revInflows = inflows.filter(o=>(getAccountByNama(o.akun)?.kode||o.akun||'').startsWith('4') && (getAccountByNama(o.akun)?.kode||o.akun||'')!=='4101');
+  const otherRevByAkun = {}; revInflows.forEach(o=>otherRevByAkun[o.akun]=(otherRevByAkun[o.akun]||0)+(+o.jumlah||0));
+  const otherRevTot = revInflows.reduce((s,o)=>s+(+o.jumlah||0),0);
+
+  const labaBersih=labaKotor-komisi-opTot+otherRevTot;
+  return {sold:sold.length,pendapatan,hppBeli,hppRawat,hpp,labaKotor,komisi,opByAkun,opTot,otherRevByAkun,otherRevTot,labaBersih};
 }
 function renderLabaRugi(){
-  const msel=document.getElementById('lrMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(''); msel.dataset.init='1'; }
-  const ysel=document.getElementById('lrYear'); if(ysel){ const c=ysel.value; ysel.innerHTML=yearOptions(c); }
-  const fm=document.getElementById('lrMonth')?.value||'';
-  const fy=document.getElementById('lrYear')?.value||'';
-  const s=summary(fy,fm);
+  const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
+  const fmSel=document.getElementById('lrFromMonth'); if(fmSel && fmSel.dataset.init!=='1'){ fmSel.innerHTML=monthOptionsStrict(mmNow); fmSel.dataset.init='1'; }
+  const fySel=document.getElementById('lrFromYear'); if(fySel && fySel.dataset.init!=='1'){ fySel.innerHTML=yearOptionsStrict(yyNow); fySel.dataset.init='1'; }
+  const tmSel=document.getElementById('lrToMonth'); if(tmSel && tmSel.dataset.init!=='1'){ tmSel.innerHTML=monthOptionsStrict(mmNow); tmSel.dataset.init='1'; }
+  const tySel=document.getElementById('lrToYear'); if(tySel && tySel.dataset.init!=='1'){ tySel.innerHTML=yearOptionsStrict(yyNow); tySel.dataset.init='1'; }
+
+  let fm=fmSel?.value||mmNow, fy=fySel?.value||yyNow, tm=tmSel?.value||mmNow, ty=tySel?.value||yyNow;
+  let fromYM=fy+'-'+fm, toYM=ty+'-'+tm;
+  // kalau urutan terbalik (Dari lebih akhir dari Sampai), tukar otomatis supaya rentang tetap valid
+  if(fromYM>toYM){ [fromYM,toYM]=[toYM,fromYM]; [fy,fm,ty,tm]=[ty,tm,fy,fm]; }
+
+  const s=summaryRange(fromYM,toYM);
   const line=(label,val,opt={})=>`<div class="flex justify-between items-center ${opt.pad?'py-2':'py-1.5'} ${opt.border?'border-t border-[var(--line)]':''}">
     <span class="${opt.bold?'font-700':'text-[var(--muted)]'} ${opt.indent?'pl-4':''} text-[13.5px]">${label}</span>
     <span class="num ${opt.bold?'font-700':''} text-[13.5px]" style="color:${opt.color||'var(--ink)'}">${opt.neg?'('+rp(val)+')':rp(val)}</span></div>`;
   const opRows=Object.entries(s.opByAkun).sort((a,b)=>b[1]-a[1]).map(([k,v])=>line(opLabel(k),v,{indent:true,neg:true})).join('');
+  const otherRevRows=Object.entries(s.otherRevByAkun).sort((a,b)=>b[1]-a[1]).map(([k,v])=>line(inLabel(k),v,{indent:true})).join('');
+
+  const marginKotor = s.pendapatan ? Math.round((s.labaKotor / s.pendapatan) * 100) : 0;
+  const marginBeban = s.pendapatan ? Math.round(((s.komisi + s.opTot) / s.pendapatan) * 100) : 0;
+  const marginBersih = s.pendapatan ? Math.round((s.labaBersih / s.pendapatan) * 100) : 0;
+
   document.getElementById('lrWrap').innerHTML=`
     <div class="grid lg:grid-cols-[1.4fr_1fr] gap-4">
       <div class="card p-6">
         <div class="flex items-center justify-between mb-1"><h3 class="g font-bold text-[16px]">Laporan Laba Rugi</h3><span class="badge" style="background:var(--blue-soft);color:var(--blue)">${s.sold} unit terjual</span></div>
-        <p class="text-[12px] text-[var(--muted)] mb-4">Periode: ${periodeLabel(fy,fm)} · Garasi Java Mobilindo</p>
+        <p class="text-[12px] text-[var(--muted)] mb-4">Periode: ${periodeRangeLabel(fy,fm,ty,tm)} · Garasi Java Mobilindo</p>
         <div class="space-y-0.5">
           ${line('Pendapatan Penjualan',s.pendapatan,{bold:true,color:'var(--pos)'})}
           <div class="pt-1"></div>
@@ -1979,6 +2629,10 @@ function renderLabaRugi(){
           ${line('Komisi / Fee Penjualan',s.komisi,{indent:true,neg:true})}
           ${opRows}
           ${line('Total Beban Usaha',s.komisi+s.opTot,{bold:true,neg:true,border:true})}
+          ${line('LABA OPERASIONAL',s.labaKotor-s.komisi-s.opTot,{bold:true,border:true,pad:true,color:(s.labaKotor-s.komisi-s.opTot)>=0?'var(--pos)':'var(--neg)'})}
+          <div class="pt-2 text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-700">Pendapatan Non-Operasional</div>
+          ${otherRevRows||`<p class="text-[12.5px] text-[var(--muted)] pl-4 py-1 italic">Tidak ada pendapatan non-operasional</p>`}
+          ${line('Total Pendapatan Non-Operasional',s.otherRevTot,{bold:true,border:true,color:'var(--pos)'})}
           ${line('LABA BERSIH',s.labaBersih,{bold:true,border:true,pad:true,color:s.labaBersih>=0?'var(--pos)':'var(--neg)'})}
         </div>
       </div>
@@ -1988,12 +2642,38 @@ function renderLabaRugi(){
           <p class="num font-700 text-[26px] mt-1" style="color:${s.labaBersih>=0?'var(--pos)':'var(--neg)'}">${s.labaBersih>=0?'+':''}${rp(s.labaBersih)}</p>
           <p class="text-[12px] text-[var(--muted)] mt-1">Margin ${s.pendapatan?((s.labaBersih/s.pendapatan)*100).toFixed(1):'0'}% dari pendapatan</p>
         </div>
-        <div class="card p-5 space-y-3">
-          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Pendapatan</span><span class="num font-600" style="color:var(--pos)">${rp(s.pendapatan)}</span></div>
-          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Laba Kotor</span><span class="num font-600">${rp(s.labaKotor)}</span></div>
-          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Komisi</span><span class="num">(${rp(s.komisi)})</span></div>
-          <div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">Biaya Operasional</span><span class="num">(${rp(s.opTot)})</span></div>
-          <div class="flex justify-between text-[13.5px] pt-2 border-t border-[var(--line)]"><span class="font-700">Laba Bersih</span><span class="num font-700" style="color:${s.labaBersih>=0?'var(--pos)':'var(--neg)'}">${rp(s.labaBersih)}</span></div>
+        <div class="card p-5 space-y-4">
+          <h3 class="g font-bold text-[14px]">Analisis Profitabilitas</h3>
+          
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-[13px]">
+              <span class="text-[var(--muted)]">Margin Laba Kotor</span>
+              <span class="num font-600" style="color:var(--pos)">${marginKotor}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="background:var(--pos); width: ${Math.min(100, Math.max(0, marginKotor))}%"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-[13px]">
+              <span class="text-[var(--muted)]">Rasio Beban Usaha</span>
+              <span class="num font-600" style="color:var(--neg)">${marginBeban}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="background:var(--neg); width: ${Math.min(100, Math.max(0, marginBeban))}%"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-[13px]">
+              <span class="text-[var(--muted)]">Margin Laba Bersih</span>
+              <span class="num font-600" style="color:var(--blue)">${marginBersih}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="background:var(--blue); width: ${Math.min(100, Math.max(0, marginBersih))}%"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2075,43 +2755,83 @@ function renderDashboard(){
   const ready=VEHICLES.filter(v=>v.status==='READY').length, soldAll=VEHICLES.filter(v=>v.status==='SOLD').length;
   const nilaiStok=VEHICLES.filter(v=>!v.jual).reduce((a,v)=>a+modal(v),0);
   const belum=VEHICLES.filter(v=>{const pi=payInfo(v);return pi.sold&&!pi.lunas;});
-  const kpi=(l,val,c)=>`<div class="card p-5 flex items-center justify-between gap-3">
-    <div>
-      <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p>
-      <p class="num font-700 text-[20px] mt-1" style="color:${c}">${val}</p>
-    </div>
-    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-      ${getKpiIcon(l)}
-    </div>
-  </div>`;
+  const getKpiColors=(label)=>{
+    const l=label.toLowerCase();
+    if(l.includes('pendapatan')||l.includes('ready')) return {bg:'rgba(16,185,129,0.06)',border:'rgba(16,185,129,0.15)',color:'var(--pos)'};
+    if(l.includes('biaya')||l.includes('piutang')) return {bg:'rgba(239,68,68,0.06)',border:'rgba(239,68,68,0.15)',color:'var(--neg)'};
+    if(l.includes('laba kotor')) return {bg:'rgba(16,185,129,0.06)',border:'rgba(16,185,129,0.15)',color:'var(--pos)'};
+    if(l.includes('laba bersih')||l.includes('sold')) return {bg:'rgba(99,102,241,0.06)',border:'rgba(99,102,241,0.15)',color:'var(--blue)'};
+    if(l.includes('total unit')||l.includes('nilai stok')) return {bg:'rgba(217,119,6,0.06)',border:'rgba(217,119,6,0.15)',color:'var(--amber)'};
+    return {bg:'var(--line)',border:'var(--line)',color:'var(--ink)'};
+  };
+  const kpi=(l,val,c)=>{
+    const theme = getKpiColors(l);
+    return `<div class="card p-5 flex items-center justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+      <div>
+        <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p>
+        <p class="num font-700 text-[20px] mt-1" style="color:${c}">${val}</p>
+      </div>
+      <div class="p-3 rounded-xl flex items-center justify-center border" style="background:${theme.bg};border-color:${theme.border};color:${theme.color}">
+        ${getKpiIcon(l)}
+      </div>
+    </div>`;
+  };
   const opByAkun=Object.entries(s.opByAkun).sort((a,b)=>b[1]-a[1]);
   document.getElementById('dashWrap').innerHTML=`
-    <div class="flex items-center gap-2 mb-3"><span class="badge" style="background:var(--blue-soft);color:var(--blue)">Periode: ${periodeLabel(fy,fm)}</span><span class="text-[12px] text-[var(--muted)]">${soldP.length} unit terjual · ${opP.length} transaksi biaya</span></div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-      ${kpi('Pendapatan (periode)',rp(s.pendapatan),'var(--pos)')}
-      ${kpi('Laba Kotor (periode)',rp(s.labaKotor),s.labaKotor>=0?'var(--pos)':'var(--neg)')}
-      ${kpi('Biaya Operasional (periode)',rp(s.opTot),'var(--neg)')}
-      ${kpi('Laba Bersih (periode)',(s.labaBersih>=0?'+':'')+rp(s.labaBersih),s.labaBersih>=0?'var(--pos)':'var(--neg)')}
+    <div class="flex items-center gap-2 mb-4"><span class="badge" style="background:var(--blue-soft);color:var(--blue)">Periode: ${periodeLabel(fy,fm)}</span><span class="text-[12px] text-[var(--muted)]">${soldP.length} unit terjual · ${opP.length} transaksi biaya</span></div>
+    
+    <!-- Kinerja Keuangan -->
+    <div class="mb-6">
+      <h3 class="g text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">Kinerja Keuangan</h3>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        ${kpi('Pendapatan (periode)',rp(s.pendapatan),'var(--pos)')}
+        ${kpi('Laba Kotor (periode)',rp(s.labaKotor),s.labaKotor>=0?'var(--pos)':'var(--neg)')}
+        ${kpi('Biaya Operasional (periode)',rp(s.opTot),'var(--neg)')}
+        ${kpi('Laba Bersih (periode)',(s.labaBersih>=0?'+':'')+rp(s.labaBersih),s.labaBersih>=0?'var(--pos)':'var(--neg)')}
+      </div>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      ${kpi('Total Unit',VEHICLES.length,'var(--ink)')}
-      ${kpi('Ready',ready,'var(--pos)')}
-      ${kpi('Sold',soldAll,'var(--blue)')}
-      ${kpi('Nilai Stok Aktif',rpShort(nilaiStok),'var(--amber)')}
+
+    <!-- Status Inventaris & Piutang -->
+    <div class="mb-6">
+      <h3 class="g text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">Ikhtisar Inventaris</h3>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        ${kpi('Total Unit',VEHICLES.length,'var(--ink)')}
+        ${kpi('Ready',ready,'var(--pos)')}
+        ${kpi('Sold',soldAll,'var(--blue)')}
+        ${kpi('Nilai Stok Aktif',rpShort(nilaiStok),'var(--amber)')}
+      </div>
     </div>
+
     <div class="grid lg:grid-cols-2 gap-4">
-      <div class="card overflow-hidden">
-        <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between"><h3 class="g font-bold text-[15px]">Penjualan Periode</h3><span class="text-[12px] text-[var(--muted)]">${periodeLabel(fy,fm)}</span></div>
-        <div class="overflow-x-auto no-sb"><table>
-          <thead><tr><th>Unit</th><th>Tgl Jual</th><th>Pembeli</th><th class="text-right">Harga</th><th class="text-right">Laba Bersih</th><th class="text-center">Bayar</th></tr></thead>
-          <tbody>${soldP.map(v=>{const lk=laba(v),lb=lk-feeOf(v),pi=payInfo(v);return `<tr><td class="font-500 whitespace-nowrap">${esc(nama(v))}</td><td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${fmtDate(v.jual.tgl)}</td><td class="whitespace-nowrap">${esc(v.jual.mediator||'—')}</td><td class="num text-right whitespace-nowrap">${rp(v.jual.harga)}</td><td class="num text-right whitespace-nowrap" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${(lb>=0?'+':'')+rp(lb)}</td><td class="text-center">${pi.lunas?'<span class="badge" style="background:var(--pos-soft);color:var(--pos)">LUNAS</span>':'<span class="badge" style="background:var(--neg-soft);color:var(--neg)">BELUM</span>'}</td></tr>`;}).join('')||`<tr><td colspan="6" class="text-center text-[var(--muted)] py-8">Belum ada penjualan pada periode ini.</td></tr>`}</tbody>
-        </table></div>
+      <div class="card overflow-hidden flex flex-col justify-between">
+        <div>
+          <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between"><h3 class="g font-bold text-[15px]">Penjualan Periode</h3><span class="text-[12px] text-[var(--muted)]">${periodeLabel(fy,fm)}</span></div>
+          <div class="overflow-x-auto no-sb">
+            ${soldP.length ? `<table>
+              <thead><tr><th>Unit</th><th>Tgl Jual</th><th>Pembeli</th><th class="text-right">Harga</th><th class="text-right">Laba Bersih</th><th class="text-center">Bayar</th></tr></thead>
+              <tbody>${soldP.map(v=>{const lk=laba(v),lb=lk-feeOf(v),pi=payInfo(v);return `<tr><td class="font-500 whitespace-nowrap">${esc(nama(v))}</td><td class="num text-[12px] text-[var(--muted)] whitespace-nowrap">${fmtDate(v.jual.tgl)}</td><td class="whitespace-nowrap">${esc(v.jual.mediator||'—')}</td><td class="num text-right whitespace-nowrap">${rp(v.jual.harga)}</td><td class="num text-right whitespace-nowrap" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${(lb>=0?'+':'')+rp(lb)}</td><td class="text-center">${pi.lunas?'<span class="badge" style="background:var(--pos-soft);color:var(--pos)">LUNAS</span>':'<span class="badge" style="background:var(--neg-soft);color:var(--neg)">BELUM</span>'}</td></tr>`;}).join('')}</tbody>
+            </table>` : `
+            <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <svg class="w-12 h-12 text-slate-300 mb-2.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
+              <p class="text-[13.5px] font-medium text-slate-600">Belum ada unit terjual</p>
+              <p class="text-[11.5px] text-slate-400 mt-0.5">Tidak ada penjualan tercatat di periode ${periodeLabel(fy,fm)}</p>
+            </div>
+            `}
+          </div>
+        </div>
       </div>
       <div class="flex flex-col gap-4">
         <div class="card overflow-hidden">
           <div class="px-5 py-4 border-b border-[var(--line)]"><h3 class="g font-bold text-[15px]">Biaya Operasional per Akun</h3></div>
-          <div class="p-5 space-y-2">${opByAkun.map(([k,val])=>`<div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">${opLabel(k)}</span><span class="num">${rp(val)}</span></div>`).join('')||`<p class="text-[13px] text-[var(--muted)] text-center py-4">Tidak ada biaya pada periode ini.</p>`}
-            ${opByAkun.length?`<div class="flex justify-between pt-2 border-t border-[var(--line)] text-[13.5px]"><span class="font-700">Total</span><span class="num font-700" style="color:var(--neg)">${rp(s.opTot)}</span></div>`:''}</div>
+          <div class="p-5 space-y-2">
+            ${opByAkun.length ? opByAkun.map(([k,val])=>`<div class="flex justify-between text-[13.5px]"><span class="text-[var(--muted)]">${opLabel(k)}</span><span class="num">${rp(val)}</span></div>`).join('') + `<div class="flex justify-between pt-2 border-t border-[var(--line)] text-[13.5px]"><span class="font-700">Total</span><span class="num font-700" style="color:var(--neg)">${rp(s.opTot)}</span></div>` : `
+            <div class="flex flex-col items-center justify-center py-6 px-4 text-center">
+              <svg class="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h.007v.008H3.75V4.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3 13.5h.007v.008H3V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3 7.5h.007v.008H3V7.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+              <p class="text-[13px] font-medium text-slate-600">Tidak ada pengeluaran</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Biaya operasional kosong di periode ${periodeLabel(fy,fm)}</p>
+            </div>
+            `}
+          </div>
         </div>
         <div class="card p-5">
           <div class="flex items-center justify-between"><h3 class="g font-bold text-[15px]">Piutang (Belum Lunas)</h3><span class="badge" style="background:${belum.length?'var(--neg-soft)':'var(--pos-soft)'};color:${belum.length?'var(--neg)':'var(--pos)'}">${belum.length} unit</span></div>
@@ -2195,9 +2915,16 @@ async function apiPut(url,body){ const r=await fetch(url,{method:'PUT',headers:{
 async function apiDelete(url){ const r=await fetch(url,{method:'DELETE'}); if(r.status===401){ handle401(401); throw new Error('Sesi login habis, silakan masuk lagi.'); } if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||('DELETE '+url+' -> '+r.status)); return r.json(); }
 
 async function loadAllFromServer(){
-  const [vehicles, opcosts] = await Promise.all([apiGet('/api/vehicles'), apiGet('/api/opcosts')]);
+  const [vehicles, opcosts, cashinflow, accounts] = await Promise.all([
+    apiGet('/api/vehicles'), 
+    apiGet('/api/opcosts'),
+    apiGet('/api/cashinflow').catch(()=>[]),
+    apiGet('/api/accounts').catch(()=>[])
+  ]);
   VEHICLES.length=0; VEHICLES.push(...vehicles);
   OPCOSTS.length=0; OPCOSTS.push(...opcosts);
+  CASH_INFLOW.length=0; CASH_INFLOW.push(...cashinflow);
+  ACCOUNTS.length=0; ACCOUNTS.push(...accounts);
 }
 function setDbStatus(kind){
   const el=document.getElementById('dbStatus'); if(!el) return;
@@ -2224,15 +2951,15 @@ function applyUserUI(){
   const label=document.getElementById('currentUserLabel');
   if(label) label.textContent = currentUser ? (currentUser.name+' · '+(currentUser.role==='admin'?'Admin':'Staff')) : '';
   const isAdmin = currentUser && currentUser.role==='admin';
-  const navUsers=document.getElementById('navUsers');
-  if(navUsers) navUsers.style.display = isAdmin ? '' : 'none';
-  const navPerms=document.getElementById('navPermissions');
-  if(navPerms) navPerms.style.display = isAdmin ? '' : 'none';
+  const navUtil=document.getElementById('navUtilitasGroup');
+  if(navUtil) navUtil.style.display = isAdmin ? '' : 'none';
   const navK=document.querySelector('.navlink[data-page="kendaraan"]');
   const navO=document.querySelector('.navlink[data-page="operasional"]');
+  const navKM=document.querySelector('.navlink[data-page="kasmasuk"]');
   const navL=document.querySelector('.navlink[data-page="labarugi"]');
   if(navK) navK.style.display = (isAdmin || can('menu_kendaraan')) ? '' : 'none';
   if(navO) navO.style.display = (isAdmin || can('menu_operasional')) ? '' : 'none';
+  if(navKM) navKM.style.display = (isAdmin || can('menu_kas_masuk')) ? '' : 'none';
   if(navL) navL.style.display = (isAdmin || can('menu_labarugi')) ? '' : 'none';
 }
 let currentPerms={};
@@ -2378,7 +3105,7 @@ async function deleteUserRow(id){
 }
 
 /* ===== Pengaturan Hak Akses ===== */
-const PERM_KEYS=['menu_kendaraan','menu_operasional','menu_labarugi','kendaraan_tambah','kendaraan_edit','kendaraan_hapus','kendaraan_export','operasional_tambah','operasional_edit','operasional_hapus','operasional_export'];
+const PERM_KEYS=['menu_kendaraan','menu_operasional','menu_kas_masuk','menu_labarugi','kendaraan_tambah','kendaraan_edit','kendaraan_hapus','kendaraan_export','operasional_tambah','operasional_edit','operasional_hapus','operasional_export','kas_masuk_tambah','kas_masuk_edit','kas_masuk_hapus','kas_masuk_export'];
 async function renderPermissionsPage(){
   let perms={};
   try{ perms=await apiGet('/api/permissions'); }catch(e){ alert('Gagal memuat hak akses: '+e.message); return; }
