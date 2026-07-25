@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   target_nett   DECIMAL(14,2),
   created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT chk_vehicles_status CHECK (`status` IN ('READY','SOLD'))
+  CONSTRAINT chk_vehicles_status CHECK (`status` IN ('READY','BOOKED','SOLD'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX IF NOT EXISTS idx_vehicles_status ON vehicles(`status`);
@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS sales (
   fee_raw         DECIMAL(14,2),
   trade_in        JSON,
   leasing         JSON,
+  dp_direct       JSON,
   alamat          TEXT,
   telp            TEXT,
   no_spk          TEXT,
@@ -199,7 +200,7 @@ INSERT IGNORE INTO akun_biaya (kode,nama) VALUES
  ('5209','Interior'),('5210','Pajak & STNK'),('5211','Kelengkapan'),('5212','Lain-lain');
 
 INSERT IGNORE INTO kas_bank (kode,nama) VALUES
- ('1101','Kas Tunai'),('1102','Bank BCA'),('1103','Bank Mandiri'),('1104','Bank BNI'),('1105','Bank BRI');
+ ('1101','Kas Besar'),('1102','Kas Kecil'),('1103','Bank BCA'),('1104','Bank Mandiri'),('1105','Bank BNI'),('1106','Bank BRI');
 
 INSERT IGNORE INTO op_akun (kode,nama) VALUES
  ('6101','Gaji Karyawan'),('6102','Sewa Showroom'),('6103','Listrik & Air'),('6104','Internet & Telepon'),

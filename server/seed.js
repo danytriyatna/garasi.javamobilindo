@@ -42,12 +42,14 @@ async function seedIfEmpty(pool) {
       if (v.jual) {
         const j = v.jual, dok = j.dok || {};
         await conn.execute(
-          `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,
+          `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,dp_direct,
              alamat,telp,no_spk,tgl_pesan,no_kwitansi,tgl_serah,nama_penyerah,rek_bank,rek_atas_nama,rek_no,checklist)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
           [v.kode, j.tgl || null, j.harga || 0, j.mediator || '', j.metode || 'Tunai',
            j.fee || 0, j.feeMode || 'rp', j.feeRaw ?? null,
-           j.tt ? JSON.stringify(j.tt) : null, j.leasing ? JSON.stringify(j.leasing) : null,
+           j.tt ? JSON.stringify(j.tt) : null,
+           j.leasing ? JSON.stringify(j.leasing) : null,
+           j.dpDirect ? JSON.stringify(j.dpDirect) : null,
            dok.alamat || null, dok.telp || null, dok.noSPK || null, dok.tglPesan || null,
            dok.noKwitansi || null, dok.tglSerah || null, dok.namaPenyerah || null,
            dok.rekBank || null, dok.rekAtasNama || null, dok.rekNo || null,
@@ -125,19 +127,19 @@ module.exports.seedDefaultSettings = seedDefaultSettings;
 module.exports.DEFAULT_STAFF_PERMS = DEFAULT_STAFF_PERMS;
 
 // Referensi Data Akun (Chart of Accounts) untuk usaha jual-beli kendaraan bekas.
-// Hanya di-seed sekali saat tabel accounts masih kosong.
 const DEFAULT_ACCOUNTS = [
   // 1xxx — Aset / Kas & Bank
-  ['1001','Kas Tunai'],
-  ['1002','Bank BCA'],
-  ['1003','Bank Mandiri'],
-  ['1004','Bank BRI'],
-  ['1005','Bank BNI'],
-  ['1006','Piutang Usaha (Belum Lunas)'],
-  ['1007','Persediaan Kendaraan (Stok Unit)'],
-  ['1008','Uang Muka Pembelian Unit'],
-  ['1009','Peralatan Kantor & Bengkel'],
-  ['1010','Kendaraan Operasional'],
+  ['1001','Kas Besar'],
+  ['1002','Kas Kecil'],
+  ['1003','Bank BCA'],
+  ['1004','Bank Mandiri'],
+  ['1005','Bank BRI'],
+  ['1006','Bank BNI'],
+  ['1007','Piutang Usaha (Belum Lunas)'],
+  ['1008','Persediaan Kendaraan (Stok Unit)'],
+  ['1009','Uang Muka Pembelian Unit'],
+  ['1010','Peralatan Kantor & Bengkel'],
+  ['1011','Kendaraan Operasional'],
   // 2xxx — Kewajiban / Hutang
   ['2001','Hutang Usaha (Pemasok/Mitra)'],
   ['2002','Hutang Leasing/Bank (Pembiayaan Unit)'],
@@ -183,10 +185,28 @@ const DEFAULT_ACCOUNTS = [
 ];
 async function seedDefaultAccounts(pool) {
   const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM accounts');
-  if (Number(rows[0].c) > 0) return;
-  for (const [kode, nama] of DEFAULT_ACCOUNTS) {
-    await pool.execute('INSERT IGNORE INTO accounts(kode,nama) VALUES (?,?)', [kode, nama]);
+  if (Number(rows[0].c) === 0) {
+    for (const [kode, nama] of DEFAULT_ACCOUNTS) {
+      await pool.execute('INSERT IGNORE INTO accounts(kode,nama) VALUES (?,?)', [kode, nama]);
+    }
+    console.log(`Referensi Data Akun dibuat (${DEFAULT_ACCOUNTS.length} akun, kepala 1-6).`);
+  } else {
+    try {
+      await pool.execute("UPDATE accounts SET nama = 'Kas Besar' WHERE nama = 'Kas Tunai'");
+      await pool.execute("UPDATE accounts SET kode = CONCAT('TEMP_', kode)");
+      for (const [kode, nama] of DEFAULT_ACCOUNTS) {
+        const [exist] = await pool.execute('SELECT kode FROM accounts WHERE nama = ?', [nama]);
+        if (exist.length > 0) {
+          await pool.execute('UPDATE accounts SET kode = ? WHERE nama = ?', [kode, nama]);
+        } else {
+          await pool.execute('INSERT IGNORE INTO accounts(kode, nama) VALUES (?, ?)', [kode, nama]);
+        }
+      }
+      await pool.execute("DELETE FROM accounts WHERE kode LIKE 'TEMP_%'");
+      console.log('Migrasi Data Akun (Kas Besar, Kas Kecil, & Urutan Kode 1xxx) selesai.');
+    } catch (e) {
+      console.error('Migrasi data akun error:', e.message);
+    }
   }
-  console.log(`Referensi Data Akun dibuat (${DEFAULT_ACCOUNTS.length} akun, kepala 1-6).`);
 }
 module.exports.seedDefaultAccounts = seedDefaultAccounts;

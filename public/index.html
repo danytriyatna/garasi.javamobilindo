@@ -344,10 +344,11 @@
           <option value="READY" selected>Ready</option>
           <option value="SOLD">Sold</option>
         </select>
-        <select id="vpayfilter" class="inp w-auto" onchange="renderKendaraan()">
+        <select id="vpayfilter" class="inp w-auto" style="display:none" onchange="renderKendaraan()">
           <option value="all">Semua pembayaran</option>
-          <option value="lunas">Lunas (Sold)</option>
-          <option value="belum">Belum Lunas (Sold)</option>
+          <option value="lunas">Lunas</option>
+          <option value="booked">Booked &amp; Belum Lunas</option>
+          <option value="belum">Belum Lunas</option>
         </select>
         <div class="flex items-center gap-2 ml-auto">
           <!-- View Toggle -->
@@ -904,19 +905,41 @@ const laba = v => v.jual ? v.jual.harga - modal(v) : 0;          // laba kotor
 const feeOf = v => v.jual ? (v.jual.fee||0) : 0;
 // info pembayaran per unit (jumlah dibayar, sisa, lunas)
 function payInfo(v){
-  if(!v.jual) return {sold:false,total:0,sisa:0,lunas:false};
+  if(!v.jual) return {sold:false,total:0,sisa:0,lunas:false,isBooked:false,isBelumLunas:false};
   const pays=v.jual.pembayaran||[];
   const ttN=(v.jual.tt&&v.jual.tt.nilai)||0;
+  const dpDirectVal=(v.jual.dpDirect&&v.jual.dpDirect.nilai)?+v.jual.dpDirect.nilai:0;
+  const dpLeasingVal=(v.jual.leasing&&v.jual.leasing.dp)?+v.jual.leasing.dp:0;
+  const payDpVal=pays.filter(x=>(x.jenis||'').toLowerCase().includes('dp')||(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+  const dpShowVal=Math.max(dpDirectVal, payDpVal);
+  const pelunasanVal=pays.filter(x=>!(x.jenis||'').toLowerCase().includes('dp')&&!(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+  const total=dpShowVal+dpLeasingVal+pelunasanVal;
   const netHarga=Math.max(0,(v.jual.harga||0)-ttN);
-  const total=pays.reduce((s,x)=>s+(+x.jumlah||0),0);
   const sisa=Math.max(0,netHarga-total);
-  return {sold:true,total,sisa,lunas:sisa<=0};
+  const lunas=sisa<=0;
+  const hasDp=(dpShowVal>0 || dpLeasingVal>0);
+  const isBooked=!lunas && hasDp && (pelunasanVal===0);
+  const isBelumLunas=!lunas && (pelunasanVal>0);
+  return {sold:true,total,sisa,lunas,isBooked,isBelumLunas,dpShowVal,dpLeasingVal,pelunasanVal};
 }
 const odoFmt = o => (o==null||o==='')?'—':(typeof o==='number'?o.toLocaleString('id-ID')+' km':String(o)+' km');
 function badge(status){
-  const map={READY:['var(--pos)','var(--pos-soft)'],SOLD:['var(--blue)','var(--blue-soft)']};
+  const map={READY:['var(--pos)','var(--pos-soft)'],BOOKED:['var(--amber)','var(--amber-soft)'],SOLD:['var(--blue)','var(--blue-soft)']};
   const [c,bg]=map[status]||['var(--muted)','#eee'];
   return `<span class="badge" style="color:${c};background:${bg}"><span class="dot" style="background:${c}"></span>${status}</span>`;
+}
+function getCardBadges(v) {
+  if (!v.jual || v.status === 'READY') {
+    return `<span class="badge" style="background:var(--pos-soft);color:var(--pos)"><span class="dot" style="background:var(--pos)"></span>READY</span>`;
+  }
+  const pi = payInfo(v);
+  if (pi.lunas) {
+    return `<span class="badge" style="background:var(--blue-soft);color:var(--blue)"><span class="dot" style="background:var(--blue)"></span>SOLD</span><span class="badge" style="background:var(--pos-soft);color:var(--pos)"><span class="dot" style="background:var(--pos)"></span>LUNAS</span>`;
+  }
+  if (pi.isBooked) {
+    return `<span class="badge" style="background:var(--amber-soft);color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>BOOKED &amp; BELUM LUNAS</span>`;
+  }
+  return `<span class="badge" style="background:var(--neg-soft);color:var(--neg)"><span class="dot" style="background:var(--neg)"></span>BELUM LUNAS</span>`;
 }
 
 /* ===== data akun terpadu (chart of accounts) ===== */
@@ -1024,8 +1047,18 @@ function currentVehicleList(){
   const f=document.getElementById('vfilter').value;
   const pf=(document.getElementById('vpayfilter')||{}).value||'all';
   return VEHICLES.filter(v=>{
-    if(!((f==='all'||v.status===f) && ((v.nopol||'')+' '+(v.rangka||'')).toLowerCase().includes(q))) return false;
-    if(pf!=='all'){ const pi=payInfo(v); if(!pi.sold) return false; if(pf==='lunas' && !pi.lunas) return false; if(pf==='belum' && pi.lunas) return false; }
+    const isSold = !!v.jual || v.status === 'SOLD' || v.status === 'BOOKED';
+    const isReady = !v.jual && v.status === 'READY';
+    if (f === 'READY' && !isReady) return false;
+    if (f === 'SOLD' && !isSold) return false;
+    if (((v.nopol||'')+' '+(v.rangka||'')).toLowerCase().includes(q) === false) return false;
+    if(pf!=='all'){
+      const pi=payInfo(v);
+      if(!pi.sold) return false;
+      if(pf==='lunas' && !pi.lunas) return false;
+      if(pf==='booked' && !pi.isBooked) return false;
+      if(pf==='belum' && (!pi.isBelumLunas || pi.isBooked)) return false;
+    }
     return true;
   });
 }
@@ -1049,6 +1082,18 @@ function getVehicleGradient(col){
   return 'linear-gradient(135deg, #F1F5F9, #E2E8F0)';
 }
 function renderKendaraan(){
+  // Toggle pay filter dropdown visibility: hanya aktif disaat memilih status SOLD
+  const fStatus = (document.getElementById('vfilter')||{}).value;
+  const payFilterEl = document.getElementById('vpayfilter');
+  if (payFilterEl) {
+    if (fStatus === 'SOLD') {
+      payFilterEl.style.display = '';
+    } else {
+      payFilterEl.style.display = 'none';
+      payFilterEl.value = 'all';
+    }
+  }
+
   // Update view mode toggle active classes
   const gridBtn = document.getElementById('btnViewGrid');
   const tableBtn = document.getElementById('btnViewTable');
@@ -1072,10 +1117,11 @@ function renderKendaraan(){
   const btnTambahU=document.getElementById('btnTambahUnit'); if(btnTambahU) btnTambahU.style.display=can('kendaraan_tambah')?'':'none';
   const btnExportK=document.getElementById('btnExportKendaraan'); if(btnExportK) btnExportK.style.display=can('kendaraan_export')?'':'none';
   const list=currentVehicleList();
-  const ready=VEHICLES.filter(v=>v.status==='READY').length, sold=VEHICLES.filter(v=>v.status==='SOLD').length;
+  const ready=VEHICLES.filter(v=>!v.jual && v.status==='READY').length;
+  const sold=VEHICLES.filter(v=>!!v.jual || v.status==='SOLD' || v.status==='BOOKED').length;
   const nilaiStok=VEHICLES.filter(v=>!v.jual).reduce((s,v)=>s+modal(v),0);
   document.getElementById('vStrip').innerHTML=[
-    ['Total unit',VEHICLES.length,'var(--ink)'],['Ready',ready,'var(--pos)'],['Sold',sold,'var(--blue)'],['Nilai stok aktif',rpShort(nilaiStok),'var(--amber)']
+    ['Total unit',VEHICLES.length,'var(--ink)'],['Ready',ready,'var(--pos)'],['Sold',sold,'var(--blue)'],['Nilai stok',rpShort(nilaiStok),'var(--amber)']
   ].map(([l,val,c])=>`<div class="card p-5 flex items-center justify-between gap-3">
     <div>
       <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">${l}</p>
@@ -1090,6 +1136,12 @@ function renderKendaraan(){
   document.getElementById('vehicleCards').innerHTML = list.map(v=>{
     const lk=laba(v), fee=feeOf(v), lb=lk-fee, pi=payInfo(v);
     const darkIcon = ['putih','silver'].some(x => String(v.warna).toLowerCase().includes(x));
+    const pays = (v.jual && v.jual.pembayaran) || [];
+    const dpDirectVal = (v.jual && v.jual.dpDirect && v.jual.dpDirect.nilai) ? +v.jual.dpDirect.nilai : 0;
+    const dpLeasingVal = (v.jual && v.jual.leasing && v.jual.leasing.dp) ? +v.jual.leasing.dp : 0;
+    const payDpVal = pays.filter(x => (x.jenis || '').toLowerCase().includes('dp') || (x.jenis || '').toLowerCase().includes('tanda jadi')).reduce((s, x) => s + (+x.jumlah || 0), 0);
+    const showDpVal = Math.max(dpDirectVal, payDpVal);
+    const pelunasanVal = pays.filter(x => !(x.jenis || '').toLowerCase().includes('dp') && !(x.jenis || '').toLowerCase().includes('tanda jadi')).reduce((s, x) => s + (+x.jumlah || 0), 0);
     return `<div class="card p-5 hover:-translate-y-1 hover:shadow-lg transition-all flex flex-col justify-between">
       <div class="cursor-pointer" onclick="openVehicle('${v.kode}')">
         <!-- Visual Header -->
@@ -1121,25 +1173,40 @@ function renderKendaraan(){
           </div>
         </div>
 
-        <!-- Profit margin if sold -->
+        <!-- Rincian Laba & Pembayaran if sold -->
         ${v.jual ? `
-        <div class="flex items-center justify-between mt-3 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[12px]">
-          <span class="text-[var(--muted)] font-500">Laba Bersih</span>
-          <span class="num font-700 text-right ${lb>=0 ? 'text-[var(--pos)]' : 'text-[var(--neg)]'}">${lb>=0 ? '+' : ''}${rp(lb)}</span>
-        </div>` : ''}
-        <!-- Sisa pembayaran jika belum lunas -->
-        ${(pi.sold && !pi.lunas) ? `
-        <div class="flex items-center justify-between mt-2 p-2 rounded-lg bg-rose-50 border border-rose-100 text-[12px]">
-          <span class="text-[var(--neg)] font-500">Sisa Pembayaran</span>
-          <span class="num font-700 text-right" style="color:var(--neg)">${rp(pi.sisa)}</span>
+        <div class="mt-2.5 space-y-1.5">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-[12px]">
+            <span class="text-[var(--muted)] font-500">Laba Bersih</span>
+            <span class="num font-700 text-right ${lb>=0 ? 'text-[var(--pos)]' : 'text-[var(--neg)]'}">${lb>=0 ? '+' : ''}${rp(lb)}</span>
+          </div>
+          ${showDpVal > 0 ? `
+          <div class="flex items-center justify-between px-1 text-[11.5px]">
+            <span class="text-[var(--muted)] font-500">Tanda Jadi / DP</span>
+            <span class="num font-600 text-[var(--pos)]">${rp(showDpVal)}</span>
+          </div>` : ''}
+          ${dpLeasingVal > 0 ? `
+          <div class="flex items-center justify-between px-1 text-[11.5px]">
+            <span class="text-[var(--muted)] font-500">DP Leasing</span>
+            <span class="num font-600 text-[var(--pos)]">${rp(dpLeasingVal)}</span>
+          </div>` : ''}
+          ${pelunasanVal > 0 ? `
+          <div class="flex items-center justify-between px-1 text-[11.5px]">
+            <span class="text-[var(--muted)] font-500">Pembayaran</span>
+            <span class="num font-600 text-[var(--pos)]">${rp(pelunasanVal)}</span>
+          </div>` : ''}
+          ${(pi.sold && !pi.lunas) ? `
+          <div class="flex items-center justify-between p-2 rounded-lg bg-rose-50 border border-rose-100 text-[11.5px]">
+            <span class="text-[var(--neg)] font-600">Sisa Pembayaran</span>
+            <span class="num font-700 text-right" style="color:var(--neg)">${rp(pi.sisa)}</span>
+          </div>` : ''}
         </div>` : ''}
       </div>
 
       <!-- Footer & Action Buttons — area ini TIDAK propagate ke kartu -->
       <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-        <div class="flex items-center gap-1.5">
-          ${badge(v.status)}
-          ${pi.sold ? `<span class="badge" style="background:${pi.lunas ? 'var(--pos-soft)' : 'var(--neg-soft)'};color:${pi.lunas ? 'var(--pos)' : 'var(--neg)'}"><span class="dot" style="background:${pi.lunas ? 'var(--pos)' : 'var(--neg)'}"></span>${pi.lunas ? 'LUNAS' : 'BELUM LUNAS'}</span>` : ''}
+        <div class="flex items-center gap-1.5 flex-wrap">
+          ${getCardBadges(v)}
         </div>
         <div class="flex items-center gap-1.5">
           <button class="act" title="Lihat Detail" onclick="openVehicle('${v.kode}')" style="--ac:var(--blue)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -1173,9 +1240,12 @@ function renderKendaraan(){
       const n=rows.length+(showTotal?1:0);
       const rs=n>1?` rowspan="${n}"`:'';
       const payCells=(()=>{const pi=payInfo(v); if(!pi.sold) return `<td class="num text-right text-[var(--muted)]"${rs}>—</td><td class="num text-right text-[var(--muted)]"${rs}>—</td><td class="text-center text-[var(--muted)]"${rs}>—</td>`;
+        const payBadge = pi.lunas ? `<span class="badge" style="background:var(--pos-soft);color:var(--pos)"><span class="dot" style="background:var(--pos)"></span>LUNAS</span>`
+                       : (pi.isBooked ? `<span class="badge" style="background:var(--amber-soft);color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>BOOKED &amp; BELUM LUNAS</span>`
+                       : `<span class="badge" style="background:var(--neg-soft);color:var(--neg)"><span class="dot" style="background:var(--neg)"></span>BELUM LUNAS</span>`);
         return `<td class="num text-right whitespace-nowrap" style="color:var(--pos)"${rs}>${rp(pi.total)}</td>
         <td class="num text-right whitespace-nowrap font-600" style="color:${pi.lunas?'var(--muted)':'var(--neg)'}"${rs}>${rp(pi.sisa)}</td>
-        <td class="text-center"${rs}><span class="badge" style="background:${pi.lunas?'var(--pos-soft)':'var(--neg-soft)'};color:${pi.lunas?'var(--pos)':'var(--neg)'}"><span class="dot" style="background:${pi.lunas?'var(--pos)':'var(--neg)'}"></span>${pi.lunas?'LUNAS':'BELUM LUNAS'}</span></td>`;})();
+        <td class="text-center"${rs}>${payBadge}</td>`;})();
       return rows.map((it,i)=>{
         const first=i===0;
         const topBorder=first?' style="border-top:2px solid var(--line)"':'';
@@ -1209,7 +1279,7 @@ function renderKendaraan(){
       ${merged(`<td class="whitespace-nowrap"${rs}>${v.bbm}</td>`)}
       ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.pajakThn)}</td>`)}
       ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.pajak5Thn)}</td>`)}
-      ${merged(`<td${rs}>${badge(v.status)}</td>`)}
+      ${merged(`<td${rs}>${badge(payInfo(v).isBooked ? 'BOOKED' : v.status)}</td>`)}
       ${merged(`<td class="num text-right whitespace-nowrap"${rs}>${rp(v.beli)}</td>`)}
       ${merged(`<td class="num text-[12px] text-[var(--muted)] whitespace-nowrap"${rs}>${fmtDate(v.tglBeli)}</td>`)}
       <td class="text-[13px] whitespace-nowrap">${it?esc(it.ket||it.akun||'—'):'—'}</td>
@@ -1393,7 +1463,11 @@ function renderVehicleDetail(){
           </div>
         </div>
       </div>
-      ${(()=>{ const pays=p.pembayaran||[]; const totBayar=pays.reduce((s,x)=>s+(+x.jumlah||0),0); const ttN=(p.tt&&p.tt.nilai)||0; const sisa=Math.max(0,(p.harga||0)-ttN-totBayar); const lunas=sisa<=0; return `
+      ${(()=>{ const pays=p.pembayaran||[];
+        const dpTot=pays.filter(x=>(x.jenis||'').toLowerCase().includes('dp')||(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+        const pelunasanTot=pays.filter(x=>!(x.jenis||'').toLowerCase().includes('dp')&&!(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+        const totBayar=dpTot+pelunasanTot;
+        const ttN=(p.tt&&p.tt.nilai)||0; const sisa=Math.max(0,(p.harga||0)-ttN-totBayar); const lunas=sisa<=0; return `
       <div class="card overflow-hidden mt-4">
         <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
           <h3 class="g font-bold text-[15px]">Riwayat Pembayaran</h3>
@@ -1403,7 +1477,9 @@ function renderVehicleDetail(){
           <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
           <tbody>${pays.map(x=>`<tr><td class="num text-[12px] text-[var(--muted)]">${fmtDate(x.tgl)}</td><td>${x.jenis?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${x.jenis}</span>`:'—'}</td><td>${x.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(x.kas)}</span>`:'—'}</td><td class="font-500">${x.ket||'—'}</td><td class="num text-right">${rp(x.jumlah||0)}</td></tr>`).join('')||`<tr><td colspan="5" class="text-center text-[var(--muted)] py-6">Belum ada pembayaran tercatat.</td></tr>`}</tbody>
           <tfoot>
-            <tr><td colspan="4" class="px-4 py-2.5 text-right font-600 text-[13px]">Total Dibayar</td><td class="num text-right font-700 px-4 py-2.5" style="color:var(--pos)">${rp(totBayar)}</td></tr>
+            ${dpTot>0?`<tr><td colspan="4" class="px-4 py-2 text-right font-600 text-[13px]">Uang Muka / DP</td><td class="num text-right font-600 px-4 py-2" style="color:var(--pos)">${rp(dpTot)}</td></tr>`:''}
+            ${pelunasanTot>0?`<tr><td colspan="4" class="px-4 py-2 text-right font-600 text-[13px]">Pencairan / Pelunasan</td><td class="num text-right font-600 px-4 py-2" style="color:var(--pos)">${rp(pelunasanTot)}</td></tr>`:''}
+            <tr><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px] border-t">Total Dibayar</td><td class="num text-right font-700 px-4 py-2.5 border-t" style="color:var(--pos)">${rp(totBayar)}</td></tr>
             <tr style="background:${lunas?'var(--pos-soft)':'var(--neg-soft)'}"><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px]">Sisa Pembayaran</td><td class="num text-right font-700 px-4 py-2.5 text-[15px]" style="color:${lunas?'var(--pos)':'var(--neg)'}">${rp(sisa)}</td></tr>
           </tfoot>
         </table></div>
@@ -1711,8 +1787,9 @@ function renderEditJual(v){
   const opt=(arr,cur)=>arr.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
   const j=v?v.jual:null, tt=j&&j.tt, ls=j&&j.leasing, metode=(j&&j.metode)||'Pembayaran Langsung';
   const dok=(j&&j.dok)||{};
-  editPay = (j&&Array.isArray(j.pembayaran)) ? j.pembayaran.map(x=>({...x}))
-          : ((j&&j.dok&&j.dok.jumlahBayar) ? [{tgl:j.tgl||null,jenis:'Tanda Jadi / DP',ket:'',jumlah:j.dok.jumlahBayar}] : []);
+  editPay = (j&&Array.isArray(j.pembayaran)) ? j.pembayaran.filter(p=>!(p.jenis||'').toLowerCase().includes('dp')&&!(p.jenis||'').toLowerCase().includes('tanda jadi')).map(x=>({...x})) : [];
+  const dpDirectItem = (j&&j.dpDirect) || (j&&Array.isArray(j.pembayaran)?j.pembayaran.find(p=>(p.jenis||'').toLowerCase().includes('dp')||(p.jenis||'').toLowerCase().includes('tanda jadi')):null);
+  const dpDirect = (dpDirectItem && ((+dpDirectItem.nilai>0)||( +dpDirectItem.jumlah>0))) ? { nilai: +dpDirectItem.nilai||+dpDirectItem.jumlah||0, tgl: dpDirectItem.tgl||(j&&j.tgl)||'', kas: dpDirectItem.kas||'' } : null;
   const rek={ bank:dok.rekBank||REK_DEFAULT.bank, atasNama:dok.rekAtasNama||REK_DEFAULT.atasNama, no:dok.rekNo||REK_DEFAULT.no };
   const ck=dok.checklist||[];
   const feeMode=(j&&j.feeMode)||'rp';
@@ -1730,15 +1807,28 @@ function renderEditJual(v){
           <div class="field"><label>Harga Penjualan (Rp)</label><input id="ef_jHarga" type="text" inputmode="numeric" class="inp" value="${esc(fmtRibuan(j&&j.harga||''))}" placeholder="0" oninput="this.value=fmtRibuan(this.value);updateEditTotals()"></div>
           <div class="field"><label>Nama Pembeli</label><input id="ef_jPembeli" class="inp" value="${esc(j&&j.mediator)}" placeholder="Nama pembeli / mediator"></div>
           <div class="field"><label>Metode Pembayaran</label><select id="ef_jMetode" class="inp" onchange="onMetodeChange()">${mopt}</select></div>
-          <div class="field"><label>Komisi</label>
+          <div class="field sm:col-span-2"><label>Komisi</label>
             <div class="flex gap-2">
               <select id="ef_jFeeMode" class="inp" style="width:78px" onchange="updateEditTotals()">
                 <option value="rp" ${feeMode!=='pct'?'selected':''}>Rp</option>
                 <option value="pct" ${feeMode==='pct'?'selected':''}>%</option>
               </select>
-              <input id="ef_jFee" type="number" step="any" class="inp" value="${esc(feeRaw)}" placeholder="0" oninput="updateEditTotals()">
+              <input id="ef_jFee" type="number" step="any" class="inp flex-1" value="${esc(feeRaw)}" placeholder="0" oninput="updateEditTotals()">
             </div>
             <p id="ef_jFeeHint" class="text-[11px] text-[var(--muted)] mt-1"></p>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-[var(--line)]">
+          <label class="flex items-center gap-2.5 text-[13.5px] font-600 cursor-pointer">
+            <input type="checkbox" id="ef_jDPon" ${dpDirect?'checked':''} onchange="toggleDPDirect()" class="w-4 h-4 accent-[color:var(--pos)]"> 
+            Pembayaran Uang Muka / DP (Tanda Jadi)
+            <span class="font-400 text-[11.5px] text-[var(--muted)]">(catat DP dengan tanggal &amp; kas/bank penerima)</span>
+          </label>
+          <div id="dpDirectFields" style="display:${dpDirect?'':'none'}" class="grid sm:grid-cols-2 gap-3 mt-3">
+            <div class="field"><label>Nilai Uang Muka / DP (Rp)</label><input id="ef_dpNilai" type="text" inputmode="numeric" class="inp" value="${esc(fmtRibuan(dpDirect&&dpDirect.nilai||''))}" placeholder="0" oninput="this.value=fmtRibuan(this.value);updateEditTotals()"></div>
+            <div class="field"><label>Tanggal Penerimaan DP</label><input id="ef_dpTgl" type="date" class="inp" value="${esc((dpDirect&&dpDirect.tgl)||(j&&j.tgl)||'')}"></div>
+            <div class="field sm:col-span-2"><label>Kas / Bank Penerima DP</label><select id="ef_dpKas" class="inp">${kasOptions((dpDirect&&dpDirect.kas)||'')}</select></div>
           </div>
         </div>
 
@@ -1765,6 +1855,8 @@ function renderEditJual(v){
           <div id="lsFields" style="display:${ls?'':'none'}" class="grid sm:grid-cols-2 gap-3 mt-3">
             <div class="field"><label>Perusahaan Leasing</label><input id="ef_lsPerusahaan" class="inp" list="dlLeasing" value="${esc(ls&&ls.perusahaan)}" placeholder="mis. BCA Finance" autocomplete="off"></div>
             <div class="field"><label>Uang Muka / DP (Rp)</label><input id="ef_lsDp" type="text" inputmode="numeric" class="inp" value="${esc(fmtRibuan(ls&&ls.dp||''))}" placeholder="0" oninput="this.value=fmtRibuan(this.value);updateEditTotals()"></div>
+            <div class="field"><label>Tanggal DP Leasing</label><input id="ef_lsDpTgl" type="date" class="inp" value="${esc((ls&&ls.dpTgl)||(j&&j.tgl)||'')}"></div>
+            <div class="field"><label>Kas / Bank Penerima DP</label><select id="ef_lsDpKas" class="inp">${kasOptions((ls&&ls.dpKas)||'')}</select></div>
           </div>
           ${dlHTML('dlLeasing',LEASING_UMUM)}
         </div>
@@ -1816,7 +1908,10 @@ function renderEditJual(v){
           <div class="space-y-2 text-[13px]">
             <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span id="eP_harga" class="num">—</span></div>
             <div class="flex justify-between" id="eP_ttRow" style="display:none"><span class="text-[var(--muted)]">Tukar tambah (potong)</span><span id="eP_tt" class="num" style="color:var(--amber)">—</span></div>
-            <div class="flex justify-between" id="eP_bayarRow" style="display:none"><span class="text-[var(--muted)]">Total dibayar</span><span id="eP_bayar" class="num" style="color:var(--pos)">—</span></div>
+            <div class="flex justify-between" id="eP_dpRow" style="display:none"><span class="text-[var(--muted)]">Tanda Jadi / DP</span><span id="eP_dp" class="num" style="color:var(--pos)">—</span></div>
+            <div class="flex justify-between" id="eP_dpLsRow" style="display:none"><span class="text-[var(--muted)]">DP Leasing</span><span id="eP_dpLs" class="num" style="color:var(--pos)">—</span></div>
+            <div class="flex justify-between" id="eP_pelunasanRow" style="display:none"><span class="text-[var(--muted)]">Pelunasan / Pencairan</span><span id="eP_pelunasan" class="num" style="color:var(--pos)">—</span></div>
+            <div class="flex justify-between pt-1 border-t border-slate-200" id="eP_bayarRow" style="display:none"><span class="font-600">Total dibayar</span><span id="eP_bayar" class="num font-600" style="color:var(--pos)">—</span></div>
             <div class="flex justify-between pt-2 border-t" style="border-color:var(--line)"><span class="font-600" id="eP_sisaLbl">Sisa pembayaran</span><span id="eP_sisa" class="num font-600" style="color:var(--blue)">—</span></div>
             <div class="flex justify-between"><span class="text-[var(--muted)]">Status</span><span id="eP_status" class="num font-600">—</span></div>
           </div>
@@ -1828,6 +1923,7 @@ function renderEditJual(v){
 }
 function toggleTT(){ const on=document.getElementById('ef_jTTon').checked; document.getElementById('ttFields').style.display=on?'':'none'; updateEditTotals(); }
 function toggleLS(){ const on=document.getElementById('ef_jLSon').checked; document.getElementById('lsFields').style.display=on?'':'none'; updateEditTotals(); }
+function toggleDPDirect(){ const on=document.getElementById('ef_jDPon').checked; document.getElementById('dpDirectFields').style.display=on?'':'none'; updateEditTotals(); }
 function onMetodeChange(){
   const m=document.getElementById('ef_jMetode').value;
   const wantsTT = (m==='Tukar Tambah' || m==='Tukar Tambah & Leasing');
@@ -1856,8 +1952,8 @@ function onMetodeChange(){
 
 /* --- riwayat pembayaran / pelunasan --- */
 let editPay=[]; let payEditIdx=null;
-const PAY_JENIS=['Tanda Jadi / DP','Angsuran','Pelunasan','Pembayaran Tunai','Transfer','Pencairan Leasing','Lain-lain'];
-const payJenisOptions=cur=>`<option value="" ${!cur?'selected':''}>— Pilih —</option>`+PAY_JENIS.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
+const PAY_JENIS=['Pelunasan','Angsuran','Pencairan Leasing','Lain-lain'];
+const payJenisOptions=cur=>`<option value="" ${!cur?'selected':''}>— Pilih —</option>`+(cur&&!PAY_JENIS.includes(cur)?[cur,...PAY_JENIS]:PAY_JENIS).map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
 function payTotal(){ return editPay.reduce((s,p)=>s+(+p.jumlah||0),0); }
 function renderEditPay(){
   const rows=editPay.map((p,i)=>`<tr>
@@ -1873,7 +1969,7 @@ function renderEditPay(){
     </tr>`).join('');
   document.getElementById('payWrap').innerHTML=`
     <div class="flex items-center justify-between mb-2">
-      <div><h4 class="text-[13.5px] font-700">Pembayaran & Pelunasan</h4><p class="text-[12px] text-[var(--muted)] mt-0.5">Catat DP, angsuran, dan pelunasan. Sisa & status dihitung otomatis.</p></div>
+      <div><h4 class="text-[13.5px] font-700">Pembayaran & Pelunasan</h4><p class="text-[12px] text-[var(--muted)] mt-0.5">Catat angsuran dan pelunasan. Sisa & status dihitung otomatis.</p></div>
       <button class="btn btn-amber" onclick="openPayModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Pembayaran</button>
     </div>
     <div class="border border-[var(--line)] rounded-xl overflow-hidden">
@@ -1951,22 +2047,43 @@ function updateEditTotals(){
   }
   const sb=document.getElementById('eStatusBadge'); if(sb) sb.innerHTML=badge(hj>0?'SOLD':'READY');
 
-  // rincian pembayaran (tukar tambah + riwayat pembayaran)
+  // rincian pembayaran (tukar tambah + DP + pelunasan)
   const ttOn=(document.getElementById('ef_jTTon')||{}).checked;
   const ttNilai=ttOn?parseRibuan((document.getElementById('ef_ttNilai')||{}).value):0;
+  const dpOn=(document.getElementById('ef_jDPon')||{}).checked;
+  const dpNilai=dpOn?parseRibuan((document.getElementById('ef_dpNilai')||{}).value):0;
   const lsOn=(document.getElementById('ef_jLSon')||{}).checked;
-  const totalBayar=(typeof editPay!=='undefined'?editPay:[]).reduce((s,p)=>s+(+p.jumlah||0),0);
+  const lsDp=lsOn?parseRibuan((document.getElementById('ef_lsDp')||{}).value):0;
+
+  const pays=(typeof editPay!=='undefined'?editPay:[]);
+  const payDpVal=pays.filter(p=>(p.jenis||'').toLowerCase().includes('dp')||(p.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,p)=>s+(+p.jumlah||0),0);
+  const dpShowVal=Math.max(dpNilai, payDpVal);
+  const lsDpVal=lsOn ? lsDp : 0;
+
+  const pelunasanTotal=pays.filter(p=>!(p.jenis||'').toLowerCase().includes('dp')&&!(p.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,p)=>s+(+p.jumlah||0),0);
+  const totalBayar=dpShowVal + lsDpVal + pelunasanTotal;
+
   const setP=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
   const setC=(id,val,color)=>{const el=document.getElementById(id); if(el){ el.textContent=val; if(color) el.style.color=color; }};
   const showRow=(id,show)=>{const el=document.getElementById(id); if(el) el.style.display=show?'':'none';};
+
   setP('eP_harga', hj?rp(hj):'—');
-  showRow('eP_ttRow', ttOn); setP('eP_tt', '- '+rp(ttNilai));
-  showRow('eP_bayarRow', totalBayar>0); setP('eP_bayar', '- '+rp(totalBayar));
+  showRow('eP_ttRow', ttOn&&ttNilai>0); setP('eP_tt', '- '+rp(ttNilai));
+  showRow('eP_dpRow', dpShowVal>0); setP('eP_dp', '- '+rp(dpShowVal));
+  showRow('eP_dpLsRow', lsDpVal>0); setP('eP_dpLs', '- '+rp(lsDpVal));
+  showRow('eP_pelunasanRow', pelunasanTotal>0); setP('eP_pelunasan', '- '+rp(pelunasanTotal));
+  showRow('eP_bayarRow', totalBayar>0); setP('eP_bayar', rp(totalBayar));
+
   const sisa=Math.max(0, hj-ttNilai-totalBayar);
   setP('eP_sisa', hj?rp(sisa):'—');
   const lbl=document.getElementById('eP_sisaLbl'); if(lbl) lbl.textContent = lsOn?'Sisa dibiayai leasing':'Sisa pembayaran';
   const lunas = hj>0 && sisa<=0;
-  setC('eP_status', hj?(lunas?'LUNAS':'BELUM LUNAS'):'—', hj?(lunas?'var(--pos)':'var(--neg)'):'var(--ink)');
+  const hasDp = (dpShowVal>0 || lsDpVal>0);
+  const isBooked = hj>0 && !lunas && hasDp && (pelunasanTotal===0);
+  const statusText = lunas ? 'LUNAS' : (isBooked ? 'BOOKED & BELUM LUNAS' : 'BELUM LUNAS');
+  const statusColor = lunas ? 'var(--pos)' : (isBooked ? 'var(--amber)' : 'var(--neg)');
+  setC('eP_status', hj ? statusText : '—', hj ? statusColor : 'var(--ink)');
+  if (sb) sb.innerHTML = badge(hj>0 ? (isBooked ? 'BOOKED' : 'SOLD') : 'READY');
 }
 
 async function saveVehicle(){
@@ -1990,10 +2107,21 @@ async function saveVehicle(){
         addStock:(document.getElementById('ef_ttStock')||{}).checked };
     }
     if((document.getElementById('ef_jLSon')||{}).checked){
-      jual.leasing={ perusahaan:gv('ef_lsPerusahaan')||'—', dp:gn('ef_lsDp')||0 };
+      const lsDp=gn('ef_lsDp')||0;
+      const lsDpTgl=gv('ef_lsDpTgl')||gv('ef_jTgl')||null;
+      const lsDpKas=(document.getElementById('ef_lsDpKas')||{}).value||'';
+      jual.leasing={ perusahaan:gv('ef_lsPerusahaan')||'—', dp:lsDp, dpTgl:lsDpTgl, dpKas:lsDpKas };
     }
     const checklist=CHECKLIST_ITEMS.filter((it,i)=>(document.getElementById('ef_ck'+i)||{}).checked);
-    jual.pembayaran = editPay.filter(p=>(+p.jumlah||0)>0 || p.jenis).map(p=>({tgl:p.tgl||null,jenis:p.jenis||'',ket:(p.ket||'').trim(),jumlah:+p.jumlah||0,kas:p.kas||''}));
+    let finalPay=editPay.filter(p=>(+p.jumlah||0)>0 || p.jenis).map(p=>({tgl:p.tgl||null,jenis:p.jenis||'',ket:(p.ket||'').trim(),jumlah:+p.jumlah||0,kas:p.kas||''}));
+    const dpVal=gn('ef_dpNilai')||0;
+    const dpTglVal=gv('ef_dpTgl')||gv('ef_jTgl')||null;
+    const dpKasVal=(document.getElementById('ef_dpKas')||{}).value||'';
+    const dpOn=(document.getElementById('ef_jDPon')||{}).checked;
+    if(dpOn || dpVal>0){
+      jual.dpDirect={ nilai:dpVal, tgl:dpTglVal, kas:dpKasVal };
+    }
+    jual.pembayaran = finalPay;
     jual.dok={
       alamat:gv('ef_dAlamat'), telp:gv('ef_dTelp'),
       noSPK:gv('ef_dNoSPK')||nextDocNumber('SPK','noSPK',editingKode), tglPesan:gv('ef_dTglPesan')||null,
@@ -2002,7 +2130,17 @@ async function saveVehicle(){
       rekBank:gv('ef_dRekBank')||REK_DEFAULT.bank, rekAtasNama:gv('ef_dRekNama')||REK_DEFAULT.atasNama, rekNo:gv('ef_dRekNo')||REK_DEFAULT.no,
       checklist:checklist
     };
-    status='SOLD';
+    const lsDpVal = (document.getElementById('ef_jLSon')||{}).checked ? (gn('ef_lsDp') || 0) : 0;
+    const ttVal = (document.getElementById('ef_jTTon')||{}).checked ? (gn('ef_ttNilai') || 0) : 0;
+    const pelunasanPayVal = finalPay.filter(p=>!(p.jenis||'').toLowerCase().includes('dp')&&!(p.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,p)=>s+(+p.jumlah||0),0);
+    const totPayVal = Math.max(dpVal, 0) + lsDpVal + pelunasanPayVal;
+    const sisaPayVal = Math.max(0, jHarga - ttVal - totPayVal);
+    const hasDpVal = (dpVal > 0 || lsDpVal > 0);
+    if (sisaPayVal > 0 && hasDpVal && pelunasanPayVal === 0) {
+      status = 'BOOKED';
+    } else {
+      status = 'SOLD';
+    }
   }
   const fields={
     merk:merk.toUpperCase(), model:model.toUpperCase(), type:gv('ef_type'),
@@ -2899,6 +3037,12 @@ function mutasiKasBank(akunNama, fy, fm){
       }
     });
     if(v.jual){
+      if(v.jual.dpDirect && v.jual.dpDirect.nilai>0 && v.jual.dpDirect.kas===akunNama && inPeriod(v.jual.dpDirect.tgl||v.jual.tgl,fy,fm)){
+        items.push({tgl:v.jual.dpDirect.tgl||v.jual.tgl, sumber:'Tanda Jadi / DP', ket:'DP Penjualan — '+nama(v)+' ('+v.kode+')'+(v.jual.mediator?' · '+v.jual.mediator:''), debit:0, kredit:+v.jual.dpDirect.nilai||0});
+      }
+      if(v.jual.leasing && v.jual.leasing.dp>0 && v.jual.leasing.dpKas===akunNama && inPeriod(v.jual.leasing.dpTgl||v.jual.tgl,fy,fm)){
+        items.push({tgl:v.jual.leasing.dpTgl||v.jual.tgl, sumber:'DP Leasing', ket:'DP Leasing ('+(v.jual.leasing.perusahaan||'Leasing')+') — '+nama(v)+' ('+v.kode+')'+(v.jual.mediator?' · '+v.jual.mediator:''), debit:0, kredit:+v.jual.leasing.dp||0});
+      }
       (v.jual.pembayaran||[]).forEach(p=>{
         if(p.kas===akunNama && inPeriod(p.tgl,fy,fm)){
           items.push({tgl:p.tgl, sumber:'Pembayaran Penjualan', ket:(p.jenis||'Pembayaran')+' — '+nama(v)+' ('+v.kode+')'+(v.jual.mediator?' · '+v.jual.mediator:''), debit:0, kredit:+p.jumlah||0});

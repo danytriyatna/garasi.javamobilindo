@@ -286,6 +286,7 @@ function toVehicleJSON(v, exps, sale, pays) {
       feeRaw: sale.fee_raw == null ? null : Number(sale.fee_raw),
       tt: sale.trade_in || null,
       leasing: sale.leasing || null,
+      dpDirect: sale.dp_direct || null,
       dok: {
         alamat: sale.alamat || '', telp: sale.telp || '', noSPK: sale.no_spk || '',
         tglPesan: sale.tgl_pesan, noKwitansi: sale.no_kwitansi || '', tglSerah: sale.tgl_serah,
@@ -326,12 +327,14 @@ async function upsertVehicle(conn, kode, body) {
   if (body.jual) {
     const j = body.jual, dok = j.dok || {};
     await conn.execute(
-      `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,
+      `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,dp_direct,
          alamat,telp,no_spk,tgl_pesan,no_kwitansi,tgl_serah,nama_penyerah,rek_bank,rek_atas_nama,rek_no,checklist)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [kode, j.tgl || null, j.harga || 0, j.mediator || '', j.metode || 'Tunai',
        j.fee || 0, j.feeMode || 'rp', j.feeRaw ?? null,
-       j.tt ? JSON.stringify(j.tt) : null, j.leasing ? JSON.stringify(j.leasing) : null,
+       j.tt ? JSON.stringify(j.tt) : null,
+       j.leasing ? JSON.stringify(j.leasing) : null,
+       j.dpDirect ? JSON.stringify(j.dpDirect) : null,
        dok.alamat || null, dok.telp || null, dok.noSPK || null, dok.tglPesan || null,
        dok.noKwitansi || null, dok.tglSerah || null, dok.namaPenyerah || null,
        dok.rekBank || null, dok.rekAtasNama || null, dok.rekNo || null,
@@ -529,6 +532,9 @@ async function waitForDb(maxTries = 30, delayMs = 1000) {
 (async () => {
   try {
     await waitForDb();
+    await pool.execute('ALTER TABLE sales ADD COLUMN dp_direct JSON').catch(() => {});
+    await pool.execute('ALTER TABLE vehicles DROP CONSTRAINT chk_vehicles_status').catch(() => {});
+    await pool.execute('ALTER TABLE vehicles DROP CHECK chk_vehicles_status').catch(() => {});
     await seedIfEmpty(pool);
     await seedDefaultAdmin(pool);
     await seedDefaultSettings(pool);
