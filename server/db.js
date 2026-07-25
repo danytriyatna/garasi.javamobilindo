@@ -19,6 +19,18 @@ const needsSSL = /sslmode=require|neon\.tech|supabase\.co/.test(connectionString
 const pool = new Pool({
   connectionString,
   ssl: needsSSL ? { rejectUnauthorized: false } : false,
+  // Database cloud (mis. Neon) bisa auto-suspend saat idle dan perlu waktu untuk "bangun".
+  // Beri batas waktu supaya koneksi gagal cepat (dengan pesan error jelas) daripada
+  // membuat request browser menggantung/loading tanpa batas.
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
+});
+
+// Cegah proses Node crash/hang kalau koneksi idle diputus paksa oleh database
+// (mis. Neon yang auto-suspend memutus koneksi yang sedang tidak dipakai).
+pool.on('error', (err) => {
+  console.error('Koneksi database idle terputus tak terduga:', err.message);
 });
 
 module.exports = { pool };
