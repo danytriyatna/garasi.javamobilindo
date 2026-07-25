@@ -8,8 +8,8 @@ function pengItem(p) {
 }
 
 async function seedIfEmpty(pool) {
-  const { rows } = await pool.query('SELECT count(*)::int AS c FROM vehicles');
-  if (rows[0].c > 0) return; // sudah ada data (mungkin dari input pengguna) -> jangan disentuh
+  const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM vehicles');
+  if (Number(rows[0].c) > 0) return; // sudah ada data -> jangan disentuh
 
   const vehiclesPath = path.join(__dirname, 'seed-data', 'vehicles.json');
   const opcostsPath = path.join(__dirname, 'seed-data', 'opcosts.json');
@@ -18,13 +18,13 @@ async function seedIfEmpty(pool) {
   const vehicles = JSON.parse(fs.readFileSync(vehiclesPath, 'utf8'));
   const opcosts = fs.existsSync(opcostsPath) ? JSON.parse(fs.readFileSync(opcostsPath, 'utf8')) : [];
 
-  const client = await pool.connect();
+  const conn = await pool.getConnection();
   try {
-    await client.query('BEGIN');
+    await conn.beginTransaction();
     for (const v of vehicles) {
-      await client.query(
-        `INSERT INTO vehicles(kode,no,merk,model,type,trans,warna,thn,nopol,odo,rangka,mesin,bbm,pajak_thn,pajak_5thn,status,beli,tgl_beli,kas_beli,penawaran,target_nett)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
+      await conn.execute(
+        `INSERT INTO vehicles(kode,no,merk,model,\`type\`,trans,warna,thn,nopol,odo,rangka,mesin,bbm,pajak_thn,pajak_5thn,\`status\`,beli,tgl_beli,kas_beli,penawaran,target_nett)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [v.kode, v.no, v.merk, v.model, v.type, v.trans, v.warna, v.thn, v.nopol,
          (v.odo == null ? null : String(v.odo)), v.rangka, v.mesin, v.bbm,
          v.pajakThn || null, v.pajak5Thn || null, v.status || 'READY',
@@ -33,24 +33,25 @@ async function seedIfEmpty(pool) {
 
       for (const p0 of (v.peng || [])) {
         const p = pengItem(p0);
-        await client.query(
-          `INSERT INTO vehicle_expenses(vehicle_kode,tgl,akun,kas,keterangan,nilai) VALUES ($1,$2,$3,$4,$5,$6)`,
+        await conn.execute(
+          `INSERT INTO vehicle_expenses(vehicle_kode,tgl,akun,kas,keterangan,nilai) VALUES (?,?,?,?,?,?)`,
           [v.kode, p.tgl, p.akun, p.kas, p.ket, p.n]
         );
       }
 
       if (v.jual) {
         const j = v.jual, dok = j.dok || {};
-        await client.query(
+        await conn.execute(
           `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,
-             alamat,telp,no_spk,tgl_pesan,no_kwitansi,tgl_serah,nama_penyerah,nama_kasir,rek_bank,rek_atas_nama,rek_no,checklist)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
+             alamat,telp,no_spk,tgl_pesan,no_kwitansi,tgl_serah,nama_penyerah,rek_bank,rek_atas_nama,rek_no,checklist)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
           [v.kode, j.tgl || null, j.harga || 0, j.mediator || '', j.metode || 'Tunai',
            j.fee || 0, j.feeMode || 'rp', j.feeRaw ?? null,
            j.tt ? JSON.stringify(j.tt) : null, j.leasing ? JSON.stringify(j.leasing) : null,
            dok.alamat || null, dok.telp || null, dok.noSPK || null, dok.tglPesan || null,
-           dok.noKwitansi || null, dok.tglSerah || null, dok.namaPenyerah || null, dok.namaKasir || null,
-           dok.rekBank || null, dok.rekAtasNama || null, dok.rekNo || null, dok.checklist || []]
+           dok.noKwitansi || null, dok.tglSerah || null, dok.namaPenyerah || null,
+           dok.rekBank || null, dok.rekAtasNama || null, dok.rekNo || null,
+           JSON.stringify(dok.checklist || [])]
         );
 
         let pays;
@@ -64,8 +65,8 @@ async function seedIfEmpty(pool) {
           pays = [{ tgl: j.tgl, jenis: 'Pembayaran Tunai', ket: 'Pelunasan (data awal)', jumlah: net, kas: '' }];
         }
         for (const p of pays) {
-          await client.query(
-            `INSERT INTO sale_payments(vehicle_kode,tgl,jenis,keterangan,jumlah,kas) VALUES ($1,$2,$3,$4,$5,$6)`,
+          await conn.execute(
+            `INSERT INTO sale_payments(vehicle_kode,tgl,jenis,keterangan,jumlah,kas) VALUES (?,?,?,?,?,?)`,
             [v.kode, p.tgl || null, p.jenis || '', p.ket || '', p.jumlah || 0, p.kas || '']
           );
         }
@@ -73,19 +74,19 @@ async function seedIfEmpty(pool) {
     }
 
     for (const o of opcosts) {
-      await client.query(
-        `INSERT INTO op_costs(tgl,akun,kas,keterangan,jumlah) VALUES ($1,$2,$3,$4,$5)`,
+      await conn.execute(
+        `INSERT INTO op_costs(tgl,akun,kas,keterangan,jumlah) VALUES (?,?,?,?,?)`,
         [o.tgl || null, o.akun || '', o.kas || '', o.ket || '', o.jumlah || 0]
       );
     }
 
-    await client.query('COMMIT');
+    await conn.commit();
     console.log(`Data awal dimuat: ${vehicles.length} kendaraan, ${opcosts.length} biaya operasional.`);
   } catch (e) {
-    await client.query('ROLLBACK');
+    await conn.rollback();
     console.error('Gagal memuat data awal:', e);
   } finally {
-    client.release();
+    conn.release();
   }
 }
 
@@ -95,11 +96,11 @@ module.exports = { seedIfEmpty };
 // Tidak pernah menimpa/menghapus akun yang sudah ada.
 async function seedDefaultAdmin(pool) {
   const bcrypt = require('bcryptjs');
-  const { rows } = await pool.query('SELECT count(*)::int AS c FROM users');
-  if (rows[0].c > 0) return;
+  const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM users');
+  if (Number(rows[0].c) > 0) return;
   const hash = await bcrypt.hash('admin123', 10);
-  await pool.query(
-    `INSERT INTO users (username, password_hash, name, role) VALUES ($1,$2,$3,'admin')`,
+  await pool.execute(
+    `INSERT INTO users (username, password_hash, name, role) VALUES (?,?,?,'admin')`,
     ['admin', hash, 'Administrator']
   );
   console.log('Akun admin default dibuat -> username: admin / password: admin123 (segera ganti passwordnya!)');
@@ -109,22 +110,22 @@ module.exports.seedDefaultAdmin = seedDefaultAdmin;
 // Hak akses default untuk role 'staff' -- permisif (semua boleh) supaya perilaku
 // yang sudah ada tidak berubah tiba-tiba. Admin selalu penuh, tidak diatur di sini.
 const DEFAULT_STAFF_PERMS = {
-  menu_kendaraan: true, menu_operasional: true, menu_labarugi: true,
+  menu_kendaraan: true, menu_operasional: true, menu_kas_masuk: true, menu_labarugi: true, menu_mutasikas: true,
   kendaraan_tambah: true, kendaraan_edit: true, kendaraan_hapus: true, kendaraan_export: true,
   operasional_tambah: true, operasional_edit: true, operasional_hapus: true, operasional_export: true,
+  kas_masuk_tambah: true, kas_masuk_edit: true, kas_masuk_hapus: true, kas_masuk_export: true,
 };
 async function seedDefaultSettings(pool) {
-  const { rows } = await pool.query("SELECT 1 FROM settings WHERE key='staff_permissions'");
+  const [rows] = await pool.execute("SELECT 1 FROM settings WHERE `key`='staff_permissions'");
   if (rows.length > 0) return;
-  await pool.query("INSERT INTO settings(key, value) VALUES ('staff_permissions', $1)", [JSON.stringify(DEFAULT_STAFF_PERMS)]);
+  await pool.execute("INSERT INTO settings(`key`, `value`) VALUES ('staff_permissions', ?)", [JSON.stringify(DEFAULT_STAFF_PERMS)]);
   console.log('Hak akses default untuk role staff dibuat (semua diizinkan).');
 }
 module.exports.seedDefaultSettings = seedDefaultSettings;
 module.exports.DEFAULT_STAFF_PERMS = DEFAULT_STAFF_PERMS;
 
 // Referensi Data Akun (Chart of Accounts) untuk usaha jual-beli kendaraan bekas.
-// Hanya di-seed sekali saat tabel accounts masih kosong -- tidak pernah menimpa
-// akun yang sudah pernah ditambah/diubah sendiri oleh pengguna.
+// Hanya di-seed sekali saat tabel accounts masih kosong.
 const DEFAULT_ACCOUNTS = [
   // 1xxx — Aset / Kas & Bank
   ['1001','Kas Tunai'],
@@ -181,10 +182,10 @@ const DEFAULT_ACCOUNTS = [
   ['6011','Lain-lain (Beban Usaha)'],
 ];
 async function seedDefaultAccounts(pool) {
-  const { rows } = await pool.query('SELECT count(*)::int AS c FROM accounts');
-  if (rows[0].c > 0) return;
+  const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM accounts');
+  if (Number(rows[0].c) > 0) return;
   for (const [kode, nama] of DEFAULT_ACCOUNTS) {
-    await pool.query('INSERT INTO accounts(kode,nama) VALUES ($1,$2) ON CONFLICT (kode) DO NOTHING', [kode, nama]);
+    await pool.execute('INSERT IGNORE INTO accounts(kode,nama) VALUES (?,?)', [kode, nama]);
   }
   console.log(`Referensi Data Akun dibuat (${DEFAULT_ACCOUNTS.length} akun, kepala 1-6).`);
 }
