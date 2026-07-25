@@ -1,36 +1,24 @@
-const { Pool, types } = require('pg');
+const mysql = require('mysql2/promise');
 
-// Kembalikan kolom DATE sebagai string 'YYYY-MM-DD' (bukan objek Date JS),
-// karena frontend memakai .slice(0,7) dkk pada string tanggal.
-types.setTypeParser(1082, (val) => val);
-// Kembalikan kolom NUMERIC sebagai number (bukan string), karena frontend
-// melakukan operasi aritmatika langsung pada nilai ini.
-types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
-
-const connectionString = process.env.DATABASE_URL ||
-  'postgresql://garasi:garasi123@localhost:5432/garasi_java_mobilindo';
-
-// Database lokal (Docker) tidak pakai SSL. Database cloud seperti Neon/Supabase
-// mewajibkan SSL (biasanya ditandai "sslmode=require" di connection string-nya).
-// Kita nyalakan SSL otomatis kalau itu terdeteksi, supaya 1 kode yang sama bisa
-// dipakai baik untuk database lokal maupun database di server/cloud.
-const needsSSL = /sslmode=require|neon\.tech|supabase\.co/.test(connectionString);
-
-const pool = new Pool({
-  connectionString,
-  ssl: needsSSL ? { rejectUnauthorized: false } : false,
-  // Database cloud (mis. Neon) bisa auto-suspend saat idle dan perlu waktu untuk "bangun".
-  // Beri batas waktu supaya koneksi gagal cepat (dengan pesan error jelas) daripada
-  // membuat request browser menggantung/loading tanpa batas.
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
-  max: 10,
+// Konfigurasi koneksi database MySQL.
+// Variabel environment dibaca dari proses Node (diset di cPanel Node.js App > Environment Variables).
+const pool = mysql.createPool({
+  host:     process.env.MYSQL_HOST     || 'localhost',
+  user:     process.env.MYSQL_USER     || 'garasi',
+  password: process.env.MYSQL_PASSWORD || 'garasi123',
+  database: process.env.MYSQL_DATABASE || 'garasi_java_mobilindo',
+  port:     parseInt(process.env.MYSQL_PORT || '3306', 10),
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  // Kembalikan kolom DATE/DATETIME sebagai string (bukan objek Date JS),
+  // supaya frontend bisa langsung pakai .slice(0,7) dll pada string tanggal.
+  dateStrings: true,
+  timezone: 'Z', // UTC
 });
 
-// Cegah proses Node crash/hang kalau koneksi idle diputus paksa oleh database
-// (mis. Neon yang auto-suspend memutus koneksi yang sedang tidak dipakai).
 pool.on('error', (err) => {
-  console.error('Koneksi database idle terputus tak terduga:', err.message);
+  console.error('Koneksi database error:', err.message);
 });
 
 module.exports = { pool };
