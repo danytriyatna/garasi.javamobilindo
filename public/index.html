@@ -19,7 +19,8 @@
   html{-webkit-font-smoothing:antialiased;}
   body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);margin:0;}
   .g{font-family:'Fraunces',serif;font-optical-sizing:auto;}
-  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em;text-align:right;}
+  input[inputmode="numeric"], input.num, select.num, textarea.num, p.val.num, span.num, td.num, div.num { text-align: right; }
   ::selection{background:var(--amber);color:#FFFFFF;}
   .no-sb::-webkit-scrollbar{width:6px;height:6px;}
   .no-sb::-webkit-scrollbar-thumb{background:rgba(15,23,42,.1);border-radius:8px;}
@@ -1326,7 +1327,7 @@ function renderVehicleDetail(){
       <div class="flex items-center gap-3">
         <span class="num text-[13px] font-600 px-2.5 py-1 rounded-md bg-[var(--ink)] text-white">${v.kode}</span>
         <h2 class="g text-[22px] font-bold">${nama(v)}</h2>
-        ${badge(v.status)}
+        ${getCardBadges(v)}
       </div>
       <div class="text-right">
         <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-600">Total modal</p>
@@ -1419,6 +1420,24 @@ function renderVehicleDetail(){
   const el=document.getElementById('tab-penjualan');
   if(v.jual){
     const p=v.jual, lk=laba(v), fee=feeOf(v), lb=lk-fee, marginPct=(lb/modal(v)*100);
+    const pi=payInfo(v);
+    const ttN=(p.tt&&p.tt.nilai)||0;
+    const dpDirectVal=(p.dpDirect&&p.dpDirect.nilai)?+p.dpDirect.nilai:0;
+    const dpLeasingVal=(p.leasing&&p.leasing.dp)?+p.leasing.dp:0;
+    const pays=p.pembayaran||[];
+    const payDpVal=pays.filter(x=>(x.jenis||'').toLowerCase().includes('dp')||(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+    const dpShowVal=Math.max(dpDirectVal, payDpVal);
+    const pelunasanTot=pays.filter(x=>!(x.jenis||'').toLowerCase().includes('dp')&&!(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
+    const totBayar=dpShowVal+dpLeasingVal+pelunasanTot;
+    const sisa=Math.max(0,(p.harga||0)-ttN-totBayar);
+    const lunas=sisa<=0;
+
+    const statusBadgeHtml = lunas
+      ? `<span class="badge" style="background:var(--pos-soft);color:var(--pos)"><span class="dot" style="background:var(--pos)"></span>LUNAS</span>`
+      : (pi.isBooked
+          ? `<span class="badge" style="background:var(--amber-soft);color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>BOOKED &amp; BELUM LUNAS</span>`
+          : `<span class="badge" style="background:var(--neg-soft);color:var(--neg)"><span class="dot" style="background:var(--neg)"></span>BELUM LUNAS</span>`);
+
     el.innerHTML=`
       <div class="grid lg:grid-cols-[1fr_340px] gap-4">
         <div class="card p-6">
@@ -1429,6 +1448,17 @@ function renderVehicleDetail(){
             <div class="field"><label>Nama Pembeli</label><p class="val">${p.mediator||'—'}</p></div>
             <div class="field"><label>Metode Pembayaran</label><p class="val">${p.metode||'—'}</p></div>
           </div>
+
+          ${(p.dpDirect && p.dpDirect.nilai>0) ? `
+          <div class="mt-6 pt-5 border-t border-[var(--line)]">
+            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--amber)] font-700 mb-3">Pembayaran Uang Muka / DP (Tanda Jadi)</p>
+            <div class="grid sm:grid-cols-3 gap-x-6 gap-y-4">
+              <div class="field"><label>Nilai Uang Muka / DP</label><p class="val num font-600" style="color:var(--pos)">${rp(p.dpDirect.nilai)}</p></div>
+              <div class="field"><label>Tanggal Penerimaan DP</label><p class="val num">${fmtDate(p.dpDirect.tgl || p.tgl)}</p></div>
+              <div class="field"><label>Kas / Bank Penerima DP</label><p class="val">${p.dpDirect.kas ? `<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(p.dpDirect.kas)}</span>` : '—'}</p></div>
+            </div>
+          </div>` : ''}
+
           ${p.tt?`
           <div class="mt-6 pt-5 border-t border-[var(--line)]">
             <p class="text-[11px] uppercase tracking-[.05em] text-[var(--amber)] font-700 mb-3">Tukar Tambah</p>
@@ -1440,50 +1470,67 @@ function renderVehicleDetail(){
               <div class="field"><label>Nilai Taksir</label><p class="val num">${rp(p.tt.nilai||0)}</p></div>
             </div>
           </div>`:''}
+
           ${p.leasing?`
           <div class="mt-6 pt-5 border-t border-[var(--line)]">
-            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--blue)] font-700 mb-3">Pembiayaan Leasing</p>
-            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-              <div class="field"><label>Perusahaan</label><p class="val">${p.leasing.perusahaan||'—'}</p></div>
-              <div class="field"><label>Uang Muka / DP</label><p class="val num">${rp(p.leasing.dp||0)}</p></div>
+            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--blue)] font-700 mb-3">Pembiayaan Melalui Leasing</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+              <div class="field"><label>Perusahaan Leasing</label><p class="val">${p.leasing.perusahaan||'—'}</p></div>
+              <div class="field"><label>Uang Muka / DP Leasing</label><p class="val num">${p.leasing.dp ? rp(p.leasing.dp) : '—'}</p></div>
+              <div class="field"><label>Tanggal DP Leasing</label><p class="val num">${fmtDate(p.leasing.dpTgl || p.tgl)}</p></div>
+              <div class="field"><label>Kas / Bank Penerima DP</label><p class="val">${p.leasing.dpKas ? `<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(p.leasing.dpKas)}</span>` : '—'}</p></div>
             </div>
           </div>`:''}
         </div>
-        <div class="card p-6" style="background:${lb>=0?'var(--pos-soft)':'var(--neg-soft)'};border-color:${lb>=0?'#bfe6d3':'#f0c9c9'}">
-          <h3 class="g font-bold text-[15px] mb-4">Perhitungan Laba</h3>
-          <div class="space-y-2.5 text-[13.5px]">
-            <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span class="num">${rp(p.harga)}</span></div>
-            <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Harga pembelian</span><span class="num">(${rp(v.beli)})</span></div>
-            <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Biaya perawatan</span><span class="num">(${rp(pengTotal(v))})</span></div>
-            <div class="flex justify-between pt-2 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Total modal</span><span class="num font-600">(${rp(modal(v))})</span></div>
-            <div class="flex justify-between pt-2.5 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Laba kotor</span><span class="num font-600">${lk>=0?'+':''}${rp(lk)}</span></div>
-            <div class="flex justify-between"><span class="text-[var(--muted)]">Komisi${p.feeMode==='pct'&&p.feeRaw?` (${p.feeRaw}%)`:''}</span><span class="num">(${rp(fee)})</span></div>
-            <div class="flex justify-between pt-2.5 mt-1 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-700">Laba bersih</span><span class="num font-700 text-[16px]" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${lb>=0?'+':''}${rp(lb)}</span></div>
-            <p class="text-[12px] text-[var(--muted)] pt-1">Margin ${marginPct.toFixed(1)}% dari modal</p>
+
+        <div class="space-y-4">
+          <div class="card p-6" style="background:${lb>=0?'var(--pos-soft)':'var(--neg-soft)'};border-color:${lb>=0?'#bfe6d3':'#f0c9c9'}">
+            <h3 class="g font-bold text-[15px] mb-4">Perhitungan Laba</h3>
+            <div class="space-y-2.5 text-[13.5px]">
+              <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span class="num">${rp(p.harga)}</span></div>
+              <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Harga pembelian</span><span class="num">(${rp(v.beli)})</span></div>
+              <div class="flex justify-between"><span class="text-[var(--muted)] pl-3">Biaya perawatan</span><span class="num">(${rp(pengTotal(v))})</span></div>
+              <div class="flex justify-between pt-2 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Total modal</span><span class="num font-600">(${rp(modal(v))})</span></div>
+              <div class="flex justify-between pt-2.5 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-600">Laba kotor</span><span class="num font-600">${lk>=0?'+':''}${rp(lk)}</span></div>
+              <div class="flex justify-between"><span class="text-[var(--muted)]">Komisi${p.feeMode==='pct'&&p.feeRaw?` (${p.feeRaw}%)`:''}</span><span class="num">(${rp(fee)})</span></div>
+              <div class="flex justify-between pt-2.5 mt-1 border-t" style="border-color:rgba(0,0,0,.1)"><span class="font-700">Laba bersih</span><span class="num font-700 text-[16px]" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${lb>=0?'+':''}${rp(lb)}</span></div>
+              <p class="text-[12px] text-[var(--muted)] pt-1">Margin ${marginPct.toFixed(1)}% dari modal</p>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="g font-bold text-[14px] mb-3">Rincian Pembayaran</h3>
+            <div class="space-y-2 text-[13px]">
+              <div class="flex justify-between"><span class="text-[var(--muted)]">Harga jual</span><span class="num font-600">${rp(p.harga)}</span></div>
+              ${ttN > 0 ? `<div class="flex justify-between"><span class="text-[var(--muted)] pl-2">Tukar tambah (potong)</span><span class="num text-[var(--amber)]">- ${rp(ttN)}</span></div>` : ''}
+              ${dpShowVal > 0 ? `<div class="flex justify-between"><span class="text-[var(--muted)] pl-2">Tanda Jadi / DP</span><span class="num text-[var(--pos)]">- ${rp(dpShowVal)}</span></div>` : ''}
+              ${dpLeasingVal > 0 ? `<div class="flex justify-between"><span class="text-[var(--muted)] pl-2">DP Leasing</span><span class="num text-[var(--pos)]">- ${rp(dpLeasingVal)}</span></div>` : ''}
+              ${pelunasanTot > 0 ? `<div class="flex justify-between"><span class="text-[var(--muted)] pl-2">Pelunasan / Pencairan</span><span class="num text-[var(--pos)]">- ${rp(pelunasanTot)}</span></div>` : ''}
+              <div class="flex justify-between pt-2 border-t font-600"><span>Total dibayar</span><span class="num text-[var(--pos)]">${rp(totBayar)}</span></div>
+              <div class="flex justify-between pt-1 border-t font-700">
+                <span>${p.leasing ? 'Sisa dibiayai leasing' : 'Sisa pembayaran'}</span>
+                <span class="num" style="color:${lunas ? 'var(--pos)' : 'var(--purple, #8b5cf6)'}">${rp(sisa)}</span>
+              </div>
+              <div class="flex justify-between items-center pt-2 border-t">
+                <span class="font-600 text-[12px] text-[var(--muted)]">Status</span>
+                <span>${statusBadgeHtml}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      ${(()=>{ const pays=p.pembayaran||[];
-        const dpTot=pays.filter(x=>(x.jenis||'').toLowerCase().includes('dp')||(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
-        const pelunasanTot=pays.filter(x=>!(x.jenis||'').toLowerCase().includes('dp')&&!(x.jenis||'').toLowerCase().includes('tanda jadi')).reduce((s,x)=>s+(+x.jumlah||0),0);
-        const totBayar=dpTot+pelunasanTot;
-        const ttN=(p.tt&&p.tt.nilai)||0; const sisa=Math.max(0,(p.harga||0)-ttN-totBayar); const lunas=sisa<=0; return `
+
       <div class="card overflow-hidden mt-4">
         <div class="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
           <h3 class="g font-bold text-[15px]">Riwayat Pembayaran</h3>
-          <span class="badge" style="background:${lunas?'var(--pos-soft)':'var(--neg-soft)'};color:${lunas?'var(--pos)':'var(--neg)'}"><span class="dot" style="background:${lunas?'var(--pos)':'var(--neg)'}"></span>${lunas?'LUNAS':'BELUM LUNAS'}</span>
+          ${statusBadgeHtml}
         </div>
         <div class="overflow-x-auto no-sb"><table>
           <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kas / Bank</th><th>Keterangan</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
-          <tbody>${pays.map(x=>`<tr><td class="num text-[12px] text-[var(--muted)]">${fmtDate(x.tgl)}</td><td>${x.jenis?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${x.jenis}</span>`:'—'}</td><td>${x.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(x.kas)}</span>`:'—'}</td><td class="font-500">${x.ket||'—'}</td><td class="num text-right">${rp(x.jumlah||0)}</td></tr>`).join('')||`<tr><td colspan="5" class="text-center text-[var(--muted)] py-6">Belum ada pembayaran tercatat.</td></tr>`}</tbody>
-          <tfoot>
-            ${dpTot>0?`<tr><td colspan="4" class="px-4 py-2 text-right font-600 text-[13px]">Uang Muka / DP</td><td class="num text-right font-600 px-4 py-2" style="color:var(--pos)">${rp(dpTot)}</td></tr>`:''}
-            ${pelunasanTot>0?`<tr><td colspan="4" class="px-4 py-2 text-right font-600 text-[13px]">Pencairan / Pelunasan</td><td class="num text-right font-600 px-4 py-2" style="color:var(--pos)">${rp(pelunasanTot)}</td></tr>`:''}
-            <tr><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px] border-t">Total Dibayar</td><td class="num text-right font-700 px-4 py-2.5 border-t" style="color:var(--pos)">${rp(totBayar)}</td></tr>
-            <tr style="background:${lunas?'var(--pos-soft)':'var(--neg-soft)'}"><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px]">Sisa Pembayaran</td><td class="num text-right font-700 px-4 py-2.5 text-[15px]" style="color:${lunas?'var(--pos)':'var(--neg)'}">${rp(sisa)}</td></tr>
-          </tfoot>
+          <tbody>${pays.map(x=>`<tr><td class="num text-[12px] text-[var(--muted)]">${fmtDate(x.tgl)}</td><td>${x.jenis?`<span class="badge" style="background:var(--pos-soft);color:var(--pos)">${x.jenis}</span>`:'—'}</td><td>${x.kas?`<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(x.kas)}</span>`:'—'}</td><td class="font-500">${x.ket||'—'}</td><td class="num text-right">${rp(x.jumlah||0)}</td></tr>`).join('')||`<tr><td colspan="5" class="text-center text-[var(--muted)] py-6">Belum ada pembayaran pelunasan tercatat.</td></tr>`}</tbody>
+          ${pelunasanTot>0?`<tfoot><tr><td colspan="4" class="px-4 py-2.5 text-right font-700 text-[13px]">Total Pembayaran Pelunasan</td><td class="num text-right font-700 px-4 py-2.5" style="color:var(--pos)">${rp(pelunasanTot)}</td></tr></tfoot>`:''}
         </table></div>
-      </div>`; })()}
+      </div>
       <div class="card p-5 mt-4">
         <div class="flex items-center justify-between flex-wrap gap-3">
           <div>
@@ -2210,7 +2257,6 @@ async function deleteVehicle(kode){
   }
 }
 
-/* ===== cetak dokumen ===== */
 function openPrint(title, html){
   document.getElementById('printTitle').textContent=title;
   document.getElementById('printDoc').innerHTML=html;
@@ -2220,21 +2266,31 @@ function openPrint(title, html){
 function closePrint(){ document.getElementById('printArea').classList.remove('open'); }
 function docHeader(){
   return `<div class="dhead">
-    <div class="brand"><img src="data:image/png;base64,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" alt="Java Mobilindo" style="height:42px;width:auto;object-fit:contain;display:block"></div>
+    <div class="brand" style="display:inline-block"><img src="/img/logo.png" alt="Java Mobilindo" style="height:52px;width:auto;object-fit:contain;display:block;filter:drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(0 0 2px #000);"></div>
     <div class="cinfo">${COMPANY.alamat}<br>Telepon: ${COMPANY.telp}<br>Email: ${COMPANY.email}</div>
   </div>`;
 }
 function cetakSPK(kode){
   const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{}, tt=j.tt;
   const tunai=(j.metode==='Pembayaran Langsung');
+
+  const dpDirectVal = (j.dpDirect && j.dpDirect.nilai) ? +j.dpDirect.nilai : 0;
+  const payDpVal = (j.pembayaran || []).filter(x => (x.jenis || '').toLowerCase().includes('dp') || (x.jenis || '').toLowerCase().includes('tanda jadi')).reduce((s, x) => s + (+x.jumlah || 0), 0);
+  const dpVal = Math.max(dpDirectVal, payDpVal, d.jumlahBayar || 0);
+
+  const dpTglFix = (j.dpDirect && j.dpDirect.tgl) || d.tglPesan || j.tgl;
+  const buyerName = j.mediator || '—';
+  const buyerAddress = d.alamat || '—';
+  const buyerTelp = d.telp || '—';
+
   const html=`<div class="doc">${docHeader()}
     <h1>SURAT PESANAN KENDARAAN</h1>
     <table class="bx"><tr>
       <td style="width:42%"><table class="kv"><tr><td class="lbl">No Surat Pesanan</td><td>: ${esc(d.noSPK)||'&nbsp;'}</td></tr>
-      <tr><td class="lbl">Tanggal Pesanan</td><td>: ${fmtTglPanjang(d.tglPesan)}</td></tr></table></td>
-      <td><table class="kv"><tr><td class="lbl">NAMA PEMESAN</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
-      <tr><td class="lbl">ALAMAT</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
-      <tr><td class="lbl">NO TELP</td><td>: ${esc(d.telp)||'&nbsp;'}</td></tr></table></td>
+      <tr><td class="lbl">Tanggal Pesanan</td><td>: ${fmtTglPanjang(dpTglFix)}</td></tr></table></td>
+      <td><table class="kv"><tr><td class="lbl">NAMA PEMESAN</td><td>: ${esc(buyerName)}</td></tr>
+      <tr><td class="lbl">ALAMAT</td><td>: ${esc(buyerAddress)}</td></tr>
+      <tr><td class="lbl">NO TELP</td><td>: ${esc(buyerTelp)}</td></tr></table></td>
     </tr></table>
     <table class="bx" style="border-top:none"><tr>
       <td style="width:42%;font-size:11px"><b>Ketentuan:</b>
@@ -2254,7 +2310,7 @@ function cetakSPK(kode){
         <tr><td class="lbl">No. Rangka</td><td>: ${esc(v.rangka)}</td></tr>
         <tr><td class="lbl">No. Mesin</td><td>: ${esc(v.mesin)}</td></tr>
         <tr><td class="lbl">Harga</td><td>: ${j.harga?rp(j.harga):'&nbsp;'}</td></tr>
-        <tr><td class="lbl">Tanda Jadi/Uang Muka</td><td>: ${d.jumlahBayar?rp(d.jumlahBayar):'Rp -'}</td></tr></table></td>
+        <tr><td class="lbl">Tanda Jadi/Uang Muka</td><td>: ${dpVal>0?rp(dpVal):'Rp -'}</td></tr></table></td>
     </tr></table>
     <div style="text-align:center;font-weight:700;margin:10px 0 4px">SYARAT PEMBAYARAN</div>
     <table class="bx"><tr>
@@ -2262,7 +2318,7 @@ function cetakSPK(kode){
       <td style="width:34%;vertical-align:top"><b>KREDIT</b>
         <table class="kv"><tr><td class="lbl" style="width:88px">Leasing</td><td>: ${esc(j.leasing&&j.leasing.perusahaan)||'&nbsp;'}</td></tr>
         <tr><td class="lbl" style="width:88px">Uang Muka</td><td>: ${j.leasing&&j.leasing.dp?rp(j.leasing.dp):'&nbsp;'}</td></tr></table></td>
-      <td style="vertical-align:top;height:1px"><div style="display:flex;flex-direction:column;height:100%;min-height:110px"><b>Dipesan Oleh:</b><div style="flex:1"></div><div style="text-align:center">( ${esc(j.mediator)||'..................'} )</div></div></td>
+      <td style="vertical-align:top;height:1px"><div style="display:flex;flex-direction:column;height:100%;min-height:110px"><b>Dipesan Oleh:</b><div style="flex:1"></div><div style="text-align:center">( ${esc(buyerName)} )</div></div></td>
     </tr>
     <tr>
       <td colspan="1" style="vertical-align:top"><b>TRADE IN</b>
@@ -2275,22 +2331,27 @@ function cetakSPK(kode){
     <div style="text-align:center;font-weight:700;margin:10px 0 4px">TANDA TERIMA UANG MUKA (SEMENTARA)</div>
     <table class="bx"><tr>
       <td style="width:52%">Telah diterima uang muka utk SPK No. ${esc(d.noSPK)||'..........'}
-        <table class="kv" style="margin-top:6px"><tr><td class="lbl" style="width:82px">Dari</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
-        <tr><td class="lbl" style="width:82px">Alamat</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
-        <tr><td class="lbl" style="width:82px">Pada Tanggal</td><td>: ${fmtTglPanjang(d.tglPesan)}</td></tr></table></td>
-      <td style="vertical-align:top">Dengan Rincian:<br><br>Uang Muka / Tanda Jadi:<br><b>${d.jumlahBayar?rp(d.jumlahBayar):'Rp -'}</b></td>
+        <table class="kv" style="margin-top:6px"><tr><td class="lbl" style="width:82px">Dari</td><td>: ${esc(buyerName)}</td></tr>
+        <tr><td class="lbl" style="width:82px">Alamat</td><td>: ${esc(buyerAddress)}</td></tr>
+        <tr><td class="lbl" style="width:82px">Pada Tanggal</td><td>: ${fmtTglPanjang(dpTglFix)}</td></tr></table></td>
+      <td style="vertical-align:top">Dengan Rincian:<br><br>Uang Muka / Tanda Jadi:<br><b>${dpVal>0?rp(dpVal):'Rp -'}</b></td>
     </tr></table>
   </div>`;
   openPrint('Surat Pesanan Kendaraan (SPK)', html);
 }
 function cetakSerah(kode){
   const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{}, ck=(d.checklist||[]);
+  const buyerName = j.mediator || '—';
+  const buyerAddress = d.alamat || '—';
+  const buyerTelp = d.telp || '—';
+  const tglSerahFix = d.tglSerah || j.tgl;
+
   const html=`<div class="doc">${docHeader()}
     <h1>BUKTI SERAH TERIMA KENDARAAN</h1>
     <p><b>Kepada Yth. Bapak/Ibu</b></p>
-    <table class="kv"><tr><td class="lbl">Nama</td><td>: ${esc(j.mediator)||'&nbsp;'}</td></tr>
-    <tr><td class="lbl">Alamat</td><td>: ${esc(d.alamat)||'&nbsp;'}</td></tr>
-    <tr><td class="lbl">No Telepon</td><td>: ${esc(d.telp)||'&nbsp;'}</td></tr></table>
+    <table class="kv"><tr><td class="lbl">Nama</td><td>: ${esc(buyerName)}</td></tr>
+    <tr><td class="lbl">Alamat</td><td>: ${esc(buyerAddress)}</td></tr>
+    <tr><td class="lbl">No Telepon</td><td>: ${esc(buyerTelp)}</td></tr></table>
     <p style="margin-top:12px"><b>Telah menerima dalam keadaan baik:</b></p>
     <table style="width:60%"><tbody>${CHECKLIST_ITEMS.map(it=>`<tr><td style="width:22px;font-size:15px">${ck.includes(it)?'&#9745;':'&#9744;'}</td><td>${it}</td></tr>`).join('')}</tbody></table>
     <p style="margin-top:12px"><b>Dengan data kendaraan sebagai berikut:</b></p>
@@ -2301,10 +2362,10 @@ function cetakSerah(kode){
     <tr><td class="lbl">No Rangka</td><td>: ${esc(v.rangka)}</td></tr>
     <tr><td class="lbl">No Mesin</td><td>: ${esc(v.mesin)}</td></tr></table>
     <p style="margin-top:12px"><b>Catatan:</b> Mobil yang sudah diterima konsumen tidak dapat dikembalikan, kecuali ingin tukar tambah unit di kemudian hari.</p>
-    <p style="margin-top:22px">Bandung, ${fmtTglPanjang(d.tglSerah||j.tgl)}</p>
+    <p style="margin-top:22px">Bandung, ${fmtTglPanjang(tglSerahFix)}</p>
     <table style="width:100%;margin-top:6px"><tr>
       <td style="text-align:center;width:50%">Yang Menyerahkan,<div style="height:62px"></div>( ${esc(d.namaPenyerah)||'..................'} )</td>
-      <td style="text-align:center">Yang Menerima,<div style="height:62px"></div>( ${esc(j.mediator)||'..................'} )</td>
+      <td style="text-align:center">Yang Menerima,<div style="height:62px"></div>( ${esc(buyerName)} )</td>
     </tr></table>
   </div>`;
   openPrint('Bukti Serah Terima Kendaraan', html);
@@ -2312,14 +2373,23 @@ function cetakSerah(kode){
 function cetakKwitansi(kode){
   const v=VEHICLES.find(x=>x.kode===kode); if(!v) return; const j=v.jual||{}, d=j.dok||{};
   const pays=j.pembayaran||[];
-  const totBayar=pays.reduce((s,x)=>s+(+x.jumlah||0),0) || (d.jumlahBayar||0);
-  const ttNilai=(j.tt&&j.tt.nilai)||0;
-  const jumlah=totBayar>0?totBayar:(j.harga||0);
-  const sisa=Math.max(0,(j.harga||0)-ttNilai-jumlah);
+  const dpDirectVal = (j.dpDirect && j.dpDirect.nilai) ? +j.dpDirect.nilai : 0;
+  const dpLeasingVal = (j.leasing && j.leasing.dp) ? +j.leasing.dp : 0;
+  const payDpVal = pays.filter(x => (x.jenis || '').toLowerCase().includes('dp') || (x.jenis || '').toLowerCase().includes('tanda jadi')).reduce((s, x) => s + (+x.jumlah || 0), 0);
+  const dpShowVal = Math.max(dpDirectVal, payDpVal);
+  const pelunasanTot = pays.filter(x => !(x.jenis || '').toLowerCase().includes('dp') && !(x.jenis || '').toLowerCase().includes('tanda jadi')).reduce((s, x) => s + (+x.jumlah || 0), 0);
+  const totBayar = dpShowVal + dpLeasingVal + pelunasanTot;
+  const ttNilai = (j.tt && j.tt.nilai) || 0;
+
+  const buyerName = j.mediator || '—';
+  const jumlah = totBayar > 0 ? totBayar : (j.harga || 0);
+  const sisa = Math.max(0, (j.harga || 0) - ttNilai - totBayar);
+  const isLunas = sisa <= 0;
+
   const html=`<div class="doc">${docHeader()}
     <h1 style="text-decoration:none;letter-spacing:2px">KWITANSI</h1>
     <table class="kv" style="font-size:13px"><tr><td class="lbl" style="width:150px">No.</td><td>: ${esc(d.noKwitansi)||'&nbsp;'}</td></tr>
-    <tr><td class="lbl"><i>Sudah Terima Dari</i></td><td>: <b>${esc(j.mediator)||'&nbsp;'}</b></td></tr>
+    <tr><td class="lbl"><i>Sudah Terima Dari</i></td><td>: <b>${esc(buyerName)}</b></td></tr>
     <tr><td class="lbl"><i>Banyaknya Uang</i></td><td>: <span style="font-style:italic;background:#eee;padding:2px 10px">${terbilang(jumlah)}</span></td></tr></table>
     <p style="margin-top:10px"><b>Untuk Pembayaran 1 unit Mobil dengan spesifikasi sebagai berikut:</b></p>
     <table class="kv"><tr><td class="lbl">Merk/Type</td><td>: ${esc(nama(v))}</td></tr>
@@ -2331,8 +2401,8 @@ function cetakKwitansi(kode){
     <table style="width:100%;margin-top:14px"><tr>
       <td style="width:56%;vertical-align:top">
         <div><i>Jumlah :</i></div><div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:2px">${rp(jumlah)}</div>
-        <div style="margin-top:8px"><i>Sisa Pelunasan :</i></div><div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:2px">${sisa>0?rp(sisa):'Rp -'}</div>
-        <div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:8px">Catatan : ${sisa>0?'Belum Lunas':'Lunas'}</div>
+        <div style="margin-top:8px"><i>Sisa Pelunasan :</i></div><div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:2px">${sisa>0?rp(sisa):'Rp 0 (LUNAS)'}</div>
+        <div style="border:1px solid #444;padding:6px 10px;display:inline-block;min-width:220px;margin-top:8px">Catatan : ${isLunas?'Lunas':(dpShowVal>0||dpLeasingVal>0?'Booked & Belum Lunas':'Belum Lunas')}</div>
         <p style="margin-top:10px;font-size:11px">Pembayaran dapat ditransfer ke rekening:<br>Bank ${esc(d.rekBank||REK_DEFAULT.bank)}<br>a/n : ${esc(d.rekAtasNama||REK_DEFAULT.atasNama)}<br>a/c : ${esc(d.rekNo||REK_DEFAULT.no)}</p>
       </td>
       <td style="text-align:center;vertical-align:top">Bandung, ${fmtTglPanjang(j.tgl)}<div style="height:72px"></div>( .................. )</td>
@@ -3012,7 +3082,7 @@ function renderLabaRugi(){
 }
 
 /* ===== Laporan Mutasi Kas/Bank ===== */
-function kasBankAccounts(){ return getAccountsByHead(['11']); }
+function kasBankAccounts(){ return ACCOUNTS.filter(a => (a.kode.startsWith('10') || a.kode.startsWith('11')) && (a.nama.toLowerCase().includes('kas') || a.nama.toLowerCase().includes('bank'))); }
 
 // Kumpulkan seluruh mutasi (transaksi) yang menyentuh 1 akun kas/bank pada 1 periode (tahun-bulan)
 function mutasiKasBank(akunNama, fy, fm){
@@ -3108,7 +3178,7 @@ function renderMutasiKas(){
           <td class="num text-right font-700 px-4 py-3">${rp(grandAkhir)}</td>
         </tr></tfoot>
       </table></div>
-    </div>` : `<div class="card p-8 text-center text-[13px] text-[var(--muted)]">Belum ada akun kas/bank (kode diawali "11"). Tambahkan dulu di menu Utilitas → Data Akun.</div>`;
+    </div>` : `<div class="card p-8 text-center text-[13px] text-[var(--muted)]">Belum ada akun kas/bank. Tambahkan dulu di menu Pengaturan → Data Akun.</div>`;
 
   if(mkSelectedAkun && !accs.some(a=>a.nama===mkSelectedAkun)) mkSelectedAkun=null;
   renderMutasiKasDetail();

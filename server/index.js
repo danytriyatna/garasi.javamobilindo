@@ -14,7 +14,14 @@ app.use(session({
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 12 }, // 12 jam
 }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders: (res) => {
+    // Paksa browser selalu mengambil versi terbaru dari server tanpa menyimpan cache lama
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // ---------------------------------------------------------------
 // Autentikasi: middleware & endpoint login/logout/me
