@@ -930,7 +930,7 @@ const akunOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih aku
 
 const kasKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
 const kasLabel = nama => { const a = getAccountByNama(nama); return a ? `${a.kode} · ${a.nama}` : (nama || '—'); };
-const kasOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih kas/bank —</option>`+getAccountsByHead(['11']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
+const kasOptions = cur => `<option value="" ${!cur?'selected':''}>— Pilih kas/bank —</option>`+getAccountsByHead(['10','11']).map(a=>`<option value="${esc(a.nama)}" ${a.nama===cur?'selected':''}>${a.kode} · ${a.nama}</option>`).join('');
 
 // Kas Keluar (Beban kepala 6, Kewajiban kepala 2, Modal kepala 3)
 const opKode = nama => { const a = getAccountByNama(nama); return a ? a.kode : ''; };
@@ -2284,7 +2284,7 @@ function renderOperasional(){
   const btnExportO=document.getElementById('btnExportOperasional'); if(btnExportO) btnExportO.style.display=can('operasional_export')?'':'none';
   // filter akun
   const fsel=document.getElementById('opfilter');
-  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['11']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
+  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['10','11']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
   // filter bulan & tahun
   const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
   const msel=document.getElementById('opMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(mmNow); msel.dataset.init='1'; }
@@ -2380,7 +2380,7 @@ function renderKasMasuk(){
   const btnExportO=document.getElementById('btnExportKasMasuk'); if(btnExportO) btnExportO.style.display=can('kas_masuk_export')?'':'none';
   // filter akun
   const fsel=document.getElementById('inflowfilter');
-  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['11']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
+  if(fsel && fsel.options.length<=1){ fsel.innerHTML='<option value="">Semua akun</option>'+getAccountsByHead(['10','11']).map(a=>`<option value="${a.nama}">${a.kode} · ${a.nama}</option>`).join(''); }
   // filter bulan & tahun
   const now=new Date(); const mmNow=String(now.getMonth()+1).padStart(2,'0'), yyNow=String(now.getFullYear());
   const msel=document.getElementById('inflowMonth'); if(msel && msel.dataset.init!=='1'){ msel.innerHTML=monthOptions(mmNow); msel.dataset.init='1'; }

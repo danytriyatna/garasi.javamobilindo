@@ -14,6 +14,7 @@ const pool = mysql.createPool({
   // Kembalikan kolom DATE/DATETIME sebagai string (bukan objek Date JS),
   // supaya frontend bisa langsung pakai .slice(0,7) dll pada string tanggal.
   dateStrings: true,
+  decimalNumbers: true,
   timezone: 'Z', // UTC
 });
 

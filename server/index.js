@@ -268,21 +268,22 @@ async function fetchAllVehicles() {
 
 function toVehicleJSON(v, exps, sale, pays) {
   const out = {
-    kode: v.kode, no: v.no, merk: v.merk, model: v.model, type: v.type,
-    trans: v.trans, warna: v.warna, thn: v.thn, nopol: v.nopol,
+    kode: v.kode, no: Number(v.no), merk: v.merk, model: v.model, type: v.type,
+    trans: v.trans, warna: v.warna, thn: Number(v.thn), nopol: v.nopol,
     odo: v.odo === null ? null : (isNaN(v.odo) ? v.odo : Number(v.odo)),
     rangka: v.rangka, mesin: v.mesin, bbm: v.bbm,
     pajakThn: v.pajak_thn, pajak5Thn: v.pajak_5thn, status: v.status,
-    beli: v.beli || 0, tglBeli: v.tgl_beli, kasBeli: v.kas_beli, mediatorBeli: v.mediator_beli,
-    penawaran: v.penawaran, targetNett: v.target_nett,
-    peng: exps.map((e) => ({ tgl: e.tgl, akun: e.akun || '', ket: e.keterangan || '', n: e.nilai || 0, kas: e.kas || '' })),
+    beli: Number(v.beli) || 0, tglBeli: v.tgl_beli, kasBeli: v.kas_beli, mediatorBeli: v.mediator_beli,
+    penawaran: v.penawaran == null ? null : Number(v.penawaran),
+    targetNett: v.target_nett == null ? null : Number(v.target_nett),
+    peng: exps.map((e) => ({ tgl: e.tgl, akun: e.akun || '', ket: e.keterangan || '', n: Number(e.nilai) || 0, kas: e.kas || '' })),
     jual: null,
   };
   if (sale) {
     out.jual = {
-      tgl: sale.tgl, harga: sale.harga || 0, mediator: sale.mediator || '',
-      metode: sale.metode || 'Tunai', fee: sale.fee || 0, feeMode: sale.fee_mode || 'rp',
-      feeRaw: sale.fee_raw,
+      tgl: sale.tgl, harga: Number(sale.harga) || 0, mediator: sale.mediator || '',
+      metode: sale.metode || 'Tunai', fee: Number(sale.fee) || 0, feeMode: sale.fee_mode || 'rp',
+      feeRaw: sale.fee_raw == null ? null : Number(sale.fee_raw),
       tt: sale.trade_in || null,
       leasing: sale.leasing || null,
       dok: {
@@ -292,7 +293,7 @@ function toVehicleJSON(v, exps, sale, pays) {
         rekBank: sale.rek_bank || '', rekAtasNama: sale.rek_atas_nama || '', rekNo: sale.rek_no || '',
         checklist: sale.checklist || [],
       },
-      pembayaran: pays.map((p) => ({ tgl: p.tgl, jenis: p.jenis || '', ket: p.keterangan || '', jumlah: p.jumlah || 0, kas: p.kas || '' })),
+      pembayaran: pays.map((p) => ({ tgl: p.tgl, jenis: p.jenis || '', ket: p.keterangan || '', jumlah: Number(p.jumlah) || 0, kas: p.kas || '' })),
     };
   }
   return out;
