@@ -289,6 +289,7 @@ function toVehicleJSON(v, exps, sale, pays) {
   if (sale) {
     out.jual = {
       tgl: sale.tgl, harga: Number(sale.harga) || 0, mediator: sale.mediator || '',
+      mediatorJual: sale.mediator_jual || '',
       metode: sale.metode || 'Tunai', fee: Number(sale.fee) || 0, feeMode: sale.fee_mode || 'rp',
       feeRaw: sale.fee_raw == null ? null : Number(sale.fee_raw),
       tt: sale.trade_in || null,
@@ -334,10 +335,10 @@ async function upsertVehicle(conn, kode, body) {
   if (body.jual) {
     const j = body.jual, dok = j.dok || {};
     await conn.execute(
-      `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,metode,fee,fee_mode,fee_raw,trade_in,leasing,dp_direct,
+      `INSERT INTO sales(vehicle_kode,tgl,harga,mediator,mediator_jual,metode,fee,fee_mode,fee_raw,trade_in,leasing,dp_direct,
          alamat,telp,no_spk,tgl_pesan,no_kwitansi,tgl_serah,nama_penyerah,rek_bank,rek_atas_nama,rek_no,checklist)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [kode, j.tgl || null, j.harga || 0, j.mediator || '', j.metode || 'Tunai',
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [kode, j.tgl || null, j.harga || 0, j.mediator || '', j.mediatorJual || null, j.metode || 'Tunai',
        j.fee || 0, j.feeMode || 'rp', j.feeRaw ?? null,
        j.tt ? JSON.stringify(j.tt) : null,
        j.leasing ? JSON.stringify(j.leasing) : null,
@@ -540,6 +541,7 @@ async function waitForDb(maxTries = 30, delayMs = 1000) {
   try {
     await waitForDb();
     await pool.execute('ALTER TABLE sales ADD COLUMN dp_direct JSON').catch(() => {});
+    await pool.execute('ALTER TABLE sales ADD COLUMN mediator_jual TEXT').catch(() => {});
     await pool.execute('ALTER TABLE vehicles DROP CONSTRAINT chk_vehicles_status').catch(() => {});
     await pool.execute('ALTER TABLE vehicles DROP CHECK chk_vehicles_status').catch(() => {});
     await seedIfEmpty(pool);

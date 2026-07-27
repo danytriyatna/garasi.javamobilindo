@@ -1563,7 +1563,7 @@ function renderVehicleDetail(){
           <div class="grid sm:grid-cols-2 gap-x-8 gap-y-5">
             <div class="field"><label>Tanggal Terjual</label><p class="val num">${fmtDate(p.tgl)}</p></div>
             <div class="field"><label>Harga Jual</label><p class="val num">${rp(p.harga)}</p></div>
-            <div class="field"><label>Nama Pembeli</label><p class="val">${p.mediator||'—'}</p></div>
+            <div class="field"><label>Mediator</label><p class="val">${p.mediatorJual||'—'}</p></div>
             <div class="field"><label>Metode Pembayaran</label><p class="val">${p.metode||'—'}</p></div>
           </div>
 
@@ -1599,6 +1599,11 @@ function renderVehicleDetail(){
               <div class="field"><label>Kas / Bank Penerima DP</label><p class="val">${p.leasing.dpKas ? `<span class="badge" style="background:#eef;color:var(--ink)">${kasLabel(p.leasing.dpKas)}</span>` : '—'}</p></div>
             </div>
           </div>`:''}
+
+          <div class="mt-6 pt-5 border-t border-[var(--line)]">
+            <p class="text-[11px] uppercase tracking-[.05em] text-[var(--muted)] font-700 mb-3">Data Pembeli</p>
+            <div class="field"><label>Nama Pembeli</label><p class="val">${p.mediator||'—'}</p></div>
+          </div>
         </div>
 
         <div class="space-y-4">
@@ -1970,7 +1975,7 @@ function renderEditJual(v){
         <div class="grid sm:grid-cols-2 gap-3">
           <div class="field"><label>Tanggal Penjualan</label><input id="ef_jTgl" type="date" class="inp" value="${esc(j&&j.tgl)}"></div>
           <div class="field"><label>Harga Penjualan (Rp)</label><input id="ef_jHarga" type="text" inputmode="numeric" class="inp" value="${esc(fmtRibuan(j&&j.harga||''))}" placeholder="0" oninput="this.value=fmtRibuan(this.value);updateEditTotals()"></div>
-          <div class="field"><label>Nama Pembeli</label><input id="ef_jPembeli" class="inp" value="${esc(j&&j.mediator)}" placeholder="Nama pembeli / mediator"></div>
+          <div class="field"><label>Mediator</label><input id="ef_jMediator" class="inp" value="${esc(j&&j.mediatorJual)}" placeholder="Nama mediator (bila ada)"></div>
           <div class="field"><label>Metode Pembayaran</label><select id="ef_jMetode" class="inp" onchange="onMetodeChange()">${mopt}</select></div>
           <div class="field sm:col-span-2"><label>Komisi</label>
             <div class="flex gap-2">
@@ -2033,6 +2038,7 @@ function renderEditJual(v){
         <div class="mt-4 pt-4 border-t border-[var(--line)]">
           <h4 class="text-[13.5px] font-700 mb-3">Data Pembeli & Dokumen</h4>
           <div class="grid sm:grid-cols-2 gap-3">
+            <div class="field sm:col-span-2"><label>Nama Pembeli</label><input id="ef_jPembeli" class="inp" value="${esc(j&&j.mediator)}" placeholder="Nama pembeli"></div>
             <div class="field sm:col-span-2"><label>Alamat Pembeli</label><input id="ef_dAlamat" class="inp" value="${esc(dok.alamat)}" placeholder="Jl. ..., Kota"></div>
             <div class="field"><label>No. Telepon Pembeli</label><input id="ef_dTelp" class="inp" value="${esc(dok.telp)}" placeholder="0857 xxxx xxxx"></div>
             <div class="field"><label>No. SPK</label><input id="ef_dNoSPK" class="inp bg-slate-50 text-slate-500" value="${esc(dok.noSPK)}" placeholder="Otomatis saat disimpan" disabled>
@@ -2265,7 +2271,7 @@ async function saveVehicle(){
     const feeMode=(document.getElementById('ef_jFeeMode')||{}).value||'rp';
     const feeRaw=+((document.getElementById('ef_jFee')||{}).value)||0;
     const feeVal=feeMode==='pct'?Math.round(jHarga*feeRaw/100):feeRaw;
-    jual={ tgl:gv('ef_jTgl')||null, harga:jHarga, mediator:gv('ef_jPembeli')||'—', fee:feeVal, feeMode:feeMode, feeRaw:feeRaw, metode:document.getElementById('ef_jMetode').value };
+    jual={ tgl:gv('ef_jTgl')||null, harga:jHarga, mediator:gv('ef_jPembeli')||'—', mediatorJual:gv('ef_jMediator')||'', fee:feeVal, feeMode:feeMode, feeRaw:feeRaw, metode:document.getElementById('ef_jMetode').value };
     if((document.getElementById('ef_jTTon')||{}).checked){
       jual.tt={ merk:gv('ef_ttMerk'), model:gv('ef_ttModel'), thn:gn('ef_ttThn'), warna:gv('ef_ttWarna')||'', nopol:gv('ef_ttNopol')||'—', nilai:gn('ef_ttNilai')||0,
         trans:gv('ef_ttTrans')||'AT', bbm:gv('ef_ttBbm')||'Bensin', odo:gv('ef_ttOdo')||null, rangka:gv('ef_ttRangka')||'—', mesin:gv('ef_ttMesin')||'—',
@@ -3584,7 +3590,7 @@ function renderDashboard(){
         ${kpi('Total Unit',VEHICLES.length,'var(--ink)')}
         ${kpi('Ready',ready,'var(--pos)')}
         ${kpi('Sold',soldAll,'var(--blue)')}
-        ${kpi('Nilai Stok Aktif',rpShort(nilaiStok),'var(--amber)')}
+        ${kpi('Nilai Stok Aktif',rp(nilaiStok),'var(--amber)')}
       </div>
     </div>
 
@@ -3597,32 +3603,46 @@ function renderDashboard(){
               <thead><tr class="text-[11px] uppercase tracking-wider text-slate-500 bg-slate-50/80 border-b border-[var(--line)]">
                 <th class="py-2.5 px-3">Unit / No. Polisi</th>
                 <th class="py-2.5 px-2 text-center whitespace-nowrap">Tgl Jual</th>
-                <th class="py-2.5 px-2 whitespace-nowrap">Pembeli</th>
-                <th class="py-2.5 px-2 text-right whitespace-nowrap">Harga Jual</th>
                 <th class="py-2.5 px-2 text-right whitespace-nowrap">Harga Beli</th>
                 <th class="py-2.5 px-2 text-right whitespace-nowrap">Biaya Perawatan</th>
+                <th class="py-2.5 px-2 text-right whitespace-nowrap">Komisi</th>
+                <th class="py-2.5 px-2 text-right whitespace-nowrap">Harga Terjual</th>
                 <th class="py-2.5 px-2 text-right whitespace-nowrap">Laba</th>
                 <th class="py-2.5 px-3 text-center whitespace-nowrap">Status</th>
               </tr></thead>
               <tbody>${soldP.map(v=>{
                 const rawat=pengTotal(v);
-                const lk=laba(v), lb=lk-feeOf(v), pi=payInfo(v);
+                const lk=laba(v), fee=feeOf(v), lb=lk-fee, pi=payInfo(v);
                 return `<tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors cursor-pointer" onclick="openVehicleFromAnywhere('${v.kode}')">
                   <td class="py-2 px-3 whitespace-nowrap">
                     <div class="font-600 text-[12px] text-slate-800 leading-tight">${esc(nama(v))}</div>
                     <div class="text-[10.5px] text-slate-500 font-mono tracking-tight mt-0.5">${esc(v.nopol||'—')}</div>
                   </td>
                   <td class="py-2 px-2 text-center text-[11.5px] text-[var(--muted)] whitespace-nowrap">${fmtDate(v.jual.tgl)}</td>
-                  <td class="py-2 px-2 text-[11.5px] text-slate-700 whitespace-nowrap">${esc(v.jual.mediator||'—')}</td>
-                  <td class="py-2 px-2 num text-right text-[12px] font-500 text-slate-800 whitespace-nowrap">${rp(v.jual.harga)}</td>
                   <td class="py-2 px-2 num text-right text-[12px] text-slate-700 whitespace-nowrap">${rp(v.beli||0)}</td>
                   <td class="py-2 px-2 num text-right text-[12px] text-purple-700 whitespace-nowrap">${rp(rawat)}</td>
+                  <td class="py-2 px-2 num text-right text-[12px] text-amber-700 whitespace-nowrap">${rp(fee)}</td>
+                  <td class="py-2 px-2 num text-right text-[12px] font-500 text-slate-800 whitespace-nowrap">${rp(v.jual.harga)}</td>
                   <td class="py-2 px-2 num text-right text-[12px] font-600 whitespace-nowrap" style="color:${lb>=0?'var(--pos)':'var(--neg)'}">${(lb>=0?'+':'')+rp(lb)}</td>
                   <td class="py-2 px-3 text-center whitespace-nowrap">
                     ${pi.lunas ? '<span class="badge text-[10.5px] px-2 py-0.5" style="background:var(--pos-soft);color:var(--pos)">LUNAS</span>' : '<span class="badge text-[10.5px] px-2 py-0.5" style="background:var(--neg-soft);color:var(--neg)">BELUM LUNAS</span>'}
                   </td>
                 </tr>`;
               }).join('')}</tbody>
+              <tfoot>${(()=>{
+                let tBeli=0,tRawat=0,tFee=0,tHarga=0,tLaba=0;
+                soldP.forEach(v=>{ const rawat=pengTotal(v), lk=laba(v), fee=feeOf(v), lb=lk-fee;
+                  tBeli+=v.beli||0; tRawat+=rawat; tFee+=fee; tHarga+=v.jual.harga||0; tLaba+=lb; });
+                return `<tr style="background:var(--pos-soft)">
+                  <td class="py-2.5 px-3 font-700 text-[12px]" colspan="2">Total</td>
+                  <td class="py-2.5 px-2 num text-right text-[12px] font-700 text-slate-800 whitespace-nowrap">${rp(tBeli)}</td>
+                  <td class="py-2.5 px-2 num text-right text-[12px] font-700 text-purple-700 whitespace-nowrap">${rp(tRawat)}</td>
+                  <td class="py-2.5 px-2 num text-right text-[12px] font-700 text-amber-700 whitespace-nowrap">${rp(tFee)}</td>
+                  <td class="py-2.5 px-2 num text-right text-[12px] font-700 text-slate-800 whitespace-nowrap">${rp(tHarga)}</td>
+                  <td class="py-2.5 px-2 num text-right text-[12px] font-700 whitespace-nowrap" style="color:${tLaba>=0?'var(--pos)':'var(--neg)'}">${(tLaba>=0?'+':'')+rp(tLaba)}</td>
+                  <td class="py-2.5 px-3"></td>
+                </tr>`;
+              })()}</tfoot>
             </table>` : `
             <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
               <svg class="w-12 h-12 text-slate-300 mb-2.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
@@ -3715,10 +3735,10 @@ function renderTrenChart(){
     const gx=x0+gw*i+gw/2;
     const hj=max?plotH*penjualan[i]/max:0, hb=max?plotH*biaya[i]/max:0;
     const xj=gx-bw-gap/2, xb=gx+gap/2;
-    const tip=`${MM[i]} ${Y}\nPenjualan: ${rp(penjualan[i])}\nBiaya: ${rp(biaya[i])}\n  · Perawatan: ${rp(rawat[i])}\n  · Operasional: ${rp(op[i])}`;
-    bars+=`<g><title>${tip}</title>
+    bars+=`<g class="bargrp" data-i="${i}" style="cursor:pointer">
       <rect x="${xj.toFixed(1)}" y="${(y1-hj).toFixed(1)}" width="${bw}" height="${hj.toFixed(1)}" rx="3" fill="url(#gJual)"/>
       <rect x="${xb.toFixed(1)}" y="${(y1-hb).toFixed(1)}" width="${bw}" height="${hb.toFixed(1)}" rx="3" fill="url(#gBiaya)"/>
+      <rect x="${(gx-gw/2).toFixed(1)}" y="${y0}" width="${gw.toFixed(1)}" height="${plotH.toFixed(1)}" fill="transparent"/>
     </g>`;
     bars+=`<text x="${gx.toFixed(1)}" y="${y1+16}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${MM[i]}</text>`;
   }
@@ -3728,18 +3748,41 @@ function renderTrenChart(){
       <span class="flex items-center gap-2"><span style="width:14px;height:14px;border-radius:4px;background:var(--pos);display:inline-block"></span>Penjualan</span>
       <span class="flex items-center gap-2"><span style="width:14px;height:14px;border-radius:4px;background:var(--neg);display:inline-block"></span>Biaya (perawatan + operasional)</span>
     </div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">
-      <defs>
-        <linearGradient id="gJual" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3F7259"/><stop offset="1" stop-color="#2E5943"/></linearGradient>
-        <linearGradient id="gBiaya" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8534A"/><stop offset="1" stop-color="#8A3B32"/></linearGradient>
-      </defs>
-      ${grid}${ylab}${bars}${empty}
-    </svg>
+    <div class="relative">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">
+        <defs>
+          <linearGradient id="gJual" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3F7259"/><stop offset="1" stop-color="#2E5943"/></linearGradient>
+          <linearGradient id="gBiaya" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8534A"/><stop offset="1" stop-color="#8A3B32"/></linearGradient>
+        </defs>
+        ${grid}${ylab}${bars}${empty}
+      </svg>
+      <div id="trenTip" class="hidden absolute z-10 pointer-events-none rounded-lg shadow-lg px-3 py-2" style="background:#1f2937;color:#fff;min-width:190px;font-size:11.5px;line-height:1.5"></div>
+    </div>
     <div class="grid grid-cols-3 gap-3 mt-3 px-1">
       <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Total Penjualan ${Y}</p><p class="num font-700 text-[15px]" style="color:var(--pos)">${rp(totJual)}</p></div>
       <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Total Biaya ${Y}</p><p class="num font-700 text-[15px]" style="color:var(--neg)">${rp(totBiaya)}</p></div>
       <div class="text-center"><p class="text-[11px] text-[var(--muted)] uppercase tracking-[.05em]">Selisih</p><p class="num font-700 text-[15px]" style="color:${totJual-totBiaya>=0?'var(--pos)':'var(--neg)'}">${(totJual-totBiaya>=0?'+':'')+rp(totJual-totBiaya)}</p></div>
     </div>`;
+  const tip=document.getElementById('trenTip');
+  const tipWrap=tip.parentElement;
+  document.querySelectorAll('#trenChart .bargrp').forEach(g=>{
+    const i=+g.dataset.i;
+    g.addEventListener('mouseenter', ()=>{
+      tip.innerHTML=`
+        <div class="font-700 mb-1.5" style="font-size:12px">${MM[i]} ${Y}</div>
+        <div class="flex justify-between gap-5"><span>Penjualan</span><span class="num font-600" style="color:#6EE7B7">${rp(penjualan[i])}</span></div>
+        <div class="flex justify-between gap-5"><span>Biaya</span><span class="num font-600" style="color:#FCA5A5">${rp(biaya[i])}</span></div>
+        <div class="mt-1 pt-1 num" style="border-top:1px solid rgba(255,255,255,.15);font-size:10px;color:#CBD5E1;text-align:right">Perawatan ${rp(rawat[i])} + Operasional ${rp(op[i])}</div>`;
+      tip.classList.remove('hidden');
+    });
+    g.addEventListener('mousemove', (ev)=>{
+      const r=tipWrap.getBoundingClientRect();
+      let left=ev.clientX-r.left+14, top=ev.clientY-r.top-14;
+      const tw=tip.offsetWidth||190; if(left+tw>r.width) left=ev.clientX-r.left-tw-14;
+      tip.style.left=Math.max(0,left)+'px'; tip.style.top=Math.max(0,top)+'px';
+    });
+    g.addEventListener('mouseleave', ()=>{ tip.classList.add('hidden'); });
+  });
 }
 
 /* ===== koneksi ke database (PostgreSQL) via API backend ===== */

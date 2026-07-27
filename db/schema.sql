@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS sales (
   tgl             DATE,
   harga           DECIMAL(14,2) NOT NULL DEFAULT 0,
   mediator        TEXT,
+  mediator_jual   TEXT,
   metode          TEXT,
   fee             DECIMAL(14,2) DEFAULT 0,
   fee_mode        VARCHAR(10) DEFAULT 'rp',
