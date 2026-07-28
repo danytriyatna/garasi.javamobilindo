@@ -2202,12 +2202,13 @@ function updateEditTotals(){
   const hj=parseRibuan((document.getElementById('ef_jHarga')||{}).value);
   const feeMode=(document.getElementById('ef_jFeeMode')||{}).value||'rp';
   const feeRaw=+((document.getElementById('ef_jFee')||{}).value)||0;
-  const fee=feeMode==='pct'?Math.round(hj*feeRaw/100):feeRaw;
+  const lkForFee=hj-md;
+  const fee=feeMode==='pct'?Math.round(lkForFee*feeRaw/100):feeRaw;
   const set=(id,val,color)=>{ const el=document.getElementById(id); if(el){ el.textContent=val; if(color)el.style.color=color; } };
   const hint=document.getElementById('ef_jFeeHint');
-  if(hint) hint.textContent = feeMode==='pct' ? (feeRaw?`${feeRaw}% dari harga jual = ${rp(fee)}`:'Persen dari harga jual') : (fee?`= ${rp(fee)}`:'Nilai komisi dalam Rupiah');
+  if(hint) hint.textContent = feeMode==='pct' ? (feeRaw?`${feeRaw}% dari laba kotor = ${rp(fee)}`:'Persen dari laba kotor') : (fee?`= ${rp(fee)}`:'Nilai komisi dalam Rupiah');
   if(hj>0){
-    const lk=hj-md, lb=lk-fee;
+    const lk=lkForFee, lb=lk-fee;
     set('eL_jual',rp(hj)); set('eL_beli','('+rp(beli)+')'); set('eL_rawat','('+rp(tot)+')'); set('eL_modal','('+rp(md)+')');
     set('eL_kotor',(lk>=0?'+':'')+rp(lk), lk>=0?'var(--pos)':'var(--neg)');
     set('eL_fee','('+rp(fee)+')'+(feeMode==='pct'&&feeRaw?` · ${feeRaw}%`:''));
@@ -2270,7 +2271,9 @@ async function saveVehicle(){
   if(jHarga){
     const feeMode=(document.getElementById('ef_jFeeMode')||{}).value||'rp';
     const feeRaw=+((document.getElementById('ef_jFee')||{}).value)||0;
-    const feeVal=feeMode==='pct'?Math.round(jHarga*feeRaw/100):feeRaw;
+    const pengTotalForFee=peng.reduce((s,p)=>s+(+p.n||0),0);
+    const labaKotorForFee=jHarga-(beli+pengTotalForFee);
+    const feeVal=feeMode==='pct'?Math.round(labaKotorForFee*feeRaw/100):feeRaw;
     jual={ tgl:gv('ef_jTgl')||null, harga:jHarga, mediator:gv('ef_jPembeli')||'—', mediatorJual:gv('ef_jMediator')||'', fee:feeVal, feeMode:feeMode, feeRaw:feeRaw, metode:document.getElementById('ef_jMetode').value };
     if((document.getElementById('ef_jTTon')||{}).checked){
       jual.tt={ merk:gv('ef_ttMerk'), model:gv('ef_ttModel'), thn:gn('ef_ttThn'), warna:gv('ef_ttWarna')||'', nopol:gv('ef_ttNopol')||'—', nilai:gn('ef_ttNilai')||0,
